@@ -524,6 +524,196 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "population-pyramid") {
+        const names = payload.locale === "ru" ? ["Мужчины", "Женщины"] : ["Men", "Women"];
+        const max =
+            Math.ceil(
+                Math.max(...payload.data.flatMap((row) => [row.value, row.value2 ?? 0])) / 10,
+            ) * 10;
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 52, right: 28, top: 48, bottom: 48 },
+            xAxis: {
+                type: "value",
+                min: -max,
+                max,
+                name: payload.unit,
+                nameLocation: "middle",
+                nameGap: 30,
+                axisLabel: { formatter: (value: number) => Math.abs(value) },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    name: names[0],
+                    type: "bar",
+                    stack: "population",
+                    data: payload.data.map((row) => -row.value),
+                },
+                {
+                    name: names[1],
+                    type: "bar",
+                    stack: "population",
+                    data: payload.data.map((row) => row.value2),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "dot-range") {
+        const minimum = payload.locale === "ru" ? "Минимум" : "Minimum";
+        const maximum = payload.locale === "ru" ? "Максимум" : "Maximum";
+        return {
+            ...base,
+            legend: { top: 0, data: [minimum, maximum] },
+            grid: { left: 92, right: 38, top: 52, bottom: 48 },
+            xAxis: {
+                type: "value",
+                name: payload.unit,
+                nameLocation: "middle",
+                nameGap: 30,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    type: "bar",
+                    stack: "range",
+                    data: payload.data.map((row) => row.value),
+                    itemStyle: { color: "transparent" },
+                    silent: true,
+                },
+                {
+                    type: "bar",
+                    stack: "range",
+                    data: payload.data.map((row) => (row.value2 ?? row.value) - row.value),
+                    barWidth: 3,
+                    itemStyle: { color: "#9eaaa3" },
+                    silent: true,
+                },
+                {
+                    name: minimum,
+                    type: "scatter",
+                    symbolSize: 15,
+                    data: payload.data.map((row) => [row.value, row.label]),
+                },
+                {
+                    name: maximum,
+                    type: "scatter",
+                    symbolSize: 15,
+                    data: payload.data.map((row) => [row.value2, row.label]),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "cumulative") {
+        return {
+            ...base,
+            grid: { left: 58, right: 28, top: 28, bottom: 52 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                name: payload.locale === "ru" ? "Порог" : "Threshold",
+                nameLocation: "middle",
+                nameGap: 30,
+                boundaryGap: false,
+            },
+            yAxis: {
+                type: "value",
+                min: 0,
+                max: 100,
+                name: payload.unit,
+                axisLabel: { formatter: "{value}%" },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "line",
+                    data: payload.data.map((row) => row.value),
+                    symbolSize: 8,
+                    lineStyle: { width: 3, color: green },
+                    itemStyle: { color: green },
+                    areaStyle: { color: "rgba(23, 107, 77, .10)" },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "observation-strip") {
+        return {
+            ...base,
+            grid: { left: 34, right: 28, top: 28, bottom: 58 },
+            xAxis: {
+                type: "value",
+                name: payload.unit,
+                nameLocation: "middle",
+                nameGap: 32,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "value",
+                min: -0.5,
+                max: 0.5,
+                show: false,
+            },
+            series: [
+                {
+                    type: "scatter",
+                    symbolSize: 14,
+                    data: payload.data.map((row, index) => [
+                        row.value,
+                        ((index * 17) % 11) / 20 - 0.25,
+                    ]),
+                    itemStyle: {
+                        color: green,
+                        opacity: 0.72,
+                        borderColor: "#fff",
+                        borderWidth: 1.5,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "barcode") {
+        return {
+            ...base,
+            grid: { left: 34, right: 28, top: 42, bottom: 58 },
+            xAxis: {
+                type: "value",
+                name: payload.unit,
+                nameLocation: "middle",
+                nameGap: 32,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "value",
+                min: -1,
+                max: 1,
+                show: false,
+            },
+            series: [
+                {
+                    type: "scatter",
+                    symbol: "rect",
+                    symbolSize: [3, 110],
+                    data: payload.data.map((row) => [row.value, 0]),
+                    itemStyle: { color: green, opacity: 0.72 },
+                },
+            ],
+        };
+    }
+
     if (payload.kind === "heatmap") {
         const pairs = payload.data.map((row) => row.label.split("|"));
         const x = [...new Set(pairs.map(([day]) => day))];

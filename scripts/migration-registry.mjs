@@ -24,6 +24,11 @@ const astroRoutes = new Map([
     ["change-time:График наклона", "slope-timeline"],
     ["change-time:Диаграмма с областями", "stacked-area"],
     ["change-time:Календарная тепловая карта", "calendar-heatmap"],
+    ["distribution:Возрастно-половая пирамида", "population-pyramid"],
+    ["distribution:Точечный диапазон", "dot-range"],
+    ["distribution:Кумулятивная кривая", "cumulative-curve"],
+    ["distribution:Полоса отдельных наблюдений", "observation-strip"],
+    ["distribution:Штрих-код распределения", "distribution-barcode"],
 ]);
 
 function parseCsv(text) {
