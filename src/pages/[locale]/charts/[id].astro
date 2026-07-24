@@ -77,46 +77,51 @@ const rows = chart.data.map((row) => ({
                     <h2 id="data-title">{copy.dataTitle}</h2>
                 </div>
             </div>
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col"
-                                >{activeLocale === "ru" ? "Наблюдение" : "Observation"}</th
-                            >
-                            <th scope="col">
+            <details class="data-details">
+                <summary>{copy.showData}</summary>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col"
+                                    >{activeLocale === "ru" ? "Наблюдение" : "Observation"}</th
+                                >
+                                <th scope="col">
+                                    {
+                                        chart.valueLabels?.primary[activeLocale] ??
+                                            (activeLocale === "ru" ? "Значение" : "Value")
+                                    }
+                                </th>
                                 {
-                                    chart.valueLabels?.primary[activeLocale] ??
-                                        (activeLocale === "ru" ? "Значение" : "Value")
+                                    rows.some((row) => row.value2 !== undefined) && (
+                                        <th scope="col">
+                                            {chart.valueLabels?.secondary?.[activeLocale] ??
+                                                (activeLocale === "ru"
+                                                    ? "Второе значение"
+                                                    : "Second value")}
+                                        </th>
+                                    )
                                 }
-                            </th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {
-                                rows.some((row) => row.value2 !== undefined) && (
-                                    <th scope="col">
-                                        {chart.valueLabels?.secondary?.[activeLocale] ??
-                                            (activeLocale === "ru"
-                                                ? "Второе значение"
-                                                : "Second value")}
-                                    </th>
-                                )
+                                rows.map((row) => (
+                                    <tr>
+                                        <th scope="row">{row.label.replace("|", " · ")}</th>
+                                        <td>{row.value.toLocaleString(activeLocale)}</td>
+                                        {rows.some((item) => item.value2 !== undefined) && (
+                                            <td>
+                                                {row.value2?.toLocaleString(activeLocale) ?? "—"}
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))
                             }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            rows.map((row) => (
-                                <tr>
-                                    <th scope="row">{row.label.replace("|", " · ")}</th>
-                                    <td>{row.value.toLocaleString(activeLocale)}</td>
-                                    {rows.some((item) => item.value2 !== undefined) && (
-                                        <td>{row.value2?.toLocaleString(activeLocale) ?? "—"}</td>
-                                    )}
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         </section>
     </article>
 </BaseLayout>

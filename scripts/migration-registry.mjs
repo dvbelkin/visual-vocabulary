@@ -19,6 +19,11 @@ const astroRoutes = new Map([
     ["ranking:График изменения мест", "rank-change"],
     ["magnitude:Буллет-чарт", "bullet-chart"],
     ["magnitude:Радарная диаграмма", "radar-chart"],
+    ["change-time:Столбцы по времени", "timeline-columns"],
+    ["change-time:Столбцы и линия по времени", "column-line-timeline"],
+    ["change-time:График наклона", "slope-timeline"],
+    ["change-time:Диаграмма с областями", "stacked-area"],
+    ["change-time:Календарная тепловая карта", "calendar-heatmap"],
 ]);
 
 function parseCsv(text) {
