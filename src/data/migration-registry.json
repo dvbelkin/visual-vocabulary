@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 30,
+  "astroReadyCount": 32,
   "entries": [
     {
       "id": "bar-diverging",
@@ -377,8 +377,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "boxplot"
     },
     {
       "id": "violin",
@@ -389,8 +389,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "violin-plot"
     },
     {
       "id": "population-pyramis",

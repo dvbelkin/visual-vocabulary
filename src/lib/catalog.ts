@@ -41,7 +41,9 @@ export type ChartKind =
     | "waterfall"
     | "diverging-stacked"
     | "spine"
-    | "balance-area";
+    | "balance-area"
+    | "boxplot"
+    | "violin";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -50,6 +52,7 @@ export interface DataRow {
     value: number;
     value2?: number;
     value3?: number;
+    values?: number[];
 }
 
 export interface ChartDefinition {
@@ -942,6 +945,90 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "16:00", en: "16:00" }, value: 61, value2: 65 },
             { label: { ru: "20:00", en: "20:00" }, value: 49, value2: 57 },
             { label: { ru: "24:00", en: "24:00" }, value: 44, value2: 47 },
+        ],
+    },
+    {
+        id: "boxplot",
+        category: "distribution",
+        kind: "boxplot",
+        title: { ru: "Ящик с усами", en: "Box plot" },
+        description: {
+            ru: "Медиана, квартили и крайние значения компактно описывают распределение каждой группы.",
+            en: "Median, quartiles, and extremes provide a compact summary of each group.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить центр, разброс и асимметрию нескольких распределений.",
+            en: "You need to compare centre, spread, and skew across several distributions.",
+        },
+        avoidWhen: {
+            ru: "В выборке мало наблюдений или важны отдельные пики и разрывы плотности.",
+            en: "Samples are small or individual peaks and gaps in density are important.",
+        },
+        unit: { ru: "минут в пути", en: "travel minutes" },
+        valueLabels: { primary: { ru: "Медиана", en: "Median" } },
+        data: [
+            {
+                label: { ru: "Автобус", en: "Bus" },
+                value: 34,
+                values: [22, 25, 27, 29, 31, 33, 34, 34, 36, 39, 42, 46, 52],
+            },
+            {
+                label: { ru: "Трамвай", en: "Tram" },
+                value: 29,
+                values: [20, 22, 24, 25, 27, 28, 29, 29, 30, 32, 34, 37, 41],
+            },
+            {
+                label: { ru: "Метро", en: "Metro" },
+                value: 23,
+                values: [17, 18, 19, 20, 21, 22, 23, 23, 24, 25, 27, 29, 32],
+            },
+            {
+                label: { ru: "Велосипед", en: "Bicycle" },
+                value: 27,
+                values: [16, 19, 21, 23, 25, 26, 27, 28, 30, 33, 36, 40, 45],
+            },
+        ],
+    },
+    {
+        id: "violin-plot",
+        category: "distribution",
+        kind: "violin",
+        title: { ru: "Скрипичная диаграмма", en: "Violin plot" },
+        description: {
+            ru: "Ширина симметричной формы показывает плотность наблюдений на разных значениях.",
+            en: "The width of each symmetric shape represents observation density at each value.",
+        },
+        useWhen: {
+            ru: "Важно сравнить не только медиану и разброс, но и форму нескольких распределений.",
+            en: "You need to compare distribution shape as well as centre and spread.",
+        },
+        avoidWhen: {
+            ru: "Аудитории нужна простая сводка или наблюдений недостаточно для оценки плотности.",
+            en: "Readers need a simple summary or there are too few observations for density estimation.",
+        },
+        unit: { ru: "минут в пути", en: "travel minutes" },
+        valueLabels: { primary: { ru: "Медиана", en: "Median" } },
+        data: [
+            {
+                label: { ru: "Автобус", en: "Bus" },
+                value: 34,
+                values: [22, 25, 27, 29, 31, 33, 34, 34, 36, 39, 42, 46, 52],
+            },
+            {
+                label: { ru: "Трамвай", en: "Tram" },
+                value: 29,
+                values: [20, 22, 24, 25, 27, 28, 29, 29, 30, 32, 34, 37, 41],
+            },
+            {
+                label: { ru: "Метро", en: "Metro" },
+                value: 23,
+                values: [17, 18, 19, 20, 21, 22, 23, 23, 24, 25, 27, 29, 32],
+            },
+            {
+                label: { ru: "Велосипед", en: "Bicycle" },
+                value: 27,
+                values: [16, 19, 21, 23, 25, 26, 27, 28, 30, 33, 36, 40, 45],
+            },
         ],
     },
 ];
