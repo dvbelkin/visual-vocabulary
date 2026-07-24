@@ -1,0 +1,16 @@
+---
+const destination = `${import.meta.env.BASE_URL}ru/`;
+---
+
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content={`0;url=${destination}`} />
+        <link rel="canonical" href={destination} />
+        <title>Визуальный словарь</title>
+    </head>
+    <body>
+        <p><a href={destination}>Открыть Визуальный словарь</a></p>
+    </body>
+</html>

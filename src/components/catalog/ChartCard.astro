@@ -1,0 +1,25 @@
+---
+import type { ChartDefinition } from "../../lib/catalog";
+import { categoryNames } from "../../lib/catalog";
+import type { Locale } from "../../lib/i18n";
+import { localePath, t } from "../../lib/i18n";
+
+interface Props {
+    chart: ChartDefinition;
+    locale: Locale;
+    index: number;
+}
+
+const { chart, locale, index } = Astro.props;
+const copy = t(locale);
+---
+
+<article class="chart-card">
+    <div class="chart-card__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
+    <p class="chart-card__category">{categoryNames[chart.category][locale]}</p>
+    <h3><a href={localePath(locale, `charts/${chart.id}`)}>{chart.title[locale]}</a></h3>
+    <p>{chart.description[locale]}</p>
+    <a class="text-link" href={localePath(locale, `charts/${chart.id}`)}>
+        {copy.openChart}<span aria-hidden="true"> →</span>
+    </a>
+</article>

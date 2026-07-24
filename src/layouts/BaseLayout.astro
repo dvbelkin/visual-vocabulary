@@ -1,0 +1,67 @@
+---
+import type { Locale } from "../lib/i18n";
+import { localePath, t } from "../lib/i18n";
+import "../styles/global.css";
+
+interface Props {
+    locale: Locale;
+    title?: string;
+    description?: string;
+    alternatePath?: string;
+}
+
+const { locale, title, description, alternatePath = "" } = Astro.props;
+const copy = t(locale);
+const otherLocale: Locale = locale === "ru" ? "en" : "ru";
+const pageTitle = title ? `${title} — ${copy.title}` : copy.title;
+const pageDescription = description ?? copy.lead;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ruUrl = new URL(localePath("ru", alternatePath), Astro.site);
+const enUrl = new URL(localePath("en", alternatePath), Astro.site);
+---
+
+<!doctype html>
+<html lang={locale}>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="description" content={pageDescription} />
+        <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+        <link rel="canonical" href={canonical} />
+        <link rel="alternate" hreflang="ru" href={ruUrl} />
+        <link rel="alternate" hreflang="en" href={enUrl} />
+        <link rel="alternate" hreflang="x-default" href={ruUrl} />
+        <title>{pageTitle}</title>
+    </head>
+    <body>
+        <a class="skip-link" href="#main">{locale === "ru" ? "К содержанию" : "Skip to content"}</a>
+        <header class="site-header">
+            <div class="site-header__inner">
+                <a class="wordmark" href={localePath(locale)}>{copy.title}</a>
+                <nav aria-label={locale === "ru" ? "Выбор языка" : "Language selector"}>
+                    <a
+                        class="language-link"
+                        href={localePath(otherLocale, alternatePath)}
+                        hreflang={otherLocale}
+                    >
+                        {copy.otherLanguage}
+                    </a>
+                </nav>
+            </div>
+        </header>
+        <main id="main">
+            <slot />
+        </main>
+        <footer class="site-footer">
+            <div class="container">
+                <p>{copy.footer}</p>
+                <p>
+                    {locale === "ru" ? "На основе" : "Based on"}
+                    <a href="https://ft-interactive.github.io/visual-vocabulary/"
+                        >Visual Vocabulary</a
+                    >
+                </p>
+            </div>
+        </footer>
+    </body>
+</html>

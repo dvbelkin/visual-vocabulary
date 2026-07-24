@@ -1,0 +1,45 @@
+---
+import ChartCard from "../../components/catalog/ChartCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { charts } from "../../lib/catalog";
+import { isLocale, locales, t, type Locale } from "../../lib/i18n";
+
+export function getStaticPaths() {
+    return locales.map((locale) => ({ params: { locale } }));
+}
+
+const localeParam = Astro.params.locale;
+if (!isLocale(localeParam)) {
+    throw new Error(`Unsupported locale: ${localeParam}`);
+}
+const locale: Locale = localeParam;
+const copy = t(locale);
+---
+
+<BaseLayout locale={locale}>
+    <section class="hero container">
+        <p class="eyebrow">{copy.eyebrow}</p>
+        <h1>{copy.title}</h1>
+        <p class="hero__lead">{copy.lead}</p>
+        <div class="hero__motif" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+    </section>
+
+    <section class="catalog container" aria-labelledby="catalog-title">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">ECharts · Astro</p>
+                <h2 id="catalog-title">{copy.catalogTitle}</h2>
+            </div>
+            <p>{copy.catalogLead}</p>
+        </div>
+        <div class="chart-grid">
+            {
+                charts.map((chart, index) => (
+                    <ChartCard chart={chart} locale={locale} index={index} />
+                ))
+            }
+        </div>
+    </section>
+</BaseLayout>

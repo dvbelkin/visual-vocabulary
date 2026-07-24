@@ -1,0 +1,21 @@
+:root {
+    color-scheme: light;
+    --font-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --color-bg: #f1f4f0;
+    --color-surface: #fbfcfa;
+    --color-surface-hover: #f6faf6;
+    --color-ink: #17201c;
+    --color-muted: #626c66;
+    --color-line: #d6ddd8;
+    --color-line-strong: #bcc7c0;
+    --color-accent: #176b4d;
+    --color-accent-soft: #d8ede2;
+    --color-warning: #a84820;
+    --color-warning-soft: #f9e2d7;
+    --color-focus: #0867c9;
+    --content-width: 76rem;
+    --page-gutter: clamp(1rem, 4vw, 2.5rem);
+    --radius-sm: 0.4rem;
+    --radius-lg: 1rem;
+    --shadow-soft: 0 1.5rem 4rem rgba(34, 55, 44, 0.07);
+}
