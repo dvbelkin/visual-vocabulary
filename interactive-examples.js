@@ -488,6 +488,170 @@ const interactiveExamples = (() => {
     };
   }
 
+  function columnLineTimeline(title) {
+    const sales = [118, 132, 126, 151, 164, 158, 182, 196];
+    const conversion = [2.8, 3.1, 2.9, 3.5, 3.8, 3.6, 4.2, 4.5];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis" },
+      legend: { top: 40 },
+      grid: { left: 54, right: 58, top: 82, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: months },
+      yAxis: [
+        { ...axis, type: "value", name: "Продажи, млн ₽", min: 0 },
+        { ...axis, type: "value", name: "Конверсия, %", min: 0, max: 5, axisLabel: { formatter: "{value}%" } }
+      ],
+      series: [
+        { name: "Продажи", type: "bar", data: sales, barMaxWidth: 34 },
+        { name: "Конверсия", type: "line", yAxisIndex: 1, data: conversion, symbolSize: 8, lineStyle: { width: 3 } }
+      ]
+    };
+  }
+
+  function candlestick(title) {
+    const dates = ["15.07","16.07","17.07","18.07","19.07","22.07","23.07","24.07"];
+    const prices = [
+      [102,108,99,111], [108,105,103,112], [105,113,104,116], [113,118,110,121],
+      [118,114,112,120], [114,121,113,124], [121,126,119,129], [126,123,120,128]
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "cross" } },
+      grid: { left: 54, right: 24, top: 62, bottom: 58 },
+      xAxis: { ...axis, type: "category", data: dates, boundaryGap: true },
+      yAxis: { ...axis, type: "value", scale: true, name: "Цена, ₽" },
+      dataZoom: [{ type: "inside" }, { type: "slider", height: 18, bottom: 8 }],
+      series: [{
+        name: "Цена",
+        type: "candlestick",
+        data: prices,
+        itemStyle: {
+          color: palette[2],
+          color0: palette[1],
+          borderColor: palette[2],
+          borderColor0: palette[1]
+        }
+      }]
+    };
+  }
+
+  function slopeTimeline(title) {
+    const groups = [
+      { name: "Альфа", values: [42, 61], color: palette[0] },
+      { name: "Бета", values: [57, 49], color: palette[1] },
+      { name: "Гамма", values: [31, 46], color: palette[2] },
+      { name: "Дельта", values: [68, 55], color: palette[3] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "item", formatter: (p) => `${p.seriesName}<br>2024: ${p.data[0]}<br>2026: ${p.data[1]}` },
+      legend: { top: 40 },
+      grid: { left: 72, right: 72, top: 82, bottom: 38 },
+      xAxis: { ...axis, type: "category", data: ["2024", "2026"], boundaryGap: false },
+      yAxis: { ...axis, type: "value", min: 20, max: 75 },
+      series: groups.map((group) => ({
+        name: group.name,
+        type: "line",
+        data: group.values,
+        symbolSize: 11,
+        lineStyle: { width: 3, color: group.color },
+        itemStyle: { color: group.color },
+        label: { show: true, formatter: ({ seriesName }) => seriesName, position: "right" }
+      }))
+    };
+  }
+
+  function fanChart(title) {
+    const periods = ["2024","2025","2026","2027","2028","2029","2030"];
+    const median = [48,52,56,60,64,68,72];
+    const lower90 = [48,52,50,48,46,43,40];
+    const lower50 = [48,52,53,54,55,56,57];
+    const band50 = [0,0,6,12,18,24,30];
+    const band90 = [0,0,12,24,36,49,64];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis" },
+      legend: { top: 40, data: ["Медианный прогноз", "50% интервал", "90% интервал"] },
+      grid: { left: 54, right: 24, top: 82, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: periods },
+      yAxis: { ...axis, type: "value", min: 35, max: 105 },
+      series: [
+        { name: "Нижняя граница 90%", type: "line", stack: "fan90", symbol: "none", lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, data: lower90 },
+        { name: "90% интервал", type: "line", stack: "fan90", symbol: "none", lineStyle: { opacity: 0 }, areaStyle: { color: palette[0], opacity: .14 }, data: band90 },
+        { name: "Нижняя граница 50%", type: "line", stack: "fan50", symbol: "none", lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, data: lower50 },
+        { name: "50% интервал", type: "line", stack: "fan50", symbol: "none", lineStyle: { opacity: 0 }, areaStyle: { color: palette[0], opacity: .3 }, data: band50 },
+        { name: "Медианный прогноз", type: "line", data: median, symbolSize: 7, lineStyle: { width: 3, color: palette[0] }, markLine: { silent: true, data: [{ xAxis: "2026", label: { formatter: "Прогноз →" } }] } }
+      ]
+    };
+  }
+
+  function priestleyTimeline(title) {
+    const rows = [
+      ["Исследование", 0, 1, 5], ["Разработка", 1, 3, 9], ["Тестирование", 2, 7, 11],
+      ["Пилот", 3, 10, 13], ["Внедрение", 4, 12, 17]
+    ];
+    const dates = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек","Янв","Фев","Мар","Апр","Май","Июн"];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.name}<br>${dates[p.value[1]]} → ${dates[p.value[2]]}` },
+      grid: { left: 104, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "value", min: 0, max: 17, interval: 1, axisLabel: { formatter: (v) => dates[v] || "" } },
+      yAxis: { ...axis, type: "category", data: rows.map((r) => r[0]) },
+      series: [{
+        type: "custom",
+        data: rows.map((r) => ({ name: r[0], value: [r[1], r[2], r[3]] })),
+        renderItem: (params, api) => {
+          const y = api.coord([0, api.value(0)])[1];
+          const start = api.coord([api.value(1), 0])[0];
+          const end = api.coord([api.value(2), 0])[0];
+          const height = Math.min(22, api.size([0, 1])[1] * .58);
+          return { type: "rect", shape: { x: start, y: y - height / 2, width: end - start, height, r: 5 }, style: api.style() };
+        }
+      }]
+    };
+  }
+
+  function circleTimeline(title) {
+    const events = [
+      [0,0,18,"Запуск"], [1,1,32,"Релиз"], [2,0,12,"Обновление"], [3,2,46,"Кампания"],
+      [4,1,22,"Партнёрство"], [5,2,35,"Конференция"], [6,0,16,"Обновление"], [7,1,54,"Крупный релиз"]
+    ];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${months[p.value[0]]}: ${p.value[3]}<br>Масштаб: ${p.value[2]}` },
+      grid: { left: 88, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: months },
+      yAxis: { ...axis, type: "category", data: ["Продукт","Бизнес","Коммуникации"] },
+      series: [{ type: "scatter", data: events, symbolSize: (v) => 10 + Math.sqrt(v[2]) * 4, itemStyle: { opacity: .72 }, emphasis: { scale: 1.35 } }]
+    };
+  }
+
+  function seismogram(title) {
+    const values = [3,8,5,18,7,42,11,6,95,14,8,31,5,62,9,17,4,78,12,6,26,4,51,8];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `Событие ${p.dataIndex + 1}<br>Величина: ${p.value[1]}` },
+      grid: { left: 54, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "value", min: 0, max: values.length - 1, name: "Время" },
+      yAxis: { ...axis, type: "value", min: 0, max: 2.2, axisLabel: { show: false }, splitLine: { show: false } },
+      series: [{
+        type: "custom",
+        data: values.map((v, i) => [i, Math.log10(v + 1), v]),
+        renderItem: (params, api) => {
+          const basePoint = api.coord([api.value(0), 0]);
+          const topPoint = api.coord([api.value(0), api.value(1)]);
+          return {
+            type: "group",
+            children: [
+              { type: "line", shape: { x1: basePoint[0], y1: basePoint[1], x2: topPoint[0], y2: topPoint[1] }, style: { stroke: palette[0], lineWidth: 3 } },
+              { type: "circle", shape: { cx: topPoint[0], cy: topPoint[1], r: 4 }, style: { fill: palette[1] } }
+            ]
+          };
+        }
+      }]
+    };
+  }
+
   function hierarchy(title, sunburst = false) {
     const data = [
       { name: "Продукты", value: 42, children: [{ name: "A", value: 24 }, { name: "B", value: 18 }] },
@@ -589,6 +753,13 @@ const interactiveExamples = (() => {
     if (key === "dot-plot.svg") return dotRange(title);
     if (key === "barcode.svg") return barcode(title);
     if (key === "cumulative-curve.svg") return cumulativeCurve(title);
+    if (key === "column-line-timeline.svg") return columnLineTimeline(title);
+    if (key === "stock-price.svg") return candlestick(title);
+    if (key === "slope-timeline.svg") return slopeTimeline(title);
+    if (key === "fan.svg") return fanChart(title);
+    if (key === "priestley-timeline.svg") return priestleyTimeline(title);
+    if (key === "circle-timeline.svg") return circleTimeline(title);
+    if (key === "seismogram.svg") return seismogram(title);
     if (key === "voronoi.svg") return voronoi(title);
     if (key === "arc.svg") return semicircle(title);
     if (key === "gridplot.svg") return symbolGrid(title);
