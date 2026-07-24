@@ -44,6 +44,9 @@ const astroRoutes = new Map([
     ["ranking:Точки на полосе", "dots-on-strip"],
     ["ranking:Вертикальный лоллипоп", "vertical-lollipop"],
     ["ranking:Бамп-чарт", "bump-chart"],
+    ["correlation:Линия и столбцы", "line-and-columns"],
+    ["correlation:Связанная диаграмма рассеяния", "connected-scatterplot"],
+    ["correlation:Пузырьковая диаграмма", "bubble-chart"],
 ]);
 
 function parseCsv(text) {
