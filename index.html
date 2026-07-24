@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Русский визуальный словарь: выбор графика по аналитической задаче и типу связи в данных.">
+  <meta name="description" content="Русский визуальный словарь с интерактивными примерами: выбор графика по аналитической задаче.">
   <title>Визуальный словарь</title>
   <link rel="stylesheet" href="./mani.css">
+  <link rel="stylesheet" href="./examples.css">
 </head>
 <body>
   <main class="container">
@@ -13,203 +14,59 @@
       <p class="eyebrow">Выбор визуализации по задаче</p>
       <h1>Визуальный словарь</h1>
       <p class="lead">
-        Способов показать данные много. Сначала определите, какая связь в данных важнее всего,
-        затем посмотрите подходящие типы графиков. Это не строгий алгоритм, а отправная точка
-        для осмысленного выбора.
+        Сначала определите, какая связь в данных важнее всего. Затем выберите форму и откройте
+        интерактивный пример, чтобы увидеть, как она ведёт себя в цифровом интерфейсе.
       </p>
     </header>
-
     <nav class="category-nav" aria-label="Аналитические задачи">
       <p class="nav-label">Что нужно показать?</p>
       <div class="category-grid" id="categoryGrid"></div>
     </nav>
-
     <section class="category-panel" id="categoryPanel" aria-live="polite">
       <div class="panel-heading">
         <span class="category-marker" id="categoryMarker" aria-hidden="true"></span>
-        <div>
-          <p class="panel-kicker">Аналитическая задача</p>
-          <h2 id="categoryTitle"></h2>
-        </div>
+        <div><p class="panel-kicker">Аналитическая задача</p><h2 id="categoryTitle"></h2></div>
       </div>
-
       <div class="panel-copy">
-        <div>
-          <h3>Когда использовать</h3>
-          <p id="categoryDescription"></p>
-        </div>
-        <div>
-          <h3>Примеры</h3>
-          <p id="categoryExamples"></p>
-        </div>
+        <div><h3>Когда использовать</h3><p id="categoryDescription"></p></div>
+        <div><h3>Примеры</h3><p id="categoryExamples"></p></div>
       </div>
-
       <div class="charts-heading">
-        <div>
-          <p class="panel-kicker">Возможные формы</p>
-          <h3>Типы графиков</h3>
-        </div>
+        <div><p class="panel-kicker">Возможные формы</p><h3>Типы графиков</h3></div>
         <p class="chart-count" id="chartCount"></p>
       </div>
-
       <div class="chart-grid" id="chartGrid"></div>
     </section>
-
     <footer>
-      <p>
-        Русская адаптация
-        <a href="https://ft-interactive.github.io/visual-vocabulary/">Visual Vocabulary</a>
-        проекта Financial Times. Основано на Graphic Continuum Джона Швабиша
-        и Visualisation Catalogue Северино Рибекки.
-      </p>
+      <p>Русская адаптация <a href="https://ft-interactive.github.io/visual-vocabulary/">Visual Vocabulary</a>. Интерактивные учебные примеры построены на Apache ECharts.</p>
     </footer>
   </main>
-
+  <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
   <script src="./v2-data.js"></script>
+  <script src="./interactive-examples.js"></script>
+  <script src="./interactive-dialog.js"></script>
   <script>
     const state = { charts: [], activeCategory: categories[0].id };
-
     function parseCsv(text) {
-      const rows = [];
-      let row = [];
-      let value = "";
-      let quoted = false;
-
-      for (let i = 0; i < text.length; i += 1) {
-        const char = text[i];
-        const next = text[i + 1];
-
-        if (char === '"' && quoted && next === '"') {
-          value += '"';
-          i += 1;
-        } else if (char === '"') {
-          quoted = !quoted;
-        } else if (char === "," && !quoted) {
-          row.push(value);
-          value = "";
-        } else if ((char === "\n" || char === "\r") && !quoted) {
-          if (char === "\r" && next === "\n") i += 1;
-          row.push(value);
-          if (row.some((cell) => cell.trim() !== "")) rows.push(row);
-          row = [];
-          value = "";
-        } else {
-          value += char;
-        }
-      }
-
-      if (value || row.length) {
-        row.push(value);
-        rows.push(row);
-      }
-
-      const headers = rows.shift();
-      return rows.map((cells) =>
-        Object.fromEntries(headers.map((header, index) => [header, cells[index] || ""]))
-      );
+      const rows=[]; let row=[], value="", quoted=false;
+      for(let i=0;i<text.length;i+=1){const c=text[i],n=text[i+1];if(c==='"'&&quoted&&n==='"'){value+='"';i+=1}else if(c==='"'){quoted=!quoted}else if(c===","&&!quoted){row.push(value);value=""}else if((c==="\n"||c==="\r")&&!quoted){if(c==="\r"&&n==="\n")i+=1;row.push(value);if(row.some(x=>x.trim()!==""))rows.push(row);row=[];value=""}else value+=c}
+      if(value||row.length){row.push(value);rows.push(row)} const headers=rows.shift();
+      return rows.map(cells=>Object.fromEntries(headers.map((h,i)=>[h,cells[i]||""])));
     }
-
-    function renderNavigation() {
-      const grid = document.getElementById("categoryGrid");
-      grid.innerHTML = "";
-
-      categories.forEach((category) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "category-button";
-        button.dataset.category = category.id;
-        button.style.setProperty("--category-color", category.color);
-        button.innerHTML = `
-          <span class="button-dot" aria-hidden="true"></span>
-          <span>${category.title}</span>
-        `;
-        button.addEventListener("click", () => selectCategory(category.id));
-        grid.append(button);
-      });
+    function renderNavigation(){
+      const grid=document.getElementById("categoryGrid"); grid.innerHTML="";
+      categories.forEach(category=>{const button=document.createElement("button");button.type="button";button.className="category-button";button.dataset.category=category.id;button.style.setProperty("--category-color",category.color);button.innerHTML=`<span class="button-dot" aria-hidden="true"></span><span>${category.title}</span>`;button.addEventListener("click",()=>selectCategory(category.id));grid.append(button)});
     }
-
-    function selectCategory(categoryId) {
-      state.activeCategory = categoryId;
-      const category = categories.find((item) => item.id === categoryId);
-      const charts = state.charts.filter((item) => item.category === categoryId);
-
-      document.querySelectorAll(".category-button").forEach((button) => {
-        const selected = button.dataset.category === categoryId;
-        button.classList.toggle("is-active", selected);
-        button.setAttribute("aria-pressed", String(selected));
-      });
-
-      document.getElementById("categoryMarker").style.backgroundColor = category.color;
-      document.getElementById("categoryTitle").textContent = category.title;
-      document.getElementById("categoryDescription").textContent = category.description;
-      document.getElementById("categoryExamples").textContent = category.examples;
-      document.getElementById("chartCount").textContent =
-        `${charts.length} ${pluralize(charts.length, "вариант", "варианта", "вариантов")}`;
-
-      const chartGrid = document.getElementById("chartGrid");
-      chartGrid.innerHTML = "";
-
-      charts.forEach((chart) => {
-        const card = document.createElement("article");
-        card.className = "chart-card";
-        card.style.setProperty("--category-color", category.color);
-
-        const image = document.createElement("img");
-        image.src = `icons/${chart.img}`;
-        image.alt = "";
-        image.loading = "lazy";
-
-        const visual = document.createElement("div");
-        visual.className = "chart-visual";
-        visual.append(image);
-
-        const content = document.createElement("div");
-        content.className = "chart-content";
-        content.innerHTML = `
-          <h4>${chart.chartName}</h4>
-          <p>${chart.description || "Краткое описание будет добавлено."}</p>
-        `;
-
-        if (chart.avail !== "TRUE") {
-          const badge = document.createElement("span");
-          badge.className = "badge";
-          badge.textContent = "концепция";
-          content.prepend(badge);
-        }
-
-        card.append(visual, content);
-        chartGrid.append(card);
-      });
-
-      document.getElementById("categoryPanel").style.setProperty("--category-color", category.color);
+    function selectCategory(categoryId){
+      state.activeCategory=categoryId;const category=categories.find(item=>item.id===categoryId);const charts=state.charts.filter(item=>item.category===categoryId);
+      document.querySelectorAll(".category-button").forEach(button=>{const selected=button.dataset.category===categoryId;button.classList.toggle("is-active",selected);button.setAttribute("aria-pressed",String(selected))});
+      document.getElementById("categoryMarker").style.backgroundColor=category.color;document.getElementById("categoryTitle").textContent=category.title;document.getElementById("categoryDescription").textContent=category.description;document.getElementById("categoryExamples").textContent=category.examples;document.getElementById("chartCount").textContent=`${charts.length} ${pluralize(charts.length,"вариант","варианта","вариантов")}`;
+      const grid=document.getElementById("chartGrid");grid.innerHTML="";
+      charts.forEach(chart=>{const card=document.createElement("article");card.className="chart-card";card.style.setProperty("--category-color",category.color);const visual=document.createElement("div");visual.className="chart-visual";const image=document.createElement("img");image.src=`icons/${chart.img}`;image.alt="";image.loading="lazy";visual.append(image);const content=document.createElement("div");content.className="chart-content";content.innerHTML=`<h4>${chart.chartName}</h4><p>${chart.description||"Краткое описание будет добавлено."}</p>`;if(chart.avail!=="TRUE"){const badge=document.createElement("span");badge.className="badge";badge.textContent="концепция";content.prepend(badge)}const button=document.createElement("button");button.type="button";button.className="example-button";button.textContent="Открыть интерактивный пример";button.addEventListener("click",()=>openInteractiveExample(chart));content.append(button);card.append(visual,content);grid.append(card)});
+      document.getElementById("categoryPanel").style.setProperty("--category-color",category.color);
     }
-
-    function pluralize(number, one, few, many) {
-      const mod10 = number % 10;
-      const mod100 = number % 100;
-      if (mod10 === 1 && mod100 !== 11) return one;
-      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
-      return many;
-    }
-
-    async function init() {
-      renderNavigation();
-      try {
-        const response = await fetch("./chartTypes.csv");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        state.charts = parseCsv(await response.text());
-        selectCategory(state.activeCategory);
-      } catch (error) {
-        document.getElementById("categoryPanel").innerHTML = `
-          <div class="error">
-            <h2>Не удалось загрузить каталог</h2>
-            <p>Откройте сайт через локальный веб-сервер или GitHub Pages.</p>
-          </div>
-        `;
-        console.error(error);
-      }
-    }
-
+    function pluralize(n,one,few,many){const a=n%10,b=n%100;if(a===1&&b!==11)return one;if(a>=2&&a<=4&&(b<12||b>14))return few;return many}
+    async function init(){renderNavigation();try{const response=await fetch("./chartTypes.csv");if(!response.ok)throw new Error(`HTTP ${response.status}`);state.charts=parseCsv(await response.text());selectCategory(state.activeCategory)}catch(error){document.getElementById("categoryPanel").innerHTML=`<div class="error"><h2>Не удалось загрузить каталог</h2><p>Откройте сайт через локальный веб-сервер или GitHub Pages.</p></div>`;console.error(error)}}
     init();
   </script>
 </body>
