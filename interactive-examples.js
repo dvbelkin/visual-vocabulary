@@ -367,6 +367,127 @@ const interactiveExamples = (() => {
     };
   }
 
+
+  function violin(title) {
+    const groups = ["Группа A", "Группа B", "Группа C"];
+    const densities = [
+      [[12,.04],[18,.16],[24,.38],[30,.72],[36,1],[42,.82],[48,.46],[54,.18],[60,.05]],
+      [[12,.03],[18,.09],[24,.24],[30,.58],[36,.9],[42,1],[48,.74],[54,.34],[60,.1]],
+      [[12,.08],[18,.3],[24,.76],[30,1],[36,.68],[42,.35],[48,.2],[54,.1],[60,.03]]
+    ];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => p.name + "<br>Значение: " + p.value[1] },
+      grid: { left: 52, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: groups },
+      yAxis: { ...axis, type: "value", name: "Значение", min: 8, max: 64 },
+      series: [{
+        type: "custom",
+        data: groups.map((name, i) => ({ name, value: [i, 36] })),
+        renderItem: (params, api) => {
+          const i = params.dataIndex;
+          const center = api.coord([i, 0])[0];
+          const halfWidth = Math.min(api.size([1, 0])[0] * .38, 54);
+          const left = densities[i].map(([v,d]) => [center - d * halfWidth, api.coord([i,v])[1]]);
+          const right = [...densities[i]].reverse().map(([v,d]) => [center + d * halfWidth, api.coord([i,v])[1]]);
+          const median = api.coord([i, densities[i].reduce((best,p) => p[1] > best[1] ? p : best)[0]]);
+          return { type: "group", children: [
+            { type: "polygon", shape: { points: [...left, ...right] }, style: api.style({ fill: palette[i], opacity: .64, stroke: palette[i], lineWidth: 2 }) },
+            { type: "line", shape: { x1: center-7, y1: median[1], x2: center+7, y2: median[1] }, style: { stroke: "#171717", lineWidth: 3 } }
+          ]};
+        }
+      }]
+    };
+  }
+
+  function populationPyramid(title) {
+    const ages = ["80+","70–79","60–69","50–59","40–49","30–39","20–29","10–19","0–9"];
+    const men = [-3,-5,-8,-11,-14,-17,-19,-16,-13];
+    const women = [5,8,11,14,16,18,19,15,12];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: (v) => Math.abs(v) + " тыс." },
+      legend: { top: 40 },
+      grid: { left: 62, right: 34, top: 82, bottom: 38 },
+      xAxis: { ...axis, type: "value", min: -22, max: 22, axisLabel: { formatter: (v) => Math.abs(v) } },
+      yAxis: { ...axis, type: "category", data: ages },
+      series: [
+        { name: "Мужчины", type: "bar", stack: "population", data: men, itemStyle: { color: palette[0] } },
+        { name: "Женщины", type: "bar", stack: "population", data: women, itemStyle: { color: palette[1] } }
+      ]
+    };
+  }
+
+  function observationStrip(title) {
+    const values = [12,14,15,17,18,18,19,21,22,22,23,24,25,25,26,27,29,31,34,38,45,52];
+    const data = values.map((v,i) => [v, ((i * 37) % 17 - 8) / 20]);
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => "Наблюдение: " + p.value[0] },
+      grid: { left: 48, right: 24, top: 70, bottom: 44 },
+      xAxis: { ...axis, type: "value", name: "Значение" },
+      yAxis: { min: -1, max: 1, show: false },
+      series: [{ type: "scatter", data, symbolSize: 13, emphasis: { scale: 1.55 }, itemStyle: { opacity: .72 } }]
+    };
+  }
+
+  function dotRange(title) {
+    const names = ["Альфа","Бета","Гамма","Дельта","Эпсилон"];
+    const ranges = [[12,31,52],[18,35,61],[9,29,67],[21,38,58],[13,33,54]];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => p.name + "<br>Минимум: " + p.value[1] + "<br>Уровень: " + p.value[2] + "<br>Максимум: " + p.value[3] },
+      grid: { left: 86, right: 30, top: 62, bottom: 40 },
+      xAxis: { ...axis, type: "value" },
+      yAxis: { ...axis, type: "category", data: names },
+      series: [{
+        type: "custom",
+        data: ranges.map((r,i) => ({ name: names[i], value: [i,...r] })),
+        renderItem: (params, api) => {
+          const y=api.coord([0,api.value(0)])[1], lo=api.coord([api.value(1),0])[0], mid=api.coord([api.value(2),0])[0], hi=api.coord([api.value(3),0])[0];
+          return { type:"group", children:[
+            { type:"line", shape:{x1:lo,y1:y,x2:hi,y2:y}, style:{stroke:"#90908a",lineWidth:4,lineCap:"round"} },
+            { type:"circle", shape:{cx:lo,cy:y,r:5}, style:{fill:"#fff",stroke:palette[0],lineWidth:2} },
+            { type:"circle", shape:{cx:hi,cy:y,r:5}, style:{fill:"#fff",stroke:palette[0],lineWidth:2} },
+            { type:"circle", shape:{cx:mid,cy:y,r:7}, style:{fill:palette[1],stroke:"#fff",lineWidth:2} }
+          ]};
+        }
+      }]
+    };
+  }
+
+  function barcode(title) {
+    const values = [7,9,12,14,15,17,18,18.5,19,21,22,22.4,23,24,25,25.3,26,27,29,31,34,38,45,52];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => "Наблюдение: " + p.value[0] },
+      grid: { left: 48, right: 24, top: 70, bottom: 44 },
+      xAxis: { ...axis, type: "value", name: "Значение" },
+      yAxis: { min: 0, max: 1, show: false },
+      series: [{
+        type: "custom",
+        data: values.map((v) => [v,.5]),
+        renderItem: (params, api) => {
+          const p=api.coord([api.value(0),.5]);
+          return { type:"line", shape:{x1:p[0],y1:p[1]-44,x2:p[0],y2:p[1]+44}, style:api.style({stroke:palette[0],lineWidth:3,opacity:.68}) };
+        }
+      }]
+    };
+  }
+
+  function cumulativeCurve(title) {
+    const sorted = [7,9,12,14,15,17,18,19,21,22,23,24,25,26,27,29,31,34,38,45,52];
+    const data = sorted.map((v,i) => [v, Math.round((i+1)/sorted.length*1000)/10]);
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", valueFormatter: (v) => v + "%" },
+      grid: { left: 54, right: 24, top: 62, bottom: 44 },
+      xAxis: { ...axis, type: "value", name: "Значение" },
+      yAxis: { ...axis, type: "value", min: 0, max: 100, name: "Накоплено, %", axisLabel: { formatter: "{value}%" } },
+      series: [{ type: "line", step: "end", showSymbol: true, symbolSize: 7, data, areaStyle: { opacity: .12 } }]
+    };
+  }
+
   function hierarchy(title, sunburst = false) {
     const data = [
       { name: "Продукты", value: 42, children: [{ name: "A", value: 24 }, { name: "B", value: 18 }] },
@@ -462,6 +583,12 @@ const interactiveExamples = (() => {
     const key = chart.img.toLowerCase();
     const title = chart.chartName;
     if (key === "bar-stacked-proportional.svg") return normalizedStacked(title);
+    if (key === "violin.svg") return violin(title);
+    if (key === "population-pyramis.svg") return populationPyramid(title);
+    if (key === "dot-plot-strip-distribution.svg") return observationStrip(title);
+    if (key === "dot-plot.svg") return dotRange(title);
+    if (key === "barcode.svg") return barcode(title);
+    if (key === "cumulative-curve.svg") return cumulativeCurve(title);
     if (key === "voronoi.svg") return voronoi(title);
     if (key === "arc.svg") return semicircle(title);
     if (key === "gridplot.svg") return symbolGrid(title);
@@ -477,8 +604,8 @@ const interactiveExamples = (() => {
     if (key.includes("sunburst")) return hierarchy(title, true);
     if (key.includes("pie") || key.includes("doughnut") || key.includes("arc")) return pie(title, key.includes("doughnut"), false);
     if (key.includes("radar") || key.includes("parallel")) return radar(title);
-    if (key.includes("histogram") || key.includes("barcode") || key.includes("violin") || key.includes("cumulative")) return distribution(title, false);
-    if (key.includes("boxplot") || key.includes("dot-plot")) return distribution(title, true);
+    if (key.includes("histogram")) return distribution(title, false);
+    if (key.includes("boxplot")) return distribution(title, true);
     if (key.includes("choropleth") || key.includes("cartogram") || key.includes("density") || key.includes("contour") || key.includes("heat-map")) return spatial(title, false);
     if (chart.category === "spatial" || key === "flow.svg") return spatial(title, key.includes("flow"));
     if (key.includes("bullet")) return gauge(title);
