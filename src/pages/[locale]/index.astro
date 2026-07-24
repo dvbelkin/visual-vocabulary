@@ -1,6 +1,7 @@
 ---
 import ChartCard from "../../components/catalog/ChartCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import migrationRegistry from "../../data/migration-registry.json";
 import { charts } from "../../lib/catalog";
 import { isLocale, locales, t, type Locale } from "../../lib/i18n";
 
@@ -34,6 +35,22 @@ const copy = t(locale);
             </div>
             <p>{copy.catalogLead}</p>
         </div>
+        <dl class="migration-progress" aria-label={copy.progressLabel}>
+            <div>
+                <dt>{copy.progressLabel}</dt>
+                <dd>
+                    <strong>{migrationRegistry.astroReadyCount}</strong>
+                    <span>/ {migrationRegistry.chartCount}</span>
+                </dd>
+            </div>
+            <div>
+                <dt>{copy.legacyLabel}</dt>
+                <dd>
+                    <strong>{migrationRegistry.legacyReadyCount}</strong>
+                    <span>/ {migrationRegistry.chartCount}</span>
+                </dd>
+            </div>
+        </dl>
         <div class="chart-grid">
             {
                 charts.map((chart, index) => (

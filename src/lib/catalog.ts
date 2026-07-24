@@ -1,7 +1,15 @@
 import type { Locale } from "./i18n";
 
 export type CategoryId =
-    "magnitude" | "change-time" | "correlation" | "distribution" | "part-whole";
+    | "deviation"
+    | "magnitude"
+    | "ranking"
+    | "change-time"
+    | "correlation"
+    | "distribution"
+    | "part-whole"
+    | "spatial"
+    | "flow";
 
 export type ChartKind = "bar" | "line" | "scatter" | "histogram" | "pie" | "heatmap";
 
@@ -26,11 +34,15 @@ export interface ChartDefinition {
 }
 
 export const categoryNames: Record<CategoryId, LocalizedText> = {
+    deviation: { ru: "Отклонение", en: "Deviation" },
     magnitude: { ru: "Величина", en: "Magnitude" },
+    ranking: { ru: "Ранжирование", en: "Ranking" },
     "change-time": { ru: "Изменение во времени", en: "Change over time" },
     correlation: { ru: "Связь", en: "Correlation" },
     distribution: { ru: "Распределение", en: "Distribution" },
     "part-whole": { ru: "Части целого", en: "Part to whole" },
+    spatial: { ru: "Пространство", en: "Spatial" },
+    flow: { ru: "Поток", en: "Flow" },
 };
 
 export const charts: readonly ChartDefinition[] = [
