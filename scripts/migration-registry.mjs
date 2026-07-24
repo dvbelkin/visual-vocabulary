@@ -39,6 +39,11 @@ const astroRoutes = new Map([
     ["deviation:Баланс с заливкой", "balance-area"],
     ["distribution:Ящик с усами", "boxplot"],
     ["distribution:Скрипичная диаграмма", "violin-plot"],
+    ["ranking:Упорядоченные вертикальные столбцы", "ordered-vertical-bars"],
+    ["ranking:Упорядоченные пропорциональные символы", "ranked-proportional-symbols"],
+    ["ranking:Точки на полосе", "dots-on-strip"],
+    ["ranking:Вертикальный лоллипоп", "vertical-lollipop"],
+    ["ranking:Бамп-чарт", "bump-chart"],
 ]);
 
 function parseCsv(text) {
