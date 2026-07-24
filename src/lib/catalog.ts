@@ -28,7 +28,12 @@ export type ChartKind =
     | "combo"
     | "slope"
     | "stacked-area"
-    | "calendar";
+    | "calendar"
+    | "population-pyramid"
+    | "dot-range"
+    | "cumulative"
+    | "observation-strip"
+    | "barcode";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -549,6 +554,151 @@ export const charts: readonly ChartDefinition[] = [
             const value = Math.round(28 + 24 * Math.abs(Math.sin(index / 8)) + (index % 7) * 3);
             return { label: { ru: iso, en: iso }, value };
         }),
+    },
+    {
+        id: "population-pyramid",
+        category: "distribution",
+        kind: "population-pyramid",
+        title: { ru: "Возрастно-половая пирамида", en: "Population pyramid" },
+        description: {
+            ru: "Зеркальные столбцы сравнивают возрастную структуру двух групп.",
+            en: "Mirrored bars compare the age structure of two groups.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить распределение населения по возрасту и полу или другой паре групп.",
+            en: "You need to compare population by age and sex or another pair of groups.",
+        },
+        avoidWhen: {
+            ru: "Группы не сопоставимы или важнее общий размер каждой возрастной категории.",
+            en: "Groups are not comparable or the combined size of each age band matters more.",
+        },
+        unit: { ru: "тыс. человек", en: "thousand people" },
+        valueLabels: {
+            primary: { ru: "Мужчины", en: "Men" },
+            secondary: { ru: "Женщины", en: "Women" },
+        },
+        data: [
+            { label: { ru: "80+", en: "80+" }, value: 12, value2: 21 },
+            { label: { ru: "70–79", en: "70–79" }, value: 28, value2: 39 },
+            { label: { ru: "60–69", en: "60–69" }, value: 46, value2: 54 },
+            { label: { ru: "50–59", en: "50–59" }, value: 58, value2: 62 },
+            { label: { ru: "40–49", en: "40–49" }, value: 66, value2: 68 },
+            { label: { ru: "30–39", en: "30–39" }, value: 74, value2: 72 },
+            { label: { ru: "20–29", en: "20–29" }, value: 69, value2: 65 },
+            { label: { ru: "10–19", en: "10–19" }, value: 61, value2: 58 },
+            { label: { ru: "0–9", en: "0–9" }, value: 55, value2: 52 },
+        ],
+    },
+    {
+        id: "dot-range",
+        category: "distribution",
+        kind: "dot-range",
+        title: { ru: "Точечный диапазон", en: "Dot range" },
+        description: {
+            ru: "Две точки и соединяющий отрезок показывают границы диапазона.",
+            en: "Two dots and a connecting segment show the endpoints of a range.",
+        },
+        useWhen: {
+            ru: "Нужно компактно сравнить минимум и максимум в нескольких категориях.",
+            en: "You need a compact comparison of minimum and maximum across categories.",
+        },
+        avoidWhen: {
+            ru: "Границы не описывают форму распределения или скрывают важные выбросы.",
+            en: "Endpoints do not describe distribution shape or conceal important outliers.",
+        },
+        unit: { ru: "минут", en: "minutes" },
+        valueLabels: {
+            primary: { ru: "Минимум", en: "Minimum" },
+            secondary: { ru: "Максимум", en: "Maximum" },
+        },
+        data: [
+            { label: { ru: "Маршрут А", en: "Route A" }, value: 24, value2: 41 },
+            { label: { ru: "Маршрут Б", en: "Route B" }, value: 31, value2: 57 },
+            { label: { ru: "Маршрут В", en: "Route C" }, value: 18, value2: 36 },
+            { label: { ru: "Маршрут Г", en: "Route D" }, value: 27, value2: 48 },
+            { label: { ru: "Маршрут Д", en: "Route E" }, value: 35, value2: 63 },
+        ],
+    },
+    {
+        id: "cumulative-curve",
+        category: "distribution",
+        kind: "cumulative",
+        title: { ru: "Кумулятивная кривая", en: "Cumulative curve" },
+        description: {
+            ru: "Кривая показывает долю наблюдений, не превышающих выбранный порог.",
+            en: "The curve shows the share of observations at or below each threshold.",
+        },
+        useWhen: {
+            ru: "Нужно отвечать на вопросы о проценте наблюдений ниже заданного значения.",
+            en: "You need to answer what share of observations falls below a threshold.",
+        },
+        avoidWhen: {
+            ru: "Читателю важнее увидеть отдельные пики и форму обычного распределения.",
+            en: "Readers need to see individual peaks and the shape of the distribution.",
+        },
+        unit: { ru: "% наблюдений", en: "% of observations" },
+        data: [
+            { label: { ru: "10", en: "10" }, value: 4 },
+            { label: { ru: "20", en: "20" }, value: 13 },
+            { label: { ru: "30", en: "30" }, value: 29 },
+            { label: { ru: "40", en: "40" }, value: 51 },
+            { label: { ru: "50", en: "50" }, value: 72 },
+            { label: { ru: "60", en: "60" }, value: 86 },
+            { label: { ru: "70", en: "70" }, value: 94 },
+            { label: { ru: "80", en: "80" }, value: 98 },
+            { label: { ru: "90", en: "90" }, value: 100 },
+        ],
+    },
+    {
+        id: "observation-strip",
+        category: "distribution",
+        kind: "observation-strip",
+        title: { ru: "Полоса отдельных наблюдений", en: "Strip plot" },
+        description: {
+            ru: "Каждая точка представляет одно наблюдение, а небольшой сдвиг раскрывает совпадения.",
+            en: "Each dot represents one observation, with slight jitter revealing overlaps.",
+        },
+        useWhen: {
+            ru: "Наблюдений немного и важно не скрывать их агрегацией.",
+            en: "There are relatively few observations and aggregation would hide useful detail.",
+        },
+        avoidWhen: {
+            ru: "Точек настолько много, что наложение мешает увидеть плотность.",
+            en: "There are so many points that overlap obscures density.",
+        },
+        unit: { ru: "баллов", en: "points" },
+        data: [
+            42, 45, 45, 48, 51, 52, 52, 53, 55, 56, 58, 58, 59, 61, 62, 64, 65, 67, 69, 72, 74, 77,
+            81, 86,
+        ].map((value, index) => ({
+            label: { ru: `Наблюдение ${index + 1}`, en: `Observation ${index + 1}` },
+            value,
+        })),
+    },
+    {
+        id: "distribution-barcode",
+        category: "distribution",
+        kind: "barcode",
+        title: { ru: "Штрих-код распределения", en: "Distribution barcode" },
+        description: {
+            ru: "Каждое наблюдение отмечено тонким штрихом на общей числовой оси.",
+            en: "Every observation is marked by a thin tick on a shared numerical axis.",
+        },
+        useWhen: {
+            ru: "Нужно показать все точные позиции и заметить скопления или пустые интервалы.",
+            en: "You want to show every exact position and reveal clusters or gaps.",
+        },
+        avoidWhen: {
+            ru: "Много совпадающих значений: штрихи накладываются и скрывают частоту.",
+            en: "Many values are identical, causing ticks to overlap and hide frequency.",
+        },
+        unit: { ru: "секунд", en: "seconds" },
+        data: [12, 14, 17, 19, 23, 24, 27, 31, 32, 34, 37, 41, 46, 48, 52, 58, 61, 68, 74, 83].map(
+            (value, index) => ({
+                label: { ru: `Замер ${index + 1}`, en: `Reading ${index + 1}` },
+                value,
+            }),
+        ),
     },
 ];
 
