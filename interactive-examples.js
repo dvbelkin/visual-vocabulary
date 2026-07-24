@@ -834,20 +834,221 @@ const interactiveExamples = (() => {
     };
   }
 
-  function spatial(title, flow = false) {
-    const cities = [[12,62,38,"Север"],[30,42,58,"Центр"],[56,55,25,"Восток"],[72,25,46,"Юг"],[43,18,31,"Запад"]];
+  const mapRegions = [
+    { name: "Северо-Запад", value: 42, points: [[8,57],[22,68],[35,64],[33,49],[18,45]] },
+    { name: "Центр", value: 78, points: [[18,45],[33,49],[45,43],[42,28],[26,25],[13,34]] },
+    { name: "Север", value: 31, points: [[35,64],[55,70],[68,61],[61,47],[45,43],[33,49]] },
+    { name: "Поволжье", value: 63, points: [[42,28],[45,43],[61,47],[66,31],[57,20]] },
+    { name: "Юг", value: 55, points: [[13,34],[26,25],[42,28],[37,12],[18,10],[7,22]] },
+    { name: "Урал", value: 48, points: [[61,47],[68,61],[82,57],[86,38],[66,31]] },
+    { name: "Сибирь", value: 26, points: [[66,31],[86,38],[96,26],[91,9],[70,10],[57,20]] }
+  ];
+
+  const mapBase = (title) => ({
+    ...base(title),
+    grid: { left: 26, right: 26, top: 66, bottom: 30 },
+    xAxis: { type: "value", min: 0, max: 102, show: false },
+    yAxis: { type: "value", min: 0, max: 76, show: false }
+  });
+
+  function polygonSeries(regions, colorFor, label = true) {
+    return {
+      type: "custom",
+      data: regions.map((region, index) => [index, region.value]),
+      renderItem: (params, api) => {
+        const region = regions[api.value(0)];
+        const points = region.points.map((point) => api.coord(point));
+        const center = points.reduce((sum, point) => [sum[0] + point[0] / points.length, sum[1] + point[1] / points.length], [0, 0]);
+        return {
+          type: "group",
+          children: [
+            {
+              type: "polygon",
+              shape: { points },
+              style: { fill: colorFor(region, api.value(0)), stroke: "#fff", lineWidth: 2 },
+              emphasis: { style: { stroke: "#171717", lineWidth: 2.5 } }
+            },
+            ...(label ? [{
+              type: "text",
+              style: { x: center[0], y: center[1], text: region.name, fill: "#171717", fontSize: 10, align: "center", verticalAlign: "middle" }
+            }] : [])
+          ]
+        };
+      }
+    };
+  }
+
+  function choroplethMap(title) {
+    const colors = ["#e9f1f8","#c7dced","#8db9d9","#4d8bbb","#175ea8"];
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => `${mapRegions[p.value[0]].name}<br>Показатель: ${p.value[1]}%` },
+      visualMap: { min: 20, max: 80, orient: "horizontal", left: "center", bottom: 4, inRange: { color: colors }, text: ["80%", "20%"] },
+      series: [polygonSeries(mapRegions, (region) => colors[Math.min(4, Math.floor((region.value - 20) / 13))])]
+    };
+  }
+
+  function proportionalSymbolMap(title) {
+    const cities = [[24,42,86,"Столица"],[47,47,52,"Север"],[68,35,34,"Восток"],[31,20,24,"Юг"],[82,20,17,"Дальний"]];
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => `${p.value[3]}<br>Объём: ${p.value[2]} тыс.` },
+      series: [
+        polygonSeries(mapRegions, () => "#edf0ee", false),
+        { type: "scatter", data: cities, symbolSize: (v) => 7 + Math.sqrt(v[2]) * 3.2, itemStyle: { color: palette[0], opacity: .72, borderColor: "#fff", borderWidth: 1.5 }, label: { show: true, formatter: (p) => p.value[3], position: "top", color: "#171717" }, emphasis: { scale: 1.25 } }
+      ]
+    };
+  }
+
+  function flowMap(title) {
+    const hub = [28,38];
+    const destinations = [[50,58,38,"Север"],[66,42,72,"Восток"],[82,20,28,"Дальний"],[44,17,51,"Юг"]];
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => p.seriesType === "lines" ? `${p.data.name}: ${p.data.value} тыс.` : p.value[3] },
+      series: [
+        polygonSeries(mapRegions, () => "#eef1ef", false),
+        {
+          type: "lines", coordinateSystem: "cartesian2d", zlevel: 2,
+          effect: { show: true, period: 4, trailLength: .25, symbol: "arrow", symbolSize: 7 },
+          lineStyle: { color: palette[0], opacity: .62, curveness: .18 },
+          data: destinations.map((d) => ({ name: `Центр → ${d[3]}`, value: d[2], coords: [hub, [d[0],d[1]]], lineStyle: { width: 1 + d[2] / 18 } }))
+        },
+        { type: "scatter", data: [[...hub,90,"Центр"], ...destinations], symbolSize: (v) => 8 + Math.sqrt(v[2]) * 1.5, label: { show: true, formatter: (p) => p.value[3], position: "top", color: "#171717" }, itemStyle: { color: palette[1] } }
+      ]
+    };
+  }
+
+  function contourMap(title) {
+    const contours = [
+      { value: 10, points: [[10,30],[22,45],[38,54],[57,55],[76,46],[93,31]], color: "#9ecae1" },
+      { value: 20, points: [[12,24],[28,34],[43,43],[58,44],[73,37],[91,22]], color: "#5fa2ce" },
+      { value: 30, points: [[18,18],[32,24],[46,32],[59,33],[73,28],[85,17]], color: "#175ea8" },
+      { value: 40, points: [[30,13],[43,18],[55,24],[68,20],[76,12]], color: "#c94f14" }
+    ];
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => `Изолиния: ${p.value[1]} ед.` },
+      series: [
+        polygonSeries(mapRegions, () => "#f1f2ef", false),
+        {
+          type: "custom", data: contours.map((line, index) => [index, line.value]),
+          renderItem: (params, api) => {
+            const line = contours[api.value(0)];
+            return { type: "polyline", shape: { points: line.points.map((point) => api.coord(point)), smooth: .35 }, style: { fill: null, stroke: line.color, lineWidth: 3 }, textContent: { type: "text", style: { text: `${line.value}`, fill: line.color, fontWeight: 700 } }, textConfig: { position: "end", distance: 5 } };
+          }
+        }
+      ]
+    };
+  }
+
+  function equalisedCartogram(title) {
+    const cells = [
+      ["СЗ",1,3,42],["Ц",1,2,78],["Ю",1,1,55],["С",2,3,31],
+      ["П",2,2,63],["У",3,2,48],["Сиб",4,2,26]
+    ];
     return {
       ...base(title),
-      tooltip: { formatter: (p) => `${p.value[3]}: ${p.value[2]}` },
-      grid: { left: 28, right: 28, top: 58, bottom: 24 },
-      xAxis: { min: 0, max: 85, show: false },
-      yAxis: { min: 0, max: 75, show: false },
-      series: flow
-        ? [
-            { type: "lines", coordinateSystem: "cartesian2d", effect: { show: true, symbol: "arrow", symbolSize: 7 }, lineStyle: { width: 2, curveness: 0.2 }, data: cities.slice(1).map((c) => ({ coords: [[30,42],[c[0],c[1]]] })) },
-            { type: "scatter", data: cities, symbolSize: (v) => 10 + v[2] / 3, label: { show: true, formatter: (p) => p.value[3], position: "top" } }
-          ]
-        : [{ type: "scatter", data: cities, symbolSize: (v) => 10 + v[2] / 2, label: { show: true, formatter: (p) => p.value[3], position: "top" }, emphasis: { focus: "series", scale: 1.3 } }]
+      tooltip: { formatter: (p) => `${p.value[0]}<br>Показатель: ${p.value[3]}%` },
+      grid: { left: "18%", right: "18%", top: 76, bottom: 38 },
+      xAxis: { min: .4, max: 4.6, show: false }, yAxis: { min: .4, max: 3.6, show: false },
+      visualMap: { min: 20, max: 80, orient: "horizontal", left: "center", bottom: 4, inRange: { color: ["#e9f1f8","#175ea8"] } },
+      series: [{
+        type: "custom", data: cells,
+        renderItem: (params, api) => {
+          const center = api.coord([api.value(1), api.value(2)]);
+          return { type: "group", children: [
+            { type: "rect", shape: { x: center[0]-24, y: center[1]-24, width: 48, height: 48, r: 5 }, style: api.style({ stroke: "#fff", lineWidth: 2 }) },
+            { type: "text", style: { x: center[0], y: center[1], text: api.value(0), fill: "#fff", align: "center", verticalAlign: "middle", fontWeight: 700 } }
+          ]};
+        }, encode: { tooltip: [0,3] }
+      }]
+    };
+  }
+
+  function scaledCartogram(title) {
+    const regions = [
+      [18,45,85,"Центр"],[42,52,54,"Север"],[66,43,39,"Урал"],
+      [82,30,23,"Сибирь"],[35,22,47,"Юг"],[58,19,31,"Поволжье"]
+    ];
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => `${p.value[3]}<br>Население: ${p.value[2]} млн` },
+      series: [{
+        type: "scatter", data: regions, symbol: "rect",
+        symbolSize: (v) => { const side = 13 + Math.sqrt(v[2]) * 4.4; return [side, side]; },
+        itemStyle: { color: palette[0], opacity: .78, borderColor: "#fff", borderWidth: 2 },
+        label: { show: true, formatter: (p) => `${p.value[3]}\n${p.value[2]}`, color: "#fff", fontSize: 10 },
+        emphasis: { scale: 1.18 }
+      }]
+    };
+  }
+
+  function dotDensityMap(title) {
+    const points = Array.from({ length: 150 }, (_, i) => {
+      const cluster = i % 3;
+      const centers = [[27,40],[54,47],[73,24]];
+      const angle = i * 2.399;
+      const radius = 2 + (i % 19) * .55;
+      return [centers[cluster][0] + Math.cos(angle) * radius, centers[cluster][1] + Math.sin(angle) * radius, cluster];
+    });
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: "Одна точка = 1 000 жителей" },
+      series: [
+        polygonSeries(mapRegions, () => "#eef1ef", false),
+        { type: "scatter", data: points, symbolSize: 4.5, itemStyle: { color: (p) => [palette[0],palette[1],palette[2]][p.value[2]], opacity: .62 } }
+      ]
+    };
+  }
+
+  function spatialHeatMap(title) {
+    const data = [];
+    for (let x = 8; x <= 94; x += 7) for (let y = 10; y <= 66; y += 7) {
+      const value = 80 * Math.exp(-((x-28)**2+(y-42)**2)/260) + 65 * Math.exp(-((x-67)**2+(y-27)**2)/300);
+      data.push([x,y,Math.round(value)]);
+    }
+    return {
+      ...mapBase(title),
+      tooltip: { formatter: (p) => `Интенсивность: ${p.value[2]}` },
+      visualMap: { min: 0, max: 85, orient: "horizontal", left: "center", bottom: 4, inRange: { color: ["#f6f1d8","#f2bd63","#d85b35","#781f3a"] } },
+      series: [
+        polygonSeries(mapRegions, () => "#f1f2ef", false),
+        { type: "heatmap", data, pointSize: 22, blurSize: 32, emphasis: { itemStyle: { borderColor: "#171717", borderWidth: 1 } } }
+      ]
+    };
+  }
+
+  function processWaterfall(title) {
+    const stages = ["Старт","Продажи","Возвраты","Сервис","Расходы","Итог"];
+    const changes = [120,35,-18,22,-41,118];
+    const bases = [0,120,137,137,118,0];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: (items) => { const item = items.find((p) => p.seriesName === "Изменение"); return `${item.axisValue}<br>${item.data.raw >= 0 ? "+" : ""}${item.data.raw}`; } },
+      grid: { left: 52, right: 26, top: 64, bottom: 54 },
+      xAxis: { ...axis, type: "category", data: stages },
+      yAxis: { ...axis, type: "value", name: "Результат" },
+      series: [
+        { name: "База", type: "bar", stack: "total", data: bases, itemStyle: { color: "transparent" }, emphasis: { itemStyle: { color: "transparent" } }, tooltip: { show: false } },
+        { name: "Изменение", type: "bar", stack: "total", data: changes.map((raw, index) => ({ value: Math.abs(raw), raw, itemStyle: { color: index === 0 || index === changes.length-1 ? palette[0] : raw >= 0 ? palette[2] : palette[1] } })), label: { show: true, position: "top", formatter: (p) => `${p.data.raw >= 0 ? "+" : ""}${p.data.raw}` } }
+      ]
+    };
+  }
+
+  function chordDiagram(title) {
+    const names = ["Север","Центр","Юг","Восток","Запад"];
+    const links = [[0,1,38],[0,3,16],[1,2,31],[1,3,25],[2,4,19],[3,4,27],[4,0,14]];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => p.dataType === "edge" ? `${names[p.data.source]} → ${names[p.data.target]}: ${p.data.value}` : names[p.dataIndex] },
+      series: [{
+        type: "graph", layout: "circular", circular: { rotateLabel: true }, roam: true,
+        data: names.map((name, index) => ({ name, symbolSize: 34, itemStyle: { color: palette[index] } })),
+        links: links.map(([source,target,value]) => ({ source, target, value, lineStyle: { width: 2 + value / 7, color: palette[source], opacity: .48, curveness: .45 } })),
+        edgeSymbol: ["none","none"], label: { show: true, position: "outside" },
+        lineStyle: { curveness: .45 }, emphasis: { focus: "adjacency", lineStyle: { opacity: .9 } }
+      }]
     };
   }
 
@@ -1272,13 +1473,23 @@ const interactiveExamples = (() => {
     if (key === "lollipop-v-magnitude.svg") return lollipop(title, false);
     if (key === "bullet.svg") return bulletChart(title);
     if (key === "parallel coordinates.svg") return parallelCoordinates(title);
+    if (key === "basic-choropleth.svg") return choroplethMap(title);
+    if (key === "proportional-symbol.svg") return proportionalSymbolMap(title);
+    if (key === "flow.svg") return flowMap(title);
+    if (key === "contour.svg") return contourMap(title);
+    if (key === "equalised-cartogram.svg") return equalisedCartogram(title);
+    if (key === "scaled-cartogram-value.svg") return scaledCartogram(title);
+    if (key === "dot-density.svg") return dotDensityMap(title);
+    if (key === "heat-map.svg") return spatialHeatMap(title);
+    if (key === "waterfall-flow.svg") return processWaterfall(title);
+    if (key === "chord.svg") return chordDiagram(title);
     if (key === "voronoi.svg") return voronoi(title);
     if (key === "arc.svg") return semicircle(title);
     if (key === "gridplot.svg") return symbolGrid(title);
     if (key === "venn.svg") return venn(title);
     if (key === "waterfall.svg") return waterfall(title);
     if (key.includes("sankey")) return sankey(title);
-    if (key.includes("network") || key.includes("chord")) return network(title);
+    if (key.includes("network")) return network(title);
     if (key.includes("heatmap")) return heatmap(title, key.includes("calendar"));
     if (key.includes("calendar")) return heatmap(title, true);
     if (key.includes("scatterplot")) return scatter(title, key.includes("bubble"), key.includes("connected") || key.includes("line"));
@@ -1289,8 +1500,6 @@ const interactiveExamples = (() => {
     if (key.includes("radar") || key.includes("parallel")) return radar(title);
     if (key.includes("histogram")) return distribution(title, false);
     if (key.includes("boxplot")) return distribution(title, true);
-    if (key.includes("choropleth") || key.includes("cartogram") || key.includes("density") || key.includes("contour") || key.includes("heat-map")) return spatial(title, false);
-    if (chart.category === "spatial" || key === "flow.svg") return spatial(title, key.includes("flow"));
     if (key.includes("bullet")) return gauge(title);
     if (key.includes("line") || key.includes("area") || key.includes("fan") || key.includes("timeline") || key.includes("bump") || key.includes("slope")) return line(title, key.includes("area"), key.includes("fan"));
     if (key.includes("stacked")) return bar(title, key.startsWith("bar"), key.includes("diverging"), true);
