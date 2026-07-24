@@ -1039,16 +1039,55 @@ const interactiveExamples = (() => {
   function chordDiagram(title) {
     const names = ["Север","Центр","Юг","Восток","Запад"];
     const links = [[0,1,38],[0,3,16],[1,2,31],[1,3,25],[2,4,19],[3,4,27],[4,0,14]];
+    const angles = names.map((_, index) => -Math.PI / 2 + index * Math.PI * 2 / names.length);
+    const polar = (center, radius, angle) => [center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius];
     return {
       ...base(title),
-      tooltip: { formatter: (p) => p.dataType === "edge" ? `${names[p.data.source]} → ${names[p.data.target]}: ${p.data.value}` : names[p.dataIndex] },
-      series: [{
-        type: "graph", layout: "circular", circular: { rotateLabel: true }, roam: true,
-        data: names.map((name, index) => ({ name, symbolSize: 34, itemStyle: { color: palette[index] } })),
-        links: links.map(([source,target,value]) => ({ source, target, value, lineStyle: { width: 2 + value / 7, color: palette[source], opacity: .48, curveness: .45 } })),
-        edgeSymbol: ["none","none"], label: { show: true, position: "outside" },
-        lineStyle: { curveness: .45 }, emphasis: { focus: "adjacency", lineStyle: { opacity: .9 } }
-      }]
+      tooltip: { formatter: (p) => `${names[p.value[0]]} → ${names[p.value[1]]}<br>Поток: ${p.value[2]}` },
+      grid: { left: 20, right: 20, top: 54, bottom: 18 },
+      xAxis: { min: 0, max: 100, show: false },
+      yAxis: { min: 0, max: 100, show: false },
+      series: [
+        {
+          type: "custom",
+          data: links,
+          renderItem: (params, api) => {
+            const center = api.coord([50,50]);
+            const radius = Math.min(api.size([31,0])[0], api.size([0,31])[1]);
+            const width = .025 + api.value(2) / 900;
+            const sourceAngle = angles[api.value(0)];
+            const targetAngle = angles[api.value(1)];
+            const s1 = polar(center, radius, sourceAngle - width);
+            const s2 = polar(center, radius, sourceAngle + width);
+            const t1 = polar(center, radius, targetAngle - width);
+            const t2 = polar(center, radius, targetAngle + width);
+            const pathData = `M ${s1[0]} ${s1[1]} C ${center[0]} ${center[1]}, ${center[0]} ${center[1]}, ${t1[0]} ${t1[1]} L ${t2[0]} ${t2[1]} C ${center[0]} ${center[1]}, ${center[0]} ${center[1]}, ${s2[0]} ${s2[1]} Z`;
+            return {
+              type: "path",
+              shape: { pathData },
+              style: { fill: palette[api.value(0)], opacity: .34, stroke: palette[api.value(0)], lineWidth: 1 },
+              emphasis: { style: { opacity: .78, lineWidth: 2 } }
+            };
+          }
+        },
+        {
+          type: "custom",
+          silent: true,
+          data: names.map((_, index) => [index]),
+          renderItem: (params, api) => {
+            const index = api.value(0);
+            const center = api.coord([50,50]);
+            const radius = Math.min(api.size([36,0])[0], api.size([0,36])[1]);
+            const angle = angles[index];
+            const half = Math.PI / names.length * .72;
+            const label = polar(center, radius + 19, angle);
+            return { type: "group", children: [
+              { type: "sector", shape: { cx: center[0], cy: center[1], r: radius, r0: radius - 15, startAngle: angle-half, endAngle: angle+half, clockwise: true }, style: { fill: palette[index] } },
+              { type: "text", style: { x: label[0], y: label[1], text: names[index], fill: "#171717", fontWeight: 650, align: "center", verticalAlign: "middle" } }
+            ]};
+          }
+        }
+      ]
     };
   }
 
