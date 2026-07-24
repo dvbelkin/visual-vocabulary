@@ -19,6 +19,7 @@ const payload = {
         value: row.value,
         value2: row.value2,
         value3: row.value3,
+        values: row.values,
     })),
 };
 ---
@@ -42,6 +43,7 @@ const payload = {
     import { init, use } from "echarts/core";
     import {
         BarChart,
+        BoxplotChart,
         CustomChart,
         HeatmapChart,
         LineChart,
@@ -65,6 +67,7 @@ const payload = {
     use([
         AriaComponent,
         BarChart,
+        BoxplotChart,
         CalendarComponent,
         CanvasRenderer,
         CustomChart,

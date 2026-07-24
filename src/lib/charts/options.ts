@@ -16,6 +16,14 @@ const gridLine = "#dfe5e1";
 const green = "#176b4d";
 const orange = "#db6b35";
 
+function quantile(values: number[], percentile: number) {
+    const sorted = [...values].sort((a, b) => a - b);
+    const index = (sorted.length - 1) * percentile;
+    const lower = Math.floor(index);
+    const fraction = index - lower;
+    return sorted[lower] + (sorted[lower + 1] - sorted[lower] || 0) * fraction;
+}
+
 export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     const base = {
         animation: !payload.reducedMotion,
@@ -295,6 +303,121 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     symbolSize: 7,
                     data: payload.data.map((row) => row.value2 ?? 0),
                     lineStyle: { width: 3, color: orange },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "boxplot") {
+        return {
+            ...base,
+            grid: { left: 58, right: 28, top: 28, bottom: 52 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "boxplot",
+                    boxWidth: ["35%", "58%"],
+                    itemStyle: { color: "rgba(23, 107, 77, .22)", borderColor: green },
+                    data: payload.data.map((row) => {
+                        const values = row.values ?? [row.value];
+                        return [
+                            Math.min(...values),
+                            quantile(values, 0.25),
+                            quantile(values, 0.5),
+                            quantile(values, 0.75),
+                            Math.max(...values),
+                        ];
+                    }),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "violin") {
+        const step = 2;
+        const bandwidth = 4.5;
+        const allValues = payload.data.flatMap((row) => row.values ?? [row.value]);
+        const shapes = payload.data.map((row) => {
+            const values = row.values ?? [row.value];
+            const min = Math.floor(Math.min(...values) / step) * step - step;
+            const max = Math.ceil(Math.max(...values) / step) * step + step;
+            const density = [];
+            for (let point = min; point <= max; point += step) {
+                const weight = values.reduce((sum, value) => {
+                    const distance = (point - value) / bandwidth;
+                    return sum + Math.exp(-0.5 * distance * distance);
+                }, 0);
+                density.push({ point, weight });
+            }
+            const peak = Math.max(...density.map((item) => item.weight));
+            return density.map((item) => ({ point: item.point, width: item.weight / peak }));
+        });
+        return {
+            ...base,
+            tooltip: { trigger: "item", confine: true },
+            grid: { left: 58, right: 28, top: 28, bottom: 52 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisLabel: { interval: 0, rotate: 18, fontSize: 10 },
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                min: Math.floor(Math.min(...allValues) / step) * step - step,
+                max: Math.ceil(Math.max(...allValues) / step) * step + step,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "custom",
+                    data: payload.data.map((row, index) => [index, row.value]),
+                    renderItem: (
+                        params: { dataIndex: number },
+                        api: {
+                            coord: (point: [number, number]) => [number, number];
+                            size: (size: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const shape = shapes[params.dataIndex];
+                        const categoryWidth = api.size([1, 0])[0] * 0.28;
+                        const right = shape.map(({ point, width }) => {
+                            const [x, y] = api.coord([params.dataIndex, point]);
+                            return [x + categoryWidth * width, y];
+                        });
+                        const left = [...shape].reverse().map(({ point, width }) => {
+                            const [x, y] = api.coord([params.dataIndex, point]);
+                            return [x - categoryWidth * width, y];
+                        });
+                        return {
+                            type: "polygon",
+                            shape: { points: [...right, ...left] },
+                            style: {
+                                fill: "rgba(47, 111, 176, .28)",
+                                stroke: "#2f6fb0",
+                                lineWidth: 2,
+                            },
+                        };
+                    },
+                },
+                {
+                    type: "scatter",
+                    symbolSize: [18, 5],
+                    data: payload.data.map((row, index) => [index, row.value]),
+                    itemStyle: { color: ink },
+                    tooltip: {
+                        formatter: ({ value }: { value: [number, number] }) =>
+                            `${payload.data[value[0]].label}: ${value[1]} ${payload.unit}`,
+                    },
                 },
             ],
         };
