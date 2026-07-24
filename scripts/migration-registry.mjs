@@ -34,6 +34,9 @@ const astroRoutes = new Map([
     ["part-whole:Круговая диаграмма", "pie-chart"],
     ["part-whole:Древовидная карта", "treemap"],
     ["part-whole:Водопад", "waterfall"],
+    ["deviation:Расходящиеся составные столбцы", "diverging-stacked-bars"],
+    ["deviation:Спайн-график", "spine-chart"],
+    ["deviation:Баланс с заливкой", "balance-area"],
 ]);
 
 function parseCsv(text) {
