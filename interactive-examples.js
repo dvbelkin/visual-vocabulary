@@ -150,6 +150,222 @@ const interactiveExamples = (() => {
     };
   }
 
+
+  function normalizedStacked(title) {
+    const groups = ["Регион A", "Регион B", "Регион C", "Регион D"];
+    const seriesData = [
+      { name: "Продукт", values: [42, 30, 24, 36] },
+      { name: "Сервис", values: [28, 35, 31, 22] },
+      { name: "Логистика", values: [18, 20, 27, 26] },
+      { name: "Прочее", values: [12, 15, 18, 16] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: (v) => `${v}%` },
+      legend: { top: 40 },
+      grid: { left: 86, right: 38, top: 82, bottom: 34 },
+      xAxis: { ...axis, type: "value", min: 0, max: 100, axisLabel: { formatter: "{value}%" } },
+      yAxis: { ...axis, type: "category", data: groups },
+      series: seriesData.map((item) => ({
+        name: item.name,
+        type: "bar",
+        stack: "share",
+        data: item.values,
+        emphasis: { focus: "series" },
+        label: { show: true, formatter: ({ value }) => value >= 15 ? `${value}%` : "" }
+      }))
+    };
+  }
+
+  function clipPolygon(polygon, a, b, c) {
+    const inside = ([x, y]) => a * x + b * y <= c + 1e-8;
+    const intersection = (p, q) => {
+      const dx = q[0] - p[0];
+      const dy = q[1] - p[1];
+      const denominator = a * dx + b * dy;
+      if (Math.abs(denominator) < 1e-10) return p;
+      const t = (c - a * p[0] - b * p[1]) / denominator;
+      return [p[0] + t * dx, p[1] + t * dy];
+    };
+    const result = [];
+    polygon.forEach((current, index) => {
+      const previous = polygon[(index + polygon.length - 1) % polygon.length];
+      const currentInside = inside(current);
+      const previousInside = inside(previous);
+      if (currentInside !== previousInside) result.push(intersection(previous, current));
+      if (currentInside) result.push(current);
+    });
+    return result;
+  }
+
+  function voronoiCells(points) {
+    return points.map((point, pointIndex) => {
+      let polygon = [[0, 0], [100, 0], [100, 100], [0, 100]];
+      points.forEach((other, otherIndex) => {
+        if (otherIndex === pointIndex) return;
+        const a = other[0] - point[0];
+        const b = other[1] - point[1];
+        const c = (other[0] ** 2 + other[1] ** 2 - point[0] ** 2 - point[1] ** 2) / 2;
+        polygon = clipPolygon(polygon, a, b, c);
+      });
+      return polygon;
+    });
+  }
+
+  function voronoi(title) {
+    const points = [
+      [17, 24, 31, "Север"], [39, 19, 18, "Запад"], [68, 20, 27, "Юг"],
+      [84, 47, 14, "Восток"], [57, 51, 36, "Центр"], [24, 62, 22, "Пригород"],
+      [46, 83, 17, "Новые районы"], [77, 79, 25, "Деловой кластер"]
+    ];
+    const cells = voronoiCells(points);
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.data.name}: ${p.data.value[2]}%` },
+      grid: { left: 18, right: 18, top: 54, bottom: 18 },
+      xAxis: { type: "value", min: 0, max: 100, show: false },
+      yAxis: { type: "value", min: 0, max: 100, show: false },
+      series: [{
+        type: "custom",
+        coordinateSystem: "cartesian2d",
+        data: points.map((point, index) => ({ value: point, name: point[3], cell: cells[index], itemStyle: { color: palette[index % palette.length] } })),
+        renderItem: (params, api) => {
+          const item = { name: points[params.dataIndex][3], cell: cells[params.dataIndex] };
+          const center = api.coord([api.value(0), api.value(1)]);
+          return {
+            type: "group",
+            children: [
+              {
+                type: "polygon",
+                shape: { points: item.cell.map((p) => api.coord(p)) },
+                style: api.style({ stroke: "#fff", lineWidth: 3, opacity: 0.84 }),
+                emphasis: { style: { opacity: 1, lineWidth: 4 } }
+              },
+              { type: "circle", shape: { cx: center[0], cy: center[1], r: 4 }, style: { fill: "#171717" } },
+              { type: "text", style: { x: center[0], y: center[1] + 15, text: item.name, textAlign: "center", fill: "#171717", font: "12px Inter, sans-serif" } }
+            ]
+          };
+        }
+      }]
+    };
+  }
+
+  function semicircle(title) {
+    return {
+      ...base(title),
+      legend: { bottom: 6 },
+      series: [{
+        type: "pie",
+        startAngle: 180,
+        endAngle: 0,
+        center: ["50%", "72%"],
+        radius: ["28%", "78%"],
+        label: { formatter: "{b}\n{c} мест" },
+        data: [
+          { name: "Партия A", value: 42 },
+          { name: "Партия B", value: 31 },
+          { name: "Партия C", value: 18 },
+          { name: "Прочие", value: 9 }
+        ],
+        emphasis: { scale: true, scaleSize: 8 }
+      }]
+    };
+  }
+
+  function symbolGrid(title) {
+    const segments = [
+      { name: "Продукт", count: 38, color: palette[0] },
+      { name: "Сервис", count: 27, color: palette[1] },
+      { name: "Логистика", count: 19, color: palette[2] },
+      { name: "Прочее", count: 16, color: palette[5] }
+    ];
+    const data = [];
+    let offset = 0;
+    segments.forEach((segment) => {
+      for (let i = 0; i < segment.count; i += 1) {
+        const index = offset + i;
+        data.push({ name: segment.name, value: [index % 10, 9 - Math.floor(index / 10), index + 1], itemStyle: { color: segment.color } });
+      }
+      offset += segment.count;
+    });
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.name}<br>Ячейка ${p.value[2]} из 100` },
+      legend: { bottom: 3, data: segments.map((s) => s.name) },
+      grid: { left: "18%", right: "18%", top: 55, bottom: 52 },
+      xAxis: { type: "value", min: -0.5, max: 9.5, show: false },
+      yAxis: { type: "value", min: -0.5, max: 9.5, show: false },
+      series: segments.map((segment) => ({
+        name: segment.name,
+        type: "scatter",
+        symbol: "roundRect",
+        symbolSize: 22,
+        data: data.filter((item) => item.name === segment.name),
+        emphasis: { scale: 1.35 }
+      }))
+    };
+  }
+
+  function venn(title) {
+    const sets = [
+      { name: "Python", value: 62, center: [42, 52], color: palette[0] },
+      { name: "SQL", value: 55, center: [58, 52], color: palette[1] },
+      { name: "BI", value: 39, center: [50, 68], color: palette[2] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.name}: ${p.value[2]} студентов` },
+      grid: { left: 20, right: 20, top: 52, bottom: 18 },
+      xAxis: { type: "value", min: 0, max: 100, show: false },
+      yAxis: { type: "value", min: 0, max: 100, show: false },
+      series: [{
+        type: "custom",
+        coordinateSystem: "cartesian2d",
+        data: sets.map((set) => ({ name: set.name, value: [...set.center, set.value], itemStyle: { color: set.color } })),
+        renderItem: (params, api) => {
+          const set = sets[params.dataIndex];
+          const center = api.coord([api.value(0), api.value(1)]);
+          const radius = Math.min(api.size([28, 0])[0], api.size([0, 28])[1]);
+          return {
+            type: "group",
+            children: [
+              { type: "circle", shape: { cx: center[0], cy: center[1], r: radius }, style: api.style({ opacity: 0.42, stroke: set.color, lineWidth: 3 }), emphasis: { style: { opacity: 0.62 } } },
+              { type: "text", style: { x: center[0], y: center[1] - radius * 0.72, text: set.name, textAlign: "center", fill: "#171717", font: "600 13px Inter, sans-serif" } }
+            ]
+          };
+        }
+      }],
+      graphic: [{ type: "text", left: "center", top: "52%", style: { text: "18", font: "700 18px Inter, sans-serif", fill: "#171717", textAlign: "center" } }]
+    };
+  }
+
+  function waterfall(title) {
+    const labels = ["Начало", "Продажи", "Возвраты", "Расходы", "Экономия", "Итог"];
+    const visible = [80, 34, -12, -25, 9, 86];
+    const helper = [0, 80, 102, 77, 77, 0];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: (items) => {
+        const item = items.find((entry) => entry.seriesName !== "База");
+        return item ? `${item.axisValue}<br>${item.seriesName}: ${item.value > 0 ? "+" : ""}${item.value}` : "";
+      } },
+      grid: { left: 48, right: 24, top: 62, bottom: 44 },
+      xAxis: { ...axis, type: "category", data: labels },
+      yAxis: { ...axis, type: "value" },
+      series: [
+        { name: "База", type: "bar", stack: "waterfall", silent: true, itemStyle: { color: "transparent" }, emphasis: { itemStyle: { color: "transparent" } }, data: helper },
+        {
+          name: "Изменение",
+          type: "bar",
+          stack: "waterfall",
+          data: visible,
+          itemStyle: { color: (p) => p.dataIndex === 0 || p.dataIndex === visible.length - 1 ? palette[0] : p.value >= 0 ? palette[2] : palette[1] },
+          label: { show: true, position: (p) => p.value >= 0 ? "top" : "bottom", formatter: ({ value, dataIndex }) => dataIndex === 0 || dataIndex === visible.length - 1 ? value : `${value > 0 ? "+" : ""}${value}` }
+        }
+      ]
+    };
+  }
+
   function hierarchy(title, sunburst = false) {
     const data = [
       { name: "Продукты", value: 42, children: [{ name: "A", value: 24 }, { name: "B", value: 18 }] },
@@ -244,6 +460,12 @@ const interactiveExamples = (() => {
   function optionFor(chart) {
     const key = chart.img.toLowerCase();
     const title = chart.chartName;
+    if (key === "bar-stacked-proportional.svg") return normalizedStacked(title);
+    if (key === "voronoi.svg") return voronoi(title);
+    if (key === "arc.svg") return semicircle(title);
+    if (key === "gridplot.svg") return symbolGrid(title);
+    if (key === "venn.svg") return venn(title);
+    if (key === "waterfall.svg") return waterfall(title);
     if (key.includes("sankey")) return sankey(title);
     if (key.includes("network") || key.includes("chord")) return network(title);
     if (key.includes("heatmap")) return heatmap(title, key.includes("calendar"));
