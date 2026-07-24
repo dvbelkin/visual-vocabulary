@@ -17,6 +17,7 @@ export type ChartKind =
     | "scatter"
     | "histogram"
     | "pie"
+    | "donut"
     | "heatmap"
     | "diverging-bar"
     | "grouped-bar"
@@ -33,7 +34,11 @@ export type ChartKind =
     | "dot-range"
     | "cumulative"
     | "observation-strip"
-    | "barcode";
+    | "barcode"
+    | "stacked-bar"
+    | "normalized-stacked"
+    | "treemap"
+    | "waterfall";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -41,6 +46,7 @@ export interface DataRow {
     label: LocalizedText;
     value: number;
     value2?: number;
+    value3?: number;
 }
 
 export interface ChartDefinition {
@@ -55,6 +61,7 @@ export interface ChartDefinition {
     valueLabels?: {
         primary: LocalizedText;
         secondary?: LocalizedText;
+        tertiary?: LocalizedText;
     };
     data: DataRow[];
 }
@@ -187,7 +194,7 @@ export const charts: readonly ChartDefinition[] = [
     {
         id: "donut-chart",
         category: "part-whole",
-        kind: "pie",
+        kind: "donut",
         title: { ru: "Кольцевая диаграмма", en: "Donut chart" },
         description: {
             ru: "Сектора показывают доли небольшого числа компонентов в одном целом.",
@@ -699,6 +706,144 @@ export const charts: readonly ChartDefinition[] = [
                 value,
             }),
         ),
+    },
+    {
+        id: "stacked-columns",
+        category: "part-whole",
+        kind: "stacked-bar",
+        title: { ru: "Составные столбцы", en: "Stacked columns" },
+        description: {
+            ru: "Сегменты столбца показывают состав общего значения в каждой категории.",
+            en: "Segments within each column show how a total is composed in every category.",
+        },
+        useWhen: {
+            ru: "Нужно одновременно сравнить общие величины и несколько устойчивых компонентов.",
+            en: "You need to compare totals and a few consistent components at the same time.",
+        },
+        avoidWhen: {
+            ru: "Важна точная разница внутренних сегментов без общей базовой линии.",
+            en: "Precise comparison of internal segments without a common baseline matters.",
+        },
+        unit: { ru: "млн ₽", en: "million units" },
+        valueLabels: {
+            primary: { ru: "Персонал", en: "Staff" },
+            secondary: { ru: "Инфраструктура", en: "Facilities" },
+            tertiary: { ru: "Программы", en: "Programmes" },
+        },
+        data: [
+            { label: { ru: "Школа А", en: "School A" }, value: 42, value2: 25, value3: 18 },
+            { label: { ru: "Школа Б", en: "School B" }, value: 38, value2: 31, value3: 22 },
+            { label: { ru: "Школа В", en: "School C" }, value: 51, value2: 28, value3: 16 },
+            { label: { ru: "Школа Г", en: "School D" }, value: 46, value2: 34, value3: 27 },
+        ],
+    },
+    {
+        id: "normalized-stacked-bars",
+        category: "part-whole",
+        kind: "normalized-stacked",
+        title: { ru: "Нормированные составные столбцы", en: "100% stacked bars" },
+        description: {
+            ru: "Каждый столбец приведён к 100%, поэтому сравнивается структура, а не общий размер.",
+            en: "Every bar is normalised to 100%, focusing comparison on composition rather than total.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить доли одинаковых компонентов в нескольких группах.",
+            en: "You need to compare the shares of consistent components across groups.",
+        },
+        avoidWhen: {
+            ru: "Различия в абсолютном размере групп важны для вывода.",
+            en: "Differences in the absolute size of groups are important to the conclusion.",
+        },
+        unit: { ru: "% ответов", en: "% of responses" },
+        valueLabels: {
+            primary: { ru: "Согласны", en: "Agree" },
+            secondary: { ru: "Нейтральны", en: "Neutral" },
+            tertiary: { ru: "Не согласны", en: "Disagree" },
+        },
+        data: [
+            { label: { ru: "Первый курс", en: "Year one" }, value: 54, value2: 26, value3: 20 },
+            { label: { ru: "Второй курс", en: "Year two" }, value: 61, value2: 23, value3: 16 },
+            { label: { ru: "Третий курс", en: "Year three" }, value: 68, value2: 19, value3: 13 },
+            { label: { ru: "Четвёртый курс", en: "Year four" }, value: 72, value2: 17, value3: 11 },
+        ],
+    },
+    {
+        id: "pie-chart",
+        category: "part-whole",
+        kind: "pie",
+        title: { ru: "Круговая диаграмма", en: "Pie chart" },
+        description: {
+            ru: "Секторы показывают доли небольшого числа компонентов в одном целом.",
+            en: "Slices show the shares of a small number of components within one whole.",
+        },
+        useWhen: {
+            ru: "Компонентов мало, они складываются в 100%, а различия достаточно велики.",
+            en: "There are few components, they sum to 100%, and differences are substantial.",
+        },
+        avoidWhen: {
+            ru: "Долей много, они близки по размеру или нужно сравнить несколько целых.",
+            en: "There are many similar shares or several wholes need comparison.",
+        },
+        unit: { ru: "% расходов", en: "% of spending" },
+        data: [
+            { label: { ru: "Обучение", en: "Teaching" }, value: 44 },
+            { label: { ru: "Исследования", en: "Research" }, value: 29 },
+            { label: { ru: "Кампус", en: "Campus" }, value: 17 },
+            { label: { ru: "Поддержка", en: "Support" }, value: 10 },
+        ],
+    },
+    {
+        id: "treemap",
+        category: "part-whole",
+        kind: "treemap",
+        title: { ru: "Древовидная карта", en: "Treemap" },
+        description: {
+            ru: "Площадь прямоугольника кодирует вклад элемента в общее значение.",
+            en: "Rectangle area encodes each item's contribution to the total.",
+        },
+        useWhen: {
+            ru: "Категорий много, важны крупные и мелкие компоненты, а точное сравнение вторично.",
+            en: "There are many components and broad size differences matter more than precision.",
+        },
+        avoidWhen: {
+            ru: "Значения близки или порядок категорий должен легко считываться.",
+            en: "Values are similar or readers need a clearly ordered comparison.",
+        },
+        unit: { ru: "тыс. м²", en: "thousand m²" },
+        data: [
+            { label: { ru: "Учебные корпуса", en: "Teaching buildings" }, value: 38 },
+            { label: { ru: "Общежития", en: "Residences" }, value: 27 },
+            { label: { ru: "Лаборатории", en: "Laboratories" }, value: 19 },
+            { label: { ru: "Спорт", en: "Sports" }, value: 11 },
+            { label: { ru: "Библиотеки", en: "Libraries" }, value: 8 },
+            { label: { ru: "Администрация", en: "Administration" }, value: 6 },
+        ],
+    },
+    {
+        id: "waterfall",
+        category: "part-whole",
+        kind: "waterfall",
+        title: { ru: "Водопад", en: "Waterfall chart" },
+        description: {
+            ru: "Последовательные положительные и отрицательные вклады формируют итог.",
+            en: "Sequential positive and negative contributions build to a final total.",
+        },
+        useWhen: {
+            ru: "Нужно объяснить, как начальное значение изменилось под действием нескольких факторов.",
+            en: "You need to explain how several factors transform a starting value into a final total.",
+        },
+        avoidWhen: {
+            ru: "Шаги не образуют последовательный расчёт или важнее независимое сравнение факторов.",
+            en: "Steps do not form a sequential calculation or factors should be compared independently.",
+        },
+        unit: { ru: "млн ₽", en: "million units" },
+        data: [
+            { label: { ru: "Старт", en: "Start" }, value: 120 },
+            { label: { ru: "Продажи", en: "Sales" }, value: 35 },
+            { label: { ru: "Возвраты", en: "Returns" }, value: -18 },
+            { label: { ru: "Расходы", en: "Costs" }, value: -41 },
+            { label: { ru: "Итог", en: "Total" }, value: 96 },
+        ],
     },
 ];
 
