@@ -51,7 +51,11 @@ export type ChartKind =
     | "bump"
     | "correlation-combo"
     | "connected-scatter"
-    | "bubble";
+    | "bubble"
+    | "sankey"
+    | "process-waterfall"
+    | "chord"
+    | "network";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1260,6 +1264,116 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Программа В", en: "Programme C" }, value: 81, value2: 84, value3: 510 },
             { label: { ru: "Программа Г", en: "Programme D" }, value: 58, value2: 74, value3: 180 },
             { label: { ru: "Программа Д", en: "Programme E" }, value: 76, value2: 66, value3: 340 },
+        ],
+    },
+    {
+        id: "sankey-diagram",
+        category: "flow",
+        kind: "sankey",
+        title: { ru: "Диаграмма Санки", en: "Sankey diagram" },
+        description: {
+            ru: "Ширина связей показывает объём потока между этапами системы.",
+            en: "Link width represents the volume flowing between stages of a system.",
+        },
+        useWhen: {
+            ru: "Нужно проследить распределение общего потока по нескольким направлениям.",
+            en: "You need to trace how a total flow splits across several destinations.",
+        },
+        avoidWhen: {
+            ru: "Связей слишком много или их величины не складываются в осмысленный поток.",
+            en: "There are too many links or their values do not form a meaningful flow.",
+        },
+        unit: { ru: "студентов", en: "students" },
+        data: [
+            { label: { ru: "Поступили|1 курс", en: "Enrolled|Year 1" }, value: 520 },
+            { label: { ru: "1 курс|2 курс", en: "Year 1|Year 2" }, value: 438 },
+            { label: { ru: "1 курс|Перевелись", en: "Year 1|Transferred" }, value: 34 },
+            { label: { ru: "1 курс|Выбыли", en: "Year 1|Left" }, value: 48 },
+            { label: { ru: "2 курс|3 курс", en: "Year 2|Year 3" }, value: 391 },
+            { label: { ru: "2 курс|Выбыли", en: "Year 2|Left" }, value: 47 },
+            { label: { ru: "3 курс|Выпустились", en: "Year 3|Graduated" }, value: 362 },
+            { label: { ru: "3 курс|Выбыли", en: "Year 3|Left" }, value: 29 },
+        ],
+    },
+    {
+        id: "process-waterfall",
+        category: "flow",
+        kind: "process-waterfall",
+        title: { ru: "Водопад процесса", en: "Process waterfall" },
+        description: {
+            ru: "Последовательные потери показывают, сколько объектов остаётся на каждом этапе.",
+            en: "Sequential losses show how many items remain at each process stage.",
+        },
+        useWhen: {
+            ru: "Нужно объяснить уменьшение исходного объёма через последовательные этапы.",
+            en: "You need to explain how an initial volume declines through sequential stages.",
+        },
+        avoidWhen: {
+            ru: "Этапы идут параллельно или объекты могут возвращаться назад.",
+            en: "Stages run in parallel or items can move backwards.",
+        },
+        unit: { ru: "заявок", en: "applications" },
+        data: [
+            { label: { ru: "Получено", en: "Received" }, value: 1000 },
+            { label: { ru: "Проверка", en: "Screening" }, value: -180 },
+            { label: { ru: "Интервью", en: "Interview" }, value: -260 },
+            { label: { ru: "Предложение", en: "Offer" }, value: -310 },
+            { label: { ru: "Принято", en: "Accepted" }, value: 250 },
+        ],
+    },
+    {
+        id: "chord-diagram",
+        category: "flow",
+        kind: "chord",
+        title: { ru: "Хордовая диаграмма", en: "Chord diagram" },
+        description: {
+            ru: "Круговая компоновка показывает взаимные потоки между одними и теми же группами.",
+            en: "A circular layout shows reciprocal flows among the same set of groups.",
+        },
+        useWhen: {
+            ru: "Нужно дать обзор обмена между небольшим числом равноправных групп.",
+            en: "You need an overview of exchanges among a small number of peer groups.",
+        },
+        avoidWhen: {
+            ru: "Требуется точно сравнить связи или направлений слишком много.",
+            en: "Links need precise comparison or there are too many directions.",
+        },
+        unit: { ru: "совместных проектов", en: "joint projects" },
+        data: [
+            { label: { ru: "Наука|Бизнес", en: "Science|Business" }, value: 18 },
+            { label: { ru: "Наука|Город", en: "Science|City" }, value: 12 },
+            { label: { ru: "Бизнес|Город", en: "Business|City" }, value: 15 },
+            { label: { ru: "Бизнес|Культура", en: "Business|Culture" }, value: 9 },
+            { label: { ru: "Город|Культура", en: "City|Culture" }, value: 14 },
+            { label: { ru: "Культура|Наука", en: "Culture|Science" }, value: 7 },
+        ],
+    },
+    {
+        id: "network-diagram",
+        category: "flow",
+        kind: "network",
+        title: { ru: "Сетевая диаграмма", en: "Network diagram" },
+        description: {
+            ru: "Узлы и связи раскрывают структуру взаимодействий без обязательной иерархии.",
+            en: "Nodes and links reveal interaction structure without requiring a hierarchy.",
+        },
+        useWhen: {
+            ru: "Важно найти центры, кластеры и мосты в небольшой сети.",
+            en: "You need to identify hubs, clusters, and bridges in a small network.",
+        },
+        avoidWhen: {
+            ru: "Связей так много, что они образуют нечитаемый клубок.",
+            en: "There are so many links that the diagram becomes an unreadable hairball.",
+        },
+        unit: { ru: "взаимодействий", en: "interactions" },
+        data: [
+            { label: { ru: "Куратор|Команда А", en: "Mentor|Team A" }, value: 8 },
+            { label: { ru: "Куратор|Команда Б", en: "Mentor|Team B" }, value: 7 },
+            { label: { ru: "Куратор|Лаборатория", en: "Mentor|Lab" }, value: 9 },
+            { label: { ru: "Команда А|Дизайн", en: "Team A|Design" }, value: 6 },
+            { label: { ru: "Команда Б|Данные", en: "Team B|Data" }, value: 5 },
+            { label: { ru: "Лаборатория|Данные", en: "Lab|Data" }, value: 7 },
+            { label: { ru: "Дизайн|Данные", en: "Design|Data" }, value: 4 },
         ],
     },
 ];
