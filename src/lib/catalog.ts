@@ -38,7 +38,10 @@ export type ChartKind =
     | "stacked-bar"
     | "normalized-stacked"
     | "treemap"
-    | "waterfall";
+    | "waterfall"
+    | "diverging-stacked"
+    | "spine"
+    | "balance-area";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -843,6 +846,102 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Возвраты", en: "Returns" }, value: -18 },
             { label: { ru: "Расходы", en: "Costs" }, value: -41 },
             { label: { ru: "Итог", en: "Total" }, value: 96 },
+        ],
+    },
+    {
+        id: "diverging-stacked-bars",
+        category: "deviation",
+        kind: "diverging-stacked",
+        title: { ru: "Расходящиеся составные столбцы", en: "Diverging stacked bars" },
+        description: {
+            ru: "Ответы расходятся от центральной линии: несогласие влево, согласие вправо.",
+            en: "Responses diverge from a central line, with disagreement left and agreement right.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить распределение ответов по шкале отношения в нескольких группах.",
+            en: "You need to compare attitude-scale response distributions across several groups.",
+        },
+        avoidWhen: {
+            ru: "Нужны точные значения каждой категории или у шкалы нет естественного центра.",
+            en: "Exact category values matter or the scale has no meaningful midpoint.",
+        },
+        unit: { ru: "% ответов", en: "% of responses" },
+        valueLabels: {
+            primary: { ru: "Не согласны", en: "Disagree" },
+            secondary: { ru: "Нейтральны", en: "Neutral" },
+            tertiary: { ru: "Согласны", en: "Agree" },
+        },
+        data: [
+            {
+                label: { ru: "Доступность", en: "Accessibility" },
+                value: 18,
+                value2: 14,
+                value3: 68,
+            },
+            { label: { ru: "Расписание", en: "Timetable" }, value: 31, value2: 19, value3: 50 },
+            { label: { ru: "Материалы", en: "Materials" }, value: 12, value2: 16, value3: 72 },
+            { label: { ru: "Обратная связь", en: "Feedback" }, value: 24, value2: 21, value3: 55 },
+        ],
+    },
+    {
+        id: "spine-chart",
+        category: "deviation",
+        kind: "spine",
+        title: { ru: "Спайн-график", en: "Spine chart" },
+        description: {
+            ru: "Каждая полоса разделена относительно общей центральной линии на две противопоставленные части.",
+            en: "Each bar splits around a shared centre line into two opposing parts.",
+        },
+        useWhen: {
+            ru: "Нужно быстро сравнить баланс двух взаимоисключающих долей между группами.",
+            en: "You need to compare the balance of two mutually exclusive shares across groups.",
+        },
+        avoidWhen: {
+            ru: "Доли не образуют целое или важнее сравнить абсолютное число наблюдений.",
+            en: "The shares do not form a whole or absolute counts matter more.",
+        },
+        unit: { ru: "% участников", en: "% of participants" },
+        valueLabels: {
+            primary: { ru: "Онлайн", en: "Online" },
+            secondary: { ru: "Очно", en: "In person" },
+        },
+        data: [
+            { label: { ru: "Первый курс", en: "Year one" }, value: 62, value2: 38 },
+            { label: { ru: "Второй курс", en: "Year two" }, value: 54, value2: 46 },
+            { label: { ru: "Третий курс", en: "Year three" }, value: 43, value2: 57 },
+            { label: { ru: "Четвёртый курс", en: "Year four" }, value: 35, value2: 65 },
+        ],
+    },
+    {
+        id: "balance-area",
+        category: "deviation",
+        kind: "balance-area",
+        title: { ru: "Баланс с заливкой", en: "Surplus and deficit area" },
+        description: {
+            ru: "Заливка между двумя рядами подчёркивает периоды избытка и дефицита.",
+            en: "The fill between two series highlights periods of surplus and deficit.",
+        },
+        useWhen: {
+            ru: "Нужно показать, когда один временной ряд превышает другой и насколько.",
+            en: "You need to show when one time series exceeds another and by how much.",
+        },
+        avoidWhen: {
+            ru: "Ряды измеряются в разных единицах или между соседними периодами нет непрерывности.",
+            en: "The series use different units or adjacent periods are not continuous.",
+        },
+        unit: { ru: "МВт·ч", en: "MWh" },
+        valueLabels: {
+            primary: { ru: "Выработка", en: "Generation" },
+            secondary: { ru: "Спрос", en: "Demand" },
+        },
+        data: [
+            { label: { ru: "00:00", en: "00:00" }, value: 42, value2: 48 },
+            { label: { ru: "04:00", en: "04:00" }, value: 38, value2: 43 },
+            { label: { ru: "08:00", en: "08:00" }, value: 55, value2: 51 },
+            { label: { ru: "12:00", en: "12:00" }, value: 68, value2: 58 },
+            { label: { ru: "16:00", en: "16:00" }, value: 61, value2: 65 },
+            { label: { ru: "20:00", en: "20:00" }, value: 49, value2: 57 },
+            { label: { ru: "24:00", en: "24:00" }, value: 44, value2: 47 },
         ],
     },
 ];

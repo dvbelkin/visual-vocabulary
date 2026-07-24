@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 27,
+  "astroReadyCount": 30,
   "entries": [
     {
       "id": "bar-diverging",
@@ -29,8 +29,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "diverging-stacked-bars"
     },
     {
       "id": "spine",
@@ -41,8 +41,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "spine-chart"
     },
     {
       "id": "line-surplur-defecit-fill",
@@ -53,8 +53,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "balance-area"
     },
     {
       "id": "scatterplot",

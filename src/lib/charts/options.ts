@@ -123,6 +123,183 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "diverging-stacked") {
+        const names =
+            payload.locale === "ru"
+                ? ["Не согласны", "Нейтральны", "Согласны"]
+                : ["Disagree", "Neutral", "Agree"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 112, right: 34, top: 52, bottom: 48 },
+            xAxis: {
+                type: "value",
+                min: -60,
+                max: 80,
+                axisLabel: { formatter: (value: number) => `${Math.abs(value)}%` },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    name: names[0],
+                    type: "bar",
+                    stack: "negative",
+                    data: payload.data.map((row) => -row.value),
+                    itemStyle: { color: orange },
+                },
+                {
+                    name: names[1],
+                    type: "bar",
+                    stack: "negative",
+                    data: payload.data.map((row) => -(row.value2 ?? 0) / 2),
+                    itemStyle: { color: "#d4a72c" },
+                    tooltip: { valueFormatter: (value: number) => `${Math.abs(value * 2)}%` },
+                },
+                {
+                    name: names[1],
+                    type: "bar",
+                    stack: "positive",
+                    data: payload.data.map((row) => (row.value2 ?? 0) / 2),
+                    itemStyle: { color: "#d4a72c" },
+                    tooltip: { valueFormatter: (value: number) => `${value * 2}%` },
+                },
+                {
+                    name: names[2],
+                    type: "bar",
+                    stack: "positive",
+                    data: payload.data.map((row) => row.value3 ?? 0),
+                    itemStyle: { color: green },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "spine") {
+        const names = payload.locale === "ru" ? ["Онлайн", "Очно"] : ["Online", "In person"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 104, right: 32, top: 52, bottom: 48 },
+            xAxis: {
+                type: "value",
+                min: -100,
+                max: 100,
+                axisLabel: { formatter: (value: number) => `${Math.abs(value)}%` },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    name: names[0],
+                    type: "bar",
+                    data: payload.data.map((row) => -row.value),
+                    itemStyle: { color: "#2f6fb0" },
+                    label: {
+                        show: true,
+                        position: "insideLeft",
+                        formatter: ({ value }: { value: number }) => `${Math.abs(value)}%`,
+                    },
+                },
+                {
+                    name: names[1],
+                    type: "bar",
+                    data: payload.data.map((row) => row.value2 ?? 0),
+                    itemStyle: { color: green },
+                    label: { show: true, position: "insideRight", formatter: "{c}%" },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "balance-area") {
+        const names = payload.locale === "ru" ? ["Выработка", "Спрос"] : ["Generation", "Demand"];
+        const intervals = payload.data.slice(0, -1).map((row, index) => {
+            const next = payload.data[index + 1];
+            return [
+                index,
+                row.value,
+                row.value2 ?? 0,
+                next.value,
+                next.value2 ?? 0,
+                (row.value + next.value) / 2 >= ((row.value2 ?? 0) + (next.value2 ?? 0)) / 2
+                    ? 1
+                    : -1,
+            ];
+        });
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 58, right: 28, top: 52, bottom: 48 },
+            xAxis: {
+                type: "category",
+                boundaryGap: false,
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "custom",
+                    silent: true,
+                    data: intervals,
+                    renderItem: (
+                        _params: unknown,
+                        api: {
+                            value: (dimension: number) => number;
+                            coord: (point: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const index = api.value(0);
+                        const generationStart = api.coord([index, api.value(1)]);
+                        const demandStart = api.coord([index, api.value(2)]);
+                        const generationEnd = api.coord([index + 1, api.value(3)]);
+                        const demandEnd = api.coord([index + 1, api.value(4)]);
+                        return {
+                            type: "polygon",
+                            shape: {
+                                points: [generationStart, generationEnd, demandEnd, demandStart],
+                            },
+                            style: {
+                                fill:
+                                    api.value(5) > 0
+                                        ? "rgba(23, 107, 77, .30)"
+                                        : "rgba(219, 107, 53, .28)",
+                            },
+                        };
+                    },
+                },
+                {
+                    name: names[0],
+                    type: "line",
+                    smooth: 0.25,
+                    symbolSize: 7,
+                    data: payload.data.map((row) => row.value),
+                    lineStyle: { width: 3, color: green },
+                },
+                {
+                    name: names[1],
+                    type: "line",
+                    smooth: 0.25,
+                    symbolSize: 7,
+                    data: payload.data.map((row) => row.value2 ?? 0),
+                    lineStyle: { width: 3, color: orange },
+                },
+            ],
+        };
+    }
+
     if (payload.kind === "grouped-bar") {
         const labels =
             payload.locale === "ru"
