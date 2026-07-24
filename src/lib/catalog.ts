@@ -11,7 +11,19 @@ export type CategoryId =
     | "spatial"
     | "flow";
 
-export type ChartKind = "bar" | "line" | "scatter" | "histogram" | "pie" | "heatmap";
+export type ChartKind =
+    | "bar"
+    | "line"
+    | "scatter"
+    | "histogram"
+    | "pie"
+    | "heatmap"
+    | "diverging-bar"
+    | "grouped-bar"
+    | "lollipop"
+    | "rank-change"
+    | "bullet"
+    | "radar";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -30,6 +42,10 @@ export interface ChartDefinition {
     useWhen: LocalizedText;
     avoidWhen: LocalizedText;
     unit: LocalizedText;
+    valueLabels?: {
+        primary: LocalizedText;
+        secondary?: LocalizedText;
+    };
     data: DataRow[];
 }
 
@@ -48,7 +64,7 @@ export const categoryNames: Record<CategoryId, LocalizedText> = {
 export const charts: readonly ChartDefinition[] = [
     {
         id: "ordered-bar",
-        category: "magnitude",
+        category: "ranking",
         kind: "bar",
         title: { ru: "Упорядоченные столбцы", en: "Ordered bars" },
         description: {
@@ -117,6 +133,10 @@ export const charts: readonly ChartDefinition[] = [
             en: "One of the variables is categorical rather than numerical.",
         },
         unit: { ru: "баллы и часы", en: "score and hours" },
+        valueLabels: {
+            primary: { ru: "Часы подготовки", en: "Study hours" },
+            secondary: { ru: "Результат", en: "Score" },
+        },
         data: [
             { label: { ru: "А", en: "A" }, value: 2, value2: 58 },
             { label: { ru: "Б", en: "B" }, value: 3, value2: 64 },
@@ -208,6 +228,176 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Чт|Вечер", en: "Thu|Evening" }, value: 58 },
             { label: { ru: "Пт|Утро", en: "Fri|Morning" }, value: 35 },
             { label: { ru: "Пт|Вечер", en: "Fri|Evening" }, value: 76 },
+        ],
+    },
+    {
+        id: "diverging-bar",
+        category: "deviation",
+        kind: "diverging-bar",
+        title: { ru: "Расходящиеся столбцы", en: "Diverging bars" },
+        description: {
+            ru: "Столбцы расходятся от общей базовой линии и показывают направление отклонения.",
+            en: "Bars extend from a shared baseline to show the direction of each deviation.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить положительные и отрицательные отклонения от плана, нуля или нормы.",
+            en: "You need to compare positive and negative differences from a target, zero, or norm.",
+        },
+        avoidWhen: {
+            ru: "Знак значения не несёт содержательного смысла или базовая линия различается.",
+            en: "The sign has no meaningful interpretation or observations use different baselines.",
+        },
+        unit: { ru: "% к плану", en: "% vs target" },
+        data: [
+            { label: { ru: "Север", en: "North" }, value: 12 },
+            { label: { ru: "Центр", en: "Central" }, value: -7 },
+            { label: { ru: "Юг", en: "South" }, value: 18 },
+            { label: { ru: "Восток", en: "East" }, value: -11 },
+            { label: { ru: "Запад", en: "West" }, value: 5 },
+        ],
+    },
+    {
+        id: "grouped-horizontal-bars",
+        category: "magnitude",
+        kind: "grouped-bar",
+        title: { ru: "Сгруппированные горизонтальные столбцы", en: "Grouped horizontal bars" },
+        description: {
+            ru: "Парные столбцы сравнивают два ряда внутри каждой категории.",
+            en: "Paired bars compare two series within every category.",
+        },
+        useWhen: {
+            ru: "Категорий немного, подписи длинные, а сравнить нужно два согласованных показателя.",
+            en: "There are few categories, labels are long, and two aligned series need comparison.",
+        },
+        avoidWhen: {
+            ru: "Рядов больше трёх или важнее показать изменение во времени.",
+            en: "There are more than three series or the time trend is more important.",
+        },
+        unit: { ru: "% студентов", en: "% of students" },
+        valueLabels: {
+            primary: { ru: "Самооценка", en: "Self-assessment" },
+            secondary: { ru: "Практическое задание", en: "Practical task" },
+        },
+        data: [
+            { label: { ru: "Анализ данных", en: "Data analysis" }, value: 72, value2: 61 },
+            { label: { ru: "Программирование", en: "Programming" }, value: 68, value2: 54 },
+            { label: { ru: "Статистика", en: "Statistics" }, value: 59, value2: 52 },
+            { label: { ru: "Коммуникация", en: "Communication" }, value: 47, value2: 63 },
+        ],
+    },
+    {
+        id: "ranking-lollipop",
+        category: "ranking",
+        kind: "lollipop",
+        title: { ru: "Горизонтальный лоллипоп", en: "Horizontal lollipop chart" },
+        description: {
+            ru: "Точка подчёркивает значение, а тонкая линия сохраняет связь с нулевой отметкой.",
+            en: "A dot emphasises the value while a thin stem preserves its connection to zero.",
+        },
+        useWhen: {
+            ru: "Нужно показать порядок небольшого числа положительных значений с лёгким визуальным весом.",
+            en: "You want to rank a small set of positive values with less visual weight than bars.",
+        },
+        avoidWhen: {
+            ru: "Нужно очень точно сравнить близкие значения или показать отрицательные величины.",
+            en: "Readers must compare very similar values precisely or values include negatives.",
+        },
+        unit: { ru: "баллов из 100", en: "score out of 100" },
+        data: [
+            { label: { ru: "Доступность", en: "Accessibility" }, value: 91 },
+            { label: { ru: "Надёжность", en: "Reliability" }, value: 84 },
+            { label: { ru: "Понятность", en: "Clarity" }, value: 78 },
+            { label: { ru: "Скорость", en: "Speed" }, value: 66 },
+            { label: { ru: "Гибкость", en: "Flexibility" }, value: 57 },
+        ],
+    },
+    {
+        id: "rank-change",
+        category: "ranking",
+        kind: "rank-change",
+        title: { ru: "График изменения мест", en: "Rank change chart" },
+        description: {
+            ru: "Линии соединяют позиции объектов в двух срезах и делают перестановки заметными.",
+            en: "Lines connect two ranked snapshots and make position changes visible.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить ранги одних и тех же объектов в двух моментах или группах.",
+            en: "You need to compare the same objects' ranks across two times or groups.",
+        },
+        avoidWhen: {
+            ru: "Важнее абсолютное изменение показателя, а не место в списке.",
+            en: "The absolute change matters more than position in the ranking.",
+        },
+        unit: { ru: "место", en: "rank" },
+        valueLabels: {
+            primary: { ru: "Место в 2024", en: "2024 rank" },
+            secondary: { ru: "Место в 2026", en: "2026 rank" },
+        },
+        data: [
+            { label: { ru: "Команда А", en: "Team A" }, value: 1, value2: 3 },
+            { label: { ru: "Команда Б", en: "Team B" }, value: 4, value2: 1 },
+            { label: { ru: "Команда В", en: "Team C" }, value: 2, value2: 2 },
+            { label: { ru: "Команда Г", en: "Team D" }, value: 3, value2: 5 },
+            { label: { ru: "Команда Д", en: "Team E" }, value: 5, value2: 4 },
+        ],
+    },
+    {
+        id: "bullet-chart",
+        category: "magnitude",
+        kind: "bullet",
+        title: { ru: "Буллет-чарт", en: "Bullet chart" },
+        description: {
+            ru: "Фактическое значение сравнивается с целью на фоне качественного диапазона.",
+            en: "An actual value is compared with a target against a qualitative range.",
+        },
+        useWhen: {
+            ru: "Нужно компактно показать выполнение цели по нескольким показателям.",
+            en: "You need a compact view of progress toward targets across several measures.",
+        },
+        avoidWhen: {
+            ru: "Нет обоснованной цели или диапазоны качества выбраны произвольно.",
+            en: "There is no defensible target or the qualitative ranges are arbitrary.",
+        },
+        unit: { ru: "% выполнения", en: "% achieved" },
+        valueLabels: {
+            primary: { ru: "Факт", en: "Actual" },
+            secondary: { ru: "Цель", en: "Target" },
+        },
+        data: [
+            { label: { ru: "Посещаемость", en: "Attendance" }, value: 84, value2: 90 },
+            { label: { ru: "Завершение курса", en: "Completion" }, value: 76, value2: 80 },
+            { label: { ru: "Практические работы", en: "Coursework" }, value: 93, value2: 85 },
+            { label: { ru: "Обратная связь", en: "Feedback" }, value: 68, value2: 75 },
+        ],
+    },
+    {
+        id: "radar-chart",
+        category: "magnitude",
+        kind: "radar",
+        title: { ru: "Радарная диаграмма", en: "Radar chart" },
+        description: {
+            ru: "Несколько нормированных характеристик образуют профиль объекта вокруг общего центра.",
+            en: "Several normalised measures form an object's profile around a shared centre.",
+        },
+        useWhen: {
+            ru: "Нужно дать обзор профилей двух объектов по небольшому числу одинаковых шкал.",
+            en: "You need an overview of two profiles across a few comparable scales.",
+        },
+        avoidWhen: {
+            ru: "Нужна точная оценка каждой величины или шкалы имеют разные единицы.",
+            en: "Readers need precise comparisons or axes use incomparable units.",
+        },
+        unit: { ru: "баллов из 100", en: "score out of 100" },
+        valueLabels: {
+            primary: { ru: "Программа А", en: "Programme A" },
+            secondary: { ru: "Программа Б", en: "Programme B" },
+        },
+        data: [
+            { label: { ru: "Точность", en: "Accuracy" }, value: 88, value2: 73 },
+            { label: { ru: "Скорость", en: "Speed" }, value: 64, value2: 91 },
+            { label: { ru: "Понятность", en: "Clarity" }, value: 82, value2: 76 },
+            { label: { ru: "Гибкость", en: "Flexibility" }, value: 71, value2: 84 },
+            { label: { ru: "Надёжность", en: "Reliability" }, value: 90, value2: 78 },
         ],
     },
 ];

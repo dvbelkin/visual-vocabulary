@@ -7,12 +7,18 @@ const statusPath = `${root}INTERACTIVE_STATUS.md`;
 const outputPath = `${root}src/data/migration-registry.json`;
 
 const astroRoutes = new Map([
-    ["Упорядоченные горизонтальные столбцы", "ordered-bar"],
-    ["Линейный график", "line-chart"],
-    ["Диаграмма рассеяния", "scatterplot"],
-    ["Гистограмма", "histogram"],
-    ["Кольцевая диаграмма", "donut-chart"],
-    ["Двумерная тепловая карта", "heatmap"],
+    ["ranking:Упорядоченные горизонтальные столбцы", "ordered-bar"],
+    ["change-time:Линейный график", "line-chart"],
+    ["correlation:Диаграмма рассеяния", "scatterplot"],
+    ["distribution:Гистограмма", "histogram"],
+    ["part-whole:Кольцевая диаграмма", "donut-chart"],
+    ["correlation:Двумерная тепловая карта", "heatmap"],
+    ["deviation:Расходящиеся столбцы", "diverging-bar"],
+    ["magnitude:Сгруппированные горизонтальные столбцы", "grouped-horizontal-bars"],
+    ["ranking:Горизонтальный лоллипоп", "ranking-lollipop"],
+    ["ranking:График изменения мест", "rank-change"],
+    ["magnitude:Буллет-чарт", "bullet-chart"],
+    ["magnitude:Радарная диаграмма", "radar-chart"],
 ]);
 
 function parseCsv(text) {
@@ -93,6 +99,7 @@ export async function buildRegistry() {
     const entries = rows.map((row) => {
         const id = stableId(row.img);
         const legacyStatus = statuses.get(row.chartName) ?? "review";
+        const astroRouteId = astroRoutes.get(`${row.category}:${row.chartName}`) ?? null;
 
         if (!id) throw new Error(`Cannot create an id for "${row.chartName}"`);
         if (ids.has(id)) throw new Error(`Duplicate migration id "${id}"`);
@@ -108,8 +115,8 @@ export async function buildRegistry() {
             originalAvailability: row.avail === "TRUE",
             legacySource: "interactive-examples.js",
             legacyStatus,
-            astroStatus: astroRoutes.has(row.chartName) ? "ready" : "missing",
-            astroRouteId: astroRoutes.get(row.chartName) ?? null,
+            astroStatus: astroRouteId ? "ready" : "missing",
+            astroRouteId,
         };
     });
 
