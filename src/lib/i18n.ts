@@ -14,6 +14,8 @@ const messages = {
         catalogTitle: "Первые учебные примеры",
         catalogLead:
             "Это первый вертикальный срез новой версии. Остальные типы будут добавляться семействами.",
+        progressLabel: "Перенесено в Astro",
+        legacyLabel: "Проверено в прежней версии",
         openChart: "Изучить диаграмму",
         back: "Вернуться в каталог",
         whenToUse: "Когда использовать",
@@ -33,6 +35,8 @@ const messages = {
         catalogTitle: "First learning examples",
         catalogLead:
             "This is the first vertical slice of the new site. More chart families will follow.",
+        progressLabel: "Migrated to Astro",
+        legacyLabel: "Audited in the legacy version",
         openChart: "Explore this chart",
         back: "Back to the catalogue",
         whenToUse: "When to use it",

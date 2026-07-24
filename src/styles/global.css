@@ -204,6 +204,50 @@ p {
     border-left: 1px solid var(--color-line-strong);
 }
 
+.migration-progress {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 0 2.5rem;
+    border-top: 1px solid var(--color-line-strong);
+    border-left: 1px solid var(--color-line-strong);
+}
+
+.migration-progress > div {
+    display: flex;
+    min-height: 8rem;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.4rem 1.6rem;
+    border-right: 1px solid var(--color-line-strong);
+    border-bottom: 1px solid var(--color-line-strong);
+}
+
+.migration-progress dt {
+    max-width: 14rem;
+    color: var(--color-muted);
+    font-weight: 700;
+}
+
+.migration-progress dd {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.migration-progress dd strong {
+    color: var(--color-accent);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: -0.06em;
+    line-height: 0.8;
+}
+
+.migration-progress dd span {
+    color: var(--color-muted);
+}
+
 .chart-card {
     position: relative;
     min-height: 22rem;
@@ -432,7 +476,8 @@ tbody th {
     }
 
     .chart-grid,
-    .learning-grid {
+    .learning-grid,
+    .migration-progress {
         grid-template-columns: 1fr;
     }
 

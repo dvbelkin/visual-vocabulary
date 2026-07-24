@@ -5,11 +5,14 @@
     "type": "module",
     "scripts": {
         "dev": "astro dev",
-        "build": "astro check && astro build",
+        "build": "npm run registry:check && astro check && astro build",
         "preview": "astro preview",
         "check": "astro check",
-        "format": "prettier --write \"src/**/*.{astro,css,ts}\" package.json tsconfig.json astro.config.mjs .prettierrc.mjs AGENTS.md PLAN.md",
-        "format:check": "prettier --check \"src/**/*.{astro,css,ts}\" package.json tsconfig.json astro.config.mjs .prettierrc.mjs AGENTS.md PLAN.md"
+        "registry:check": "node scripts/migration-registry.mjs check",
+        "registry:generate": "node scripts/migration-registry.mjs write",
+        "test": "node --test tests/*.test.mjs",
+        "format": "prettier --write \"src/**/*.{astro,css,ts}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" package.json tsconfig.json astro.config.mjs .prettierrc.mjs AGENTS.md PLAN.md",
+        "format:check": "prettier --check \"src/**/*.{astro,css,ts}\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" package.json tsconfig.json astro.config.mjs .prettierrc.mjs AGENTS.md PLAN.md"
     },
     "dependencies": {
         "astro": "^7.1.3",
