@@ -327,6 +327,8 @@ p {
     max-width: 14ch;
     margin-bottom: 0;
     font-size: clamp(3rem, 7vw, 6.4rem);
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
 
 .chart-page__header > p {

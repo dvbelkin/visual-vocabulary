@@ -43,7 +43,12 @@ export type ChartKind =
     | "spine"
     | "balance-area"
     | "boxplot"
-    | "violin";
+    | "violin"
+    | "vertical-bar"
+    | "proportional-symbols"
+    | "dot-strip"
+    | "vertical-lollipop"
+    | "bump";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1029,6 +1034,136 @@ export const charts: readonly ChartDefinition[] = [
                 value: 27,
                 values: [16, 19, 21, 23, 25, 26, 27, 28, 30, 33, 36, 40, 45],
             },
+        ],
+    },
+    {
+        id: "ordered-vertical-bars",
+        category: "ranking",
+        kind: "vertical-bar",
+        title: { ru: "Упорядоченные вертикальные столбцы", en: "Ordered columns" },
+        description: {
+            ru: "Высота отсортированных столбцов показывает величину и место категории.",
+            en: "Sorted column heights show both category magnitude and rank.",
+        },
+        useWhen: {
+            ru: "Категорий немного, подписи короткие и нужно подчеркнуть порядок.",
+            en: "There are few categories, labels are short, and rank should be prominent.",
+        },
+        avoidWhen: {
+            ru: "Названия длинные или категорий слишком много для горизонтальной оси.",
+            en: "Labels are long or there are too many categories for the horizontal axis.",
+        },
+        unit: { ru: "заявок", en: "applications" },
+        data: [
+            { label: { ru: "ИТ", en: "IT" }, value: 96 },
+            { label: { ru: "Дизайн", en: "Design" }, value: 81 },
+            { label: { ru: "Экономика", en: "Economics" }, value: 68 },
+            { label: { ru: "Экология", en: "Ecology" }, value: 54 },
+            { label: { ru: "История", en: "History" }, value: 39 },
+        ],
+    },
+    {
+        id: "ranked-proportional-symbols",
+        category: "ranking",
+        kind: "proportional-symbols",
+        title: { ru: "Упорядоченные пропорциональные символы", en: "Ranked proportional symbols" },
+        description: {
+            ru: "Площадь кругов кодирует величину, а порядок помогает сравнить ранг.",
+            en: "Circle area encodes magnitude while ordering supports rank comparison.",
+        },
+        useWhen: {
+            ru: "Нужно выразительно показать большие различия среди небольшого числа категорий.",
+            en: "You want an expressive view of large differences among a few categories.",
+        },
+        avoidWhen: {
+            ru: "Значения близки и требуется точное сравнение.",
+            en: "Values are close and precise comparison is required.",
+        },
+        unit: { ru: "участников", en: "participants" },
+        data: [
+            { label: { ru: "Фестиваль", en: "Festival" }, value: 2400 },
+            { label: { ru: "Хакатон", en: "Hackathon" }, value: 1700 },
+            { label: { ru: "Лекторий", en: "Lecture series" }, value: 980 },
+            { label: { ru: "Турнир", en: "Tournament" }, value: 620 },
+            { label: { ru: "Клуб", en: "Club" }, value: 310 },
+        ],
+    },
+    {
+        id: "dots-on-strip",
+        category: "ranking",
+        kind: "dot-strip",
+        title: { ru: "Точки на полосе", en: "Dots on a strip" },
+        description: {
+            ru: "Точки показывают позиции категорий на общей числовой шкале без тяжёлых столбцов.",
+            en: "Dots place categories on a shared numerical scale without heavy bars.",
+        },
+        useWhen: {
+            ru: "Нужно лёгкое и точное ранжирование нескольких значений.",
+            en: "You need a light but precise ranking of several values.",
+        },
+        avoidWhen: {
+            ru: "Нулевая базовая линия принципиальна для интерпретации величины.",
+            en: "A zero baseline is essential to interpreting magnitude.",
+        },
+        unit: { ru: "баллов", en: "points" },
+        data: [
+            { label: { ru: "Север", en: "North" }, value: 88 },
+            { label: { ru: "Центр", en: "Central" }, value: 79 },
+            { label: { ru: "Восток", en: "East" }, value: 73 },
+            { label: { ru: "Юг", en: "South" }, value: 65 },
+            { label: { ru: "Запад", en: "West" }, value: 58 },
+        ],
+    },
+    {
+        id: "vertical-lollipop",
+        category: "ranking",
+        kind: "vertical-lollipop",
+        title: { ru: "Вертикальный лоллипоп", en: "Vertical lollipop chart" },
+        description: {
+            ru: "Тонкая линия связывает базу с точкой, сохраняя акцент на конечном значении.",
+            en: "A thin stem connects the baseline to a dot, keeping focus on the endpoint.",
+        },
+        useWhen: {
+            ru: "Категорий немного и нужен более лёгкий вариант вертикальных столбцов.",
+            en: "There are few categories and you want a lighter alternative to columns.",
+        },
+        avoidWhen: {
+            ru: "Подписи длинные или нужно сравнить состав каждого значения.",
+            en: "Labels are long or each value's composition needs comparison.",
+        },
+        unit: { ru: "% завершивших", en: "% completed" },
+        data: [
+            { label: { ru: "Курс A", en: "Course A" }, value: 91 },
+            { label: { ru: "Курс Б", en: "Course B" }, value: 84 },
+            { label: { ru: "Курс В", en: "Course C" }, value: 76 },
+            { label: { ru: "Курс Г", en: "Course D" }, value: 69 },
+            { label: { ru: "Курс Д", en: "Course E" }, value: 61 },
+        ],
+    },
+    {
+        id: "bump-chart",
+        category: "ranking",
+        kind: "bump",
+        title: { ru: "Бамп-чарт", en: "Bump chart" },
+        description: {
+            ru: "Линии показывают, как места участников меняются между несколькими периодами.",
+            en: "Lines show how participants move through ranks across several periods.",
+        },
+        useWhen: {
+            ru: "Важны перестановки в рейтинге во времени, а не абсолютные показатели.",
+            en: "Movement in rank over time matters more than absolute measures.",
+        },
+        avoidWhen: {
+            ru: "Участников слишком много или важен размер разрыва между их показателями.",
+            en: "There are too many participants or gaps between underlying values matter.",
+        },
+        unit: { ru: "место", en: "rank" },
+        valueLabels: { primary: { ru: "Итоговое место", en: "Final rank" } },
+        data: [
+            { label: { ru: "Команда А", en: "Team A" }, value: 2, values: [1, 2, 3, 2] },
+            { label: { ru: "Команда Б", en: "Team B" }, value: 1, values: [4, 3, 2, 1] },
+            { label: { ru: "Команда В", en: "Team C" }, value: 4, values: [2, 1, 1, 4] },
+            { label: { ru: "Команда Г", en: "Team D" }, value: 3, values: [3, 4, 4, 3] },
         ],
     },
 ];

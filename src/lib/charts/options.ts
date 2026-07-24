@@ -342,6 +342,142 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "proportional-symbols") {
+        const maximum = Math.max(...payload.data.map((row) => row.value));
+        return {
+            ...base,
+            grid: { left: 42, right: 42, top: 28, bottom: 58 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisTick: { show: false },
+            },
+            yAxis: { type: "value", min: -1, max: 1, show: false },
+            series: [
+                {
+                    type: "scatter",
+                    data: payload.data.map((row) => [row.label, 0, row.value]),
+                    symbolSize: (value: [string, number, number]) =>
+                        22 + Math.sqrt(value[2] / maximum) * 54,
+                    label: {
+                        show: true,
+                        position: "inside",
+                        formatter: ({ value }: { value: [string, number, number] }) => value[2],
+                        color: "#fff",
+                        fontWeight: 700,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "dot-strip") {
+        return {
+            ...base,
+            grid: { left: 90, right: 42, top: 28, bottom: 52 },
+            xAxis: {
+                type: "value",
+                name: payload.unit,
+                nameLocation: "middle",
+                nameGap: 30,
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    type: "scatter",
+                    symbolSize: 18,
+                    data: payload.data.map((row) => [row.value, row.label]),
+                    label: {
+                        show: true,
+                        position: "right",
+                        formatter: ({ value }: { value: [number, string] }) => value[0],
+                        color: ink,
+                        fontWeight: 700,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "vertical-lollipop") {
+        return {
+            ...base,
+            grid: { left: 54, right: 28, top: 28, bottom: 52 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "bar",
+                    data: payload.data.map((row) => row.value),
+                    barWidth: 3,
+                    itemStyle: { color: "#aeb9b2" },
+                    silent: true,
+                },
+                {
+                    type: "scatter",
+                    symbolSize: 18,
+                    data: payload.data.map((row) => [row.label, row.value]),
+                    label: {
+                        show: true,
+                        position: "top",
+                        formatter: ({ value }: { value: [string, number] }) => value[1],
+                        color: ink,
+                        fontWeight: 700,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "bump") {
+        const periods =
+            payload.locale === "ru"
+                ? ["Семестр 1", "Семестр 2", "Семестр 3", "Семестр 4"]
+                : ["Term 1", "Term 2", "Term 3", "Term 4"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 54, right: 84, top: 52, bottom: 48 },
+            xAxis: { type: "category", data: periods, boundaryGap: false },
+            yAxis: {
+                type: "value",
+                min: 1,
+                max: payload.data.length,
+                interval: 1,
+                inverse: true,
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: payload.data.map((row) => ({
+                name: row.label,
+                type: "line",
+                data: row.values ?? [row.value],
+                symbolSize: 10,
+                lineStyle: { width: 3 },
+                label: {
+                    show: true,
+                    position: "right",
+                    formatter: ({ dataIndex }: { dataIndex: number }) =>
+                        dataIndex === periods.length - 1 ? row.label : "",
+                },
+                emphasis: { focus: "series" },
+            })),
+        };
+    }
+
     if (payload.kind === "violin") {
         const step = 2;
         const bandwidth = 4.5;
