@@ -341,13 +341,14 @@ const interactiveExamples = (() => {
 
   function waterfall(title) {
     const labels = ["Начало", "Продажи", "Возвраты", "Расходы", "Экономия", "Итог"];
-    const visible = [80, 34, -12, -25, 9, 86];
+    const changes = [80, 34, -12, -25, 9, 86];
+    const visible = [80, 34, 12, 25, 9, 86];
     const helper = [0, 80, 102, 77, 77, 0];
     return {
       ...base(title),
       tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: (items) => {
         const item = items.find((entry) => entry.seriesName !== "База");
-        return item ? `${item.axisValue}<br>${item.seriesName}: ${item.value > 0 ? "+" : ""}${item.value}` : "";
+        return item ? `${item.axisValue}<br>${item.seriesName}: ${changes[item.dataIndex] > 0 && item.dataIndex > 0 && item.dataIndex < changes.length - 1 ? "+" : ""}${changes[item.dataIndex]}` : "";
       } },
       grid: { left: 48, right: 24, top: 62, bottom: 44 },
       xAxis: { ...axis, type: "category", data: labels },
@@ -359,8 +360,8 @@ const interactiveExamples = (() => {
           type: "bar",
           stack: "waterfall",
           data: visible,
-          itemStyle: { color: (p) => p.dataIndex === 0 || p.dataIndex === visible.length - 1 ? palette[0] : p.value >= 0 ? palette[2] : palette[1] },
-          label: { show: true, position: (p) => p.value >= 0 ? "top" : "bottom", formatter: ({ value, dataIndex }) => dataIndex === 0 || dataIndex === visible.length - 1 ? value : `${value > 0 ? "+" : ""}${value}` }
+          itemStyle: { color: (p) => p.dataIndex === 0 || p.dataIndex === visible.length - 1 ? palette[0] : changes[p.dataIndex] >= 0 ? palette[2] : palette[1] },
+          label: { show: true, position: "top", formatter: ({ dataIndex }) => dataIndex === 0 || dataIndex === visible.length - 1 ? changes[dataIndex] : `${changes[dataIndex] > 0 ? "+" : ""}${changes[dataIndex]}` }
         }
       ]
     };
