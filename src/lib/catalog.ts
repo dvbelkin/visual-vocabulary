@@ -48,7 +48,10 @@ export type ChartKind =
     | "proportional-symbols"
     | "dot-strip"
     | "vertical-lollipop"
-    | "bump";
+    | "bump"
+    | "correlation-combo"
+    | "connected-scatter"
+    | "bubble";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1164,6 +1167,99 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Команда Б", en: "Team B" }, value: 1, values: [4, 3, 2, 1] },
             { label: { ru: "Команда В", en: "Team C" }, value: 4, values: [2, 1, 1, 4] },
             { label: { ru: "Команда Г", en: "Team D" }, value: 3, values: [3, 4, 4, 3] },
+        ],
+    },
+    {
+        id: "line-and-columns",
+        category: "correlation",
+        kind: "correlation-combo",
+        title: { ru: "Линия и столбцы", en: "Line and columns" },
+        description: {
+            ru: "Столбцы показывают абсолютный объём, а линия — связанный относительный показатель.",
+            en: "Columns show absolute volume while a line tracks a related relative measure.",
+        },
+        useWhen: {
+            ru: "Нужно сопоставить объём и нормированный показатель в общей последовательности.",
+            en: "You need to compare a volume measure with a related rate across one sequence.",
+        },
+        avoidWhen: {
+            ru: "Две шкалы создают ложную связь или показатели не имеют общего контекста.",
+            en: "Dual scales imply a false relationship or the measures lack shared context.",
+        },
+        unit: { ru: "посещения / %", en: "visits / %" },
+        valueLabels: {
+            primary: { ru: "Посещения, тыс.", en: "Visits, thousands" },
+            secondary: { ru: "Доля возвратов, %", en: "Return rate, %" },
+        },
+        data: [
+            { label: { ru: "Янв", en: "Jan" }, value: 42, value2: 31 },
+            { label: { ru: "Фев", en: "Feb" }, value: 51, value2: 34 },
+            { label: { ru: "Мар", en: "Mar" }, value: 58, value2: 39 },
+            { label: { ru: "Апр", en: "Apr" }, value: 66, value2: 43 },
+            { label: { ru: "Май", en: "May" }, value: 73, value2: 47 },
+            { label: { ru: "Июн", en: "Jun" }, value: 79, value2: 52 },
+        ],
+    },
+    {
+        id: "connected-scatterplot",
+        category: "correlation",
+        kind: "connected-scatter",
+        title: { ru: "Связанная диаграмма рассеяния", en: "Connected scatterplot" },
+        description: {
+            ru: "Траектория соединяет последовательные пары значений и показывает изменение их связи.",
+            en: "A trajectory connects sequential value pairs and shows how their relationship evolves.",
+        },
+        useWhen: {
+            ru: "Есть два числовых показателя и важен путь между последовательными периодами.",
+            en: "You have two numerical measures and the path between periods is meaningful.",
+        },
+        avoidWhen: {
+            ru: "Последовательность точек не важна или траектория слишком запутана.",
+            en: "Point order is irrelevant or the trajectory becomes too tangled.",
+        },
+        unit: { ru: "индексы", en: "indices" },
+        valueLabels: {
+            primary: { ru: "Доступность", en: "Affordability" },
+            secondary: { ru: "Качество", en: "Quality" },
+        },
+        data: [
+            { label: { ru: "2020", en: "2020" }, value: 58, value2: 62 },
+            { label: { ru: "2021", en: "2021" }, value: 54, value2: 67 },
+            { label: { ru: "2022", en: "2022" }, value: 61, value2: 71 },
+            { label: { ru: "2023", en: "2023" }, value: 68, value2: 76 },
+            { label: { ru: "2024", en: "2024" }, value: 73, value2: 74 },
+            { label: { ru: "2025", en: "2025" }, value: 78, value2: 81 },
+        ],
+    },
+    {
+        id: "bubble-chart",
+        category: "correlation",
+        kind: "bubble",
+        title: { ru: "Пузырьковая диаграмма", en: "Bubble chart" },
+        description: {
+            ru: "Положение показывает два числовых показателя, а площадь круга — третий.",
+            en: "Position shows two numerical measures while circle area encodes a third.",
+        },
+        useWhen: {
+            ru: "Нужно исследовать связь двух показателей с учётом масштаба наблюдения.",
+            en: "You need to explore two-variable relationships while accounting for observation size.",
+        },
+        avoidWhen: {
+            ru: "Пузырей много, размеры близки или третья переменная несущественна.",
+            en: "There are many bubbles, sizes are similar, or the third variable is not meaningful.",
+        },
+        unit: { ru: "баллы / студентов", en: "scores / students" },
+        valueLabels: {
+            primary: { ru: "Практика, баллы", en: "Practice score" },
+            secondary: { ru: "Экзамен, баллы", en: "Exam score" },
+            tertiary: { ru: "Студентов", en: "Students" },
+        },
+        data: [
+            { label: { ru: "Программа А", en: "Programme A" }, value: 72, value2: 78, value3: 420 },
+            { label: { ru: "Программа Б", en: "Programme B" }, value: 64, value2: 69, value3: 260 },
+            { label: { ru: "Программа В", en: "Programme C" }, value: 81, value2: 84, value3: 510 },
+            { label: { ru: "Программа Г", en: "Programme D" }, value: 58, value2: 74, value3: 180 },
+            { label: { ru: "Программа Д", en: "Programme E" }, value: 76, value2: 66, value3: 340 },
         ],
     },
 ];

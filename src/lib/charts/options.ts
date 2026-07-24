@@ -45,6 +45,8 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 payload.kind === "pie" ||
                 payload.kind === "donut" ||
                 payload.kind === "scatter" ||
+                payload.kind === "connected-scatter" ||
+                payload.kind === "bubble" ||
                 payload.kind === "radar"
                     ? "item"
                     : "axis",
@@ -92,6 +94,125 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                         name: label,
                         value: [value, value2],
                     })),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "correlation-combo") {
+        const labels =
+            payload.locale === "ru"
+                ? ["Посещения, тыс.", "Доля возвратов, %"]
+                : ["Visits, thousands", "Return rate, %"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 58, right: 58, top: 52, bottom: 48 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: [
+                {
+                    type: "value",
+                    name: labels[0],
+                    splitLine: { lineStyle: { color: gridLine } },
+                },
+                {
+                    type: "value",
+                    name: "%",
+                    min: 0,
+                    max: 60,
+                    splitLine: { show: false },
+                },
+            ],
+            series: [
+                {
+                    name: labels[0],
+                    type: "bar",
+                    data: payload.data.map((row) => row.value),
+                    barMaxWidth: 42,
+                },
+                {
+                    name: labels[1],
+                    type: "line",
+                    yAxisIndex: 1,
+                    data: payload.data.map((row) => row.value2 ?? 0),
+                    symbolSize: 9,
+                    lineStyle: { width: 3 },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "connected-scatter") {
+        const axisNames =
+            payload.locale === "ru" ? ["Доступность", "Качество"] : ["Affordability", "Quality"];
+        const points = payload.data.map((row) => [row.value, row.value2 ?? 0]);
+        return {
+            ...base,
+            grid: { left: 58, right: 32, top: 28, bottom: 54 },
+            xAxis: {
+                type: "value",
+                name: axisNames[0],
+                nameLocation: "middle",
+                nameGap: 32,
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "value",
+                name: axisNames[1],
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "line",
+                    data: points,
+                    symbolSize: 10,
+                    lineStyle: { width: 3 },
+                    label: {
+                        show: true,
+                        position: "top",
+                        formatter: ({ dataIndex }: { dataIndex: number }) =>
+                            payload.data[dataIndex].label,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "bubble") {
+        const maximum = Math.max(...payload.data.map((row) => row.value3 ?? 0));
+        const axisNames = payload.locale === "ru" ? ["Практика", "Экзамен"] : ["Practice", "Exam"];
+        return {
+            ...base,
+            grid: { left: 58, right: 32, top: 28, bottom: 54 },
+            xAxis: {
+                type: "value",
+                name: axisNames[0],
+                nameLocation: "middle",
+                nameGap: 32,
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "value",
+                name: axisNames[1],
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "scatter",
+                    data: payload.data.map((row) => ({
+                        name: row.label,
+                        value: [row.value, row.value2 ?? 0, row.value3 ?? 0],
+                    })),
+                    symbolSize: (value: [number, number, number]) =>
+                        18 + Math.sqrt(value[2] / maximum) * 46,
+                    label: { show: true, position: "top", formatter: "{b}" },
                 },
             ],
         };
