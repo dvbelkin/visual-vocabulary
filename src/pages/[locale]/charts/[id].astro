@@ -84,11 +84,19 @@ const rows = chart.data.map((row) => ({
                             <th scope="col"
                                 >{activeLocale === "ru" ? "Наблюдение" : "Observation"}</th
                             >
-                            <th scope="col">{activeLocale === "ru" ? "Значение" : "Value"}</th>
+                            <th scope="col">
+                                {
+                                    chart.valueLabels?.primary[activeLocale] ??
+                                        (activeLocale === "ru" ? "Значение" : "Value")
+                                }
+                            </th>
                             {
                                 rows.some((row) => row.value2 !== undefined) && (
                                     <th scope="col">
-                                        {activeLocale === "ru" ? "Второе значение" : "Second value"}
+                                        {chart.valueLabels?.secondary?.[activeLocale] ??
+                                            (activeLocale === "ru"
+                                                ? "Второе значение"
+                                                : "Second value")}
                                     </th>
                                 )
                             }
