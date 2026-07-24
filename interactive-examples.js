@@ -1052,6 +1052,190 @@ const interactiveExamples = (() => {
     };
   }
 
+  function spineChart(title) {
+    const groups = ["Север", "Центр", "Юг", "Восток"];
+    const left = [48, 36, 57, 42];
+    const right = left.map((value) => 100 - value);
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: (v) => `${Math.abs(v)}%` },
+      legend: { top: 40 },
+      grid: { left: 76, right: 32, top: 82, bottom: 42 },
+      xAxis: {
+        ...axis,
+        type: "value",
+        min: -70,
+        max: 70,
+        axisLabel: { formatter: (v) => `${Math.abs(v)}%` }
+      },
+      yAxis: { ...axis, type: "category", data: groups },
+      series: [
+        { name: "Мужчины", type: "bar", stack: "spine", data: left.map((v) => -v), itemStyle: { color: palette[0] }, label: { show: true, position: "insideLeft", formatter: ({ value }) => `${Math.abs(value)}%` } },
+        { name: "Женщины", type: "bar", stack: "spine", data: right, itemStyle: { color: palette[1] }, label: { show: true, position: "insideRight", formatter: "{c}%" } }
+      ]
+    };
+  }
+
+  function balanceFill(title) {
+    const periods = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт"];
+    const balance = [-18, -9, 5, 14, 22, 11, -4, -15, 3, 19];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", valueFormatter: (v) => `${v > 0 ? "+" : ""}${v} п.п.` },
+      grid: { left: 54, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: periods, boundaryGap: false },
+      yAxis: { ...axis, type: "value", min: -25, max: 25, name: "Баланс, п.п." },
+      visualMap: {
+        show: false,
+        dimension: 1,
+        pieces: [
+          { lte: 0, color: palette[1] },
+          { gt: 0, color: palette[2] }
+        ]
+      },
+      series: [{
+        name: "Баланс",
+        type: "line",
+        data: balance,
+        symbolSize: 7,
+        lineStyle: { width: 3 },
+        areaStyle: { opacity: .32 },
+        markLine: { silent: true, symbol: "none", lineStyle: { color: "#626762", width: 2 }, data: [{ yAxis: 0 }] }
+      }]
+    };
+  }
+
+  function groupedBars(title, horizontal = false) {
+    const groups = ["Север", "Центр", "Юг", "Восток"];
+    const current = [72, 91, 64, 83];
+    const previous = [61, 78, 69, 74];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      legend: { top: 40 },
+      grid: { left: horizontal ? 76 : 50, right: 28, top: 82, bottom: 42 },
+      xAxis: horizontal ? { ...axis, type: "value", min: 0 } : { ...axis, type: "category", data: groups },
+      yAxis: horizontal ? { ...axis, type: "category", data: groups } : { ...axis, type: "value", min: 0 },
+      series: [
+        { name: "2025", type: "bar", data: previous, barMaxWidth: 28 },
+        { name: "2026", type: "bar", data: current, barMaxWidth: 28 }
+      ]
+    };
+  }
+
+  function compositionMagnitude(title) {
+    const groups = ["Проект A", "Проект B", "Проект C", "Проект D"];
+    const parts = [
+      { name: "Работы", data: [48, 35, 22, 43] },
+      { name: "Материалы", data: [31, 27, 18, 26] },
+      { name: "Прочее", data: [16, 10, 8, 14] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      legend: { top: 40 },
+      grid: { left: 86, right: 32, top: 82, bottom: 40 },
+      xAxis: { ...axis, type: "value", min: 0, name: "Общий объём" },
+      yAxis: { ...axis, type: "category", data: groups },
+      series: parts.map((part) => ({
+        name: part.name,
+        type: "bar",
+        stack: "total",
+        data: part.data,
+        emphasis: { focus: "series" },
+        label: { show: true, position: "inside", formatter: ({ value }) => value >= 14 ? value : "" }
+      }))
+    };
+  }
+
+  function pictogram(title) {
+    const groups = [
+      { name: "Команда A", value: 8, color: palette[0] },
+      { name: "Команда B", value: 6, color: palette[1] },
+      { name: "Команда C", value: 4, color: palette[2] }
+    ];
+    const data = groups.flatMap((group, row) =>
+      Array.from({ length: group.value }, (_, index) => ({
+        name: group.name,
+        value: [index + 1, row, group.value],
+        itemStyle: { color: group.color }
+      }))
+    );
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.name}: ${p.value[2]} человек` },
+      grid: { left: 92, right: 30, top: 64, bottom: 38 },
+      xAxis: { type: "value", min: .5, max: 10.5, show: false },
+      yAxis: { ...axis, type: "category", inverse: true, data: groups.map((g) => g.name) },
+      series: [{
+        type: "scatter",
+        symbol: "path://M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-5 10h10l2 8h-4v8H9v-8H5l2-8z",
+        symbolSize: 28,
+        data,
+        emphasis: { scale: 1.3 }
+      }]
+    };
+  }
+
+  function bulletChart(title) {
+    const names = ["Выручка", "Маржа", "Удержание", "Срок"];
+    const actual = [78, 64, 86, 57];
+    const target = [85, 70, 80, 65];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${names[p.value[1]]}<br>Факт: ${p.value[2]}<br>Цель: ${p.value[3]}` },
+      grid: { left: 92, right: 34, top: 62, bottom: 40 },
+      xAxis: { ...axis, type: "value", min: 0, max: 100, axisLabel: { formatter: "{value}%" } },
+      yAxis: { ...axis, type: "category", data: names },
+      series: [{
+        type: "custom",
+        data: actual.map((value, index) => [0, index, value, target[index]]),
+        renderItem: (params, api) => {
+          const row = api.value(1);
+          const y = api.coord([0, row])[1];
+          const x0 = api.coord([0, row])[0];
+          const x60 = api.coord([60, row])[0];
+          const x80 = api.coord([80, row])[0];
+          const x100 = api.coord([100, row])[0];
+          const xActual = api.coord([api.value(2), row])[0];
+          const xTarget = api.coord([api.value(3), row])[0];
+          return { type: "group", children: [
+            { type: "rect", shape: { x: x0, y: y - 15, width: x60 - x0, height: 30 }, style: { fill: "#deded8" } },
+            { type: "rect", shape: { x: x60, y: y - 15, width: x80 - x60, height: 30 }, style: { fill: "#c7c7c0" } },
+            { type: "rect", shape: { x: x80, y: y - 15, width: x100 - x80, height: 30 }, style: { fill: "#adada5" } },
+            { type: "rect", shape: { x: x0, y: y - 6, width: xActual - x0, height: 12 }, style: { fill: palette[0] } },
+            { type: "line", shape: { x1: xTarget, y1: y - 12, x2: xTarget, y2: y + 12 }, style: { stroke: "#171717", lineWidth: 3 } }
+          ]};
+        }
+      }]
+    };
+  }
+
+  function parallelCoordinates(title) {
+    const dimensions = ["Цена", "Качество", "Скорость", "Сервис", "Лояльность"];
+    const observations = [
+      { name: "Альфа", value: [72, 88, 61, 82, 77] },
+      { name: "Бета", value: [44, 73, 91, 69, 84] },
+      { name: "Гамма", value: [63, 58, 75, 93, 66] },
+      { name: "Дельта", value: [86, 79, 54, 62, 71] },
+      { name: "Эпсилон", value: [55, 66, 83, 76, 89] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "item" },
+      legend: { top: 40 },
+      parallel: { left: 58, right: 42, top: 92, bottom: 42, parallelAxisDefault: { type: "value", min: 0, max: 100, axisLine: axis.axisLine, axisLabel: axis.axisLabel, splitLine: axis.splitLine } },
+      parallelAxis: dimensions.map((name, dim) => ({ dim, name })),
+      series: observations.map((item, index) => ({
+        name: item.name,
+        type: "parallel",
+        data: [item.value],
+        lineStyle: { width: 2.5, opacity: .66, color: palette[index] },
+        emphasis: { focus: "series", lineStyle: { width: 6, opacity: 1 } }
+      }))
+    };
+  }
+
   function optionFor(chart) {
     const key = chart.img.toLowerCase();
     const title = chart.chartName;
@@ -1078,6 +1262,16 @@ const interactiveExamples = (() => {
     if (key === "lollipop-h.svg") return lollipop(title, true);
     if (key === "lollipop-v.svg") return lollipop(title, false);
     if (key === "bump.svg") return bumpChart(title);
+    if (key === "spine.svg") return spineChart(title);
+    if (key === "line-surplur-defecit-fill.svg") return balanceFill(title);
+    if (key === "column-grouped.svg") return groupedBars(title, false);
+    if (key === "bar-grouped-magnitude.svg") return groupedBars(title, true);
+    if (key === "bar-stacked-proportional-magnitude.svg") return compositionMagnitude(title);
+    if (key === "isotope.svg") return pictogram(title);
+    if (key === "lollipop-h-magnitude.svg") return lollipop(title, true);
+    if (key === "lollipop-v-magnitude.svg") return lollipop(title, false);
+    if (key === "bullet.svg") return bulletChart(title);
+    if (key === "parallel coordinates.svg") return parallelCoordinates(title);
     if (key === "voronoi.svg") return voronoi(title);
     if (key === "arc.svg") return semicircle(title);
     if (key === "gridplot.svg") return symbolGrid(title);
