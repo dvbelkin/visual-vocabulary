@@ -735,77 +735,26 @@ const interactiveExamples = (() => {
   }
 
   function seismogram(title) {
-    const values = [
-      7,12,9,18,6,11,15,8,24,10,14,9,
-      17,6,31,8,20,12,16,13,19,22,18,28,
-      15,34,9,14,21,17,26,13,29,48,37,20,
-      25,33,42,54,36,23,39,47,68,58,49,41
-    ];
-    const observations = values.map((value, index) => ({
-      name: `Наблюдение ${index + 1}`,
-      value: [value, index]
-    }));
+    const values = [3,8,5,18,7,42,11,6,95,14,8,31,5,62,9,17,4,78,12,6,26,4,51,8];
     return {
       ...base(title),
-      tooltip: {
-        formatter: (p) => `Момент ${p.value[1] + 1}<br>Величина: ${p.value[0]}`
-      },
-      grid: { left: 34, right: 34, top: 58, bottom: 34 },
-      xAxis: {
-        type: "value",
-        min: -75,
-        max: 75,
-        axisLine: { show: true, lineStyle: { color: "#90908a" } },
-        axisLabel: { show: false },
-        axisTick: { show: false },
-        splitLine: { show: false }
-      },
-      yAxis: {
-        type: "category",
-        inverse: true,
-        data: observations.map((_, index) => index + 1),
-        axisLine: { show: false },
-        axisLabel: { show: false },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        name: "Время ↓",
-        nameLocation: "start",
-        nameTextStyle: { color: "#3f3f3b", padding: [0, 0, 6, 0] }
-      },
+      tooltip: { formatter: (p) => `Событие ${p.dataIndex + 1}<br>Величина: ${p.value[1]}` },
+      grid: { left: 54, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "value", min: 0, max: values.length - 1, name: "Время" },
+      yAxis: { ...axis, type: "value", min: 0, max: 2.2, axisLabel: { show: false }, splitLine: { show: false } },
       series: [{
-        name: "Величина",
         type: "custom",
-        data: observations,
+        data: values.map((v, i) => [i, Math.log10(v + 1), v]),
         renderItem: (params, api) => {
-          const magnitude = api.value(0);
-          const row = api.value(1);
-          const left = api.coord([-magnitude, row]);
-          const right = api.coord([magnitude, row]);
-          const centerY = left[1];
-          const height = Math.max(2, Math.min(5, api.size([0, 1])[1] * 0.62));
+          const basePoint = api.coord([api.value(0), 0]);
+          const topPoint = api.coord([api.value(0), api.value(1)]);
           return {
-            type: "rect",
-            shape: {
-              x: left[0],
-              y: centerY - height / 2,
-              width: right[0] - left[0],
-              height
-            },
-            style: api.style({ fill: palette[2], opacity: 0.82 }),
-            emphasis: {
-              style: { fill: palette[1], opacity: 1 }
-            }
+            type: "group",
+            children: [
+              { type: "line", shape: { x1: basePoint[0], y1: basePoint[1], x2: topPoint[0], y2: topPoint[1] }, style: { stroke: palette[0], lineWidth: 3 } },
+              { type: "circle", shape: { cx: topPoint[0], cy: topPoint[1], r: 4 }, style: { fill: palette[1] } }
+            ]
           };
-        }
-      }],
-      graphic: [{
-        type: "text",
-        right: 20,
-        bottom: 10,
-        style: {
-          text: "Длина полосы = величина",
-          fill: "#626762",
-          font: "11px Inter, sans-serif"
         }
       }]
     };
@@ -902,6 +851,207 @@ const interactiveExamples = (() => {
     };
   }
 
+  function orderedSymbols(title) {
+    const data = [
+      [94, "Альфа"], [76, "Бета"], [58, "Гамма"],
+      [41, "Дельта"], [27, "Эпсилон"], [15, "Дзета"]
+    ];
+    return {
+      ...base(title),
+      tooltip: { formatter: (p) => `${p.value[1]}: ${p.value[0]}` },
+      grid: { left: 86, right: 54, top: 62, bottom: 34 },
+      xAxis: { ...axis, type: "value", min: 0, max: 105, name: "Значение" },
+      yAxis: {
+        ...axis,
+        type: "category",
+        inverse: true,
+        data: data.map((item) => item[1])
+      },
+      series: [{
+        type: "scatter",
+        data,
+        symbolSize: (value) => 8 + Math.sqrt(value[0]) * 4.5,
+        itemStyle: { opacity: .76, borderColor: "#fff", borderWidth: 2 },
+        label: {
+          show: true,
+          formatter: (p) => p.value[0],
+          position: "right",
+          color: "#171717",
+          fontWeight: 650
+        },
+        emphasis: { scale: 1.25 }
+      }]
+    };
+  }
+
+  function rankingDotStrip(title) {
+    const categories = ["Качество", "Цена", "Сервис"];
+    const objects = [
+      { name: "Альфа", values: [1, 4, 2], color: palette[0] },
+      { name: "Бета", values: [3, 1, 4], color: palette[1] },
+      { name: "Гамма", values: [2, 3, 1], color: palette[2] },
+      { name: "Дельта", values: [4, 2, 3], color: palette[3] }
+    ];
+    return {
+      ...base(title),
+      tooltip: {
+        formatter: (p) => `${p.seriesName}<br>${categories[p.value[1]]}: ${p.value[0]}-е место`
+      },
+      legend: { top: 40 },
+      grid: { left: 92, right: 30, top: 82, bottom: 46 },
+      xAxis: {
+        ...axis,
+        type: "value",
+        min: .5,
+        max: 4.5,
+        interval: 1,
+        inverse: true,
+        name: "Место",
+        axisLabel: { formatter: (value) => Number.isInteger(value) ? value : "" }
+      },
+      yAxis: { ...axis, type: "category", data: categories },
+      series: objects.map((object) => ({
+        name: object.name,
+        type: "scatter",
+        data: object.values.map((rank, categoryIndex) => [rank, categoryIndex]),
+        symbolSize: 16,
+        itemStyle: { color: object.color, borderColor: "#fff", borderWidth: 2 },
+        emphasis: { scale: 1.45 }
+      }))
+    };
+  }
+
+  function rankChange(title) {
+    const groups = [
+      { name: "Альфа", ranks: [1, 3], color: palette[0] },
+      { name: "Бета", ranks: [4, 1], color: palette[1] },
+      { name: "Гамма", ranks: [2, 2], color: palette[2] },
+      { name: "Дельта", ranks: [3, 5], color: palette[3] },
+      { name: "Эпсилон", ranks: [5, 4], color: palette[4] }
+    ];
+    return {
+      ...base(title),
+      tooltip: {
+        trigger: "item",
+        formatter: (p) => `${p.seriesName}<br>2024: ${p.data[0]}-е место<br>2026: ${p.data[1]}-е место`
+      },
+      grid: { left: 86, right: 92, top: 64, bottom: 38 },
+      xAxis: { ...axis, type: "category", data: ["2024", "2026"], boundaryGap: false },
+      yAxis: {
+        ...axis,
+        type: "value",
+        min: 1,
+        max: 5,
+        interval: 1,
+        inverse: true,
+        name: "Место"
+      },
+      series: groups.map((group) => ({
+        name: group.name,
+        type: "line",
+        data: group.ranks,
+        symbolSize: 11,
+        lineStyle: { width: 3, color: group.color },
+        itemStyle: { color: group.color },
+        label: {
+          show: true,
+          formatter: ({ dataIndex }) => dataIndex === 1 ? group.name : "",
+          position: "right",
+          color: group.color
+        },
+        emphasis: { focus: "series" }
+      }))
+    };
+  }
+
+  function lollipop(title, horizontal = true) {
+    const names = ["Альфа", "Бета", "Гамма", "Дельта", "Эпсилон", "Дзета"];
+    const values = [92, 76, 63, 49, 34, 21];
+    const stemSeries = {
+      name: "Значение",
+      type: "bar",
+      data: values,
+      barWidth: 3,
+      itemStyle: { color: "#aeb5b0" },
+      emphasis: { disabled: true },
+      z: 1
+    };
+    const dotSeries = {
+      name: "Значение",
+      type: "scatter",
+      data: values.map((value, index) => horizontal
+        ? [value, names[index]]
+        : [names[index], value]),
+      symbolSize: 18,
+      itemStyle: { color: palette[0], borderColor: "#fff", borderWidth: 2 },
+      label: {
+        show: true,
+        formatter: ({ value }) => horizontal ? value[0] : value[1],
+        position: horizontal ? "right" : "top",
+        color: "#171717",
+        fontWeight: 650
+      },
+      emphasis: { scale: 1.35 },
+      z: 3
+    };
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      grid: { left: horizontal ? 86 : 50, right: 42, top: 62, bottom: 46 },
+      xAxis: horizontal
+        ? { ...axis, type: "value", min: 0, max: 100 }
+        : { ...axis, type: "category", data: names },
+      yAxis: horizontal
+        ? { ...axis, type: "category", inverse: true, data: names }
+        : { ...axis, type: "value", min: 0, max: 100 },
+      series: [stemSeries, dotSeries]
+    };
+  }
+
+  function bumpChart(title) {
+    const periods = ["2022", "2023", "2024", "2025", "2026"];
+    const groups = [
+      { name: "Альфа", ranks: [1, 1, 2, 3, 2], color: palette[0] },
+      { name: "Бета", ranks: [3, 2, 1, 1, 1], color: palette[1] },
+      { name: "Гамма", ranks: [2, 3, 4, 2, 3], color: palette[2] },
+      { name: "Дельта", ranks: [5, 4, 3, 4, 5], color: palette[3] },
+      { name: "Эпсилон", ranks: [4, 5, 5, 5, 4], color: palette[4] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis" },
+      grid: { left: 54, right: 92, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: periods, boundaryGap: false },
+      yAxis: {
+        ...axis,
+        type: "value",
+        min: 1,
+        max: 5,
+        interval: 1,
+        inverse: true,
+        name: "Место"
+      },
+      series: groups.map((group) => ({
+        name: group.name,
+        type: "line",
+        data: group.ranks,
+        smooth: .28,
+        symbol: "circle",
+        symbolSize: 12,
+        lineStyle: { width: 4, color: group.color },
+        itemStyle: { color: group.color, borderColor: "#fff", borderWidth: 2 },
+        endLabel: {
+          show: true,
+          formatter: group.name,
+          color: group.color,
+          fontWeight: 650,
+          distance: 8
+        },
+        emphasis: { focus: "series", lineStyle: { width: 7 } }
+      }))
+    };
+  }
+
   function optionFor(chart) {
     const key = chart.img.toLowerCase();
     const title = chart.chartName;
@@ -922,6 +1072,12 @@ const interactiveExamples = (() => {
     if (key === "priestley-timeline.svg") return priestleyTimeline(title);
     if (key === "circle-timeline.svg") return circleTimeline(title);
     if (key === "seismogram.svg") return seismogram(title);
+    if (key === "symbol-proportional-ordered.svg") return orderedSymbols(title);
+    if (key === "dot-plot-strip.svg") return rankingDotStrip(title);
+    if (key === "slope-ranking.svg") return rankChange(title);
+    if (key === "lollipop-h.svg") return lollipop(title, true);
+    if (key === "lollipop-v.svg") return lollipop(title, false);
+    if (key === "bump.svg") return bumpChart(title);
     if (key === "voronoi.svg") return voronoi(title);
     if (key === "arc.svg") return semicircle(title);
     if (key === "gridplot.svg") return symbolGrid(title);
