@@ -43,7 +43,7 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
   <script src="./v2-data.js"></script>
-  <script src="./interactive-examples.js?v=20260724-block4"></script>
+  <script src="./interactive-examples.js?v=20260724-block5"></script>
   <script src="./interactive-dialog.js"></script>
   <script>
     const state = { charts: [], activeCategory: categories[0].id };
@@ -62,11 +62,11 @@
       document.querySelectorAll(".category-button").forEach(button=>{const selected=button.dataset.category===categoryId;button.classList.toggle("is-active",selected);button.setAttribute("aria-pressed",String(selected))});
       document.getElementById("categoryMarker").style.backgroundColor=category.color;document.getElementById("categoryTitle").textContent=category.title;document.getElementById("categoryDescription").textContent=category.description;document.getElementById("categoryExamples").textContent=category.examples;document.getElementById("chartCount").textContent=`${charts.length} ${pluralize(charts.length,"вариант","варианта","вариантов")}`;
       const grid=document.getElementById("chartGrid");grid.innerHTML="";
-      charts.forEach(chart=>{const card=document.createElement("article");card.className="chart-card";card.style.setProperty("--category-color",category.color);const visual=document.createElement("div");visual.className="chart-visual";const image=document.createElement("img");image.src=`icons/${chart.img}`;image.alt="";image.loading="lazy";visual.append(image);const content=document.createElement("div");content.className="chart-content";content.innerHTML=`<h4>${chart.chartName}</h4><p>${chart.description||"Краткое описание будет добавлено."}</p>`;if(chart.avail!=="TRUE"){const badge=document.createElement("span");badge.className="badge";badge.textContent="концепция";content.prepend(badge)}const button=document.createElement("button");button.type="button";button.className="example-button";button.textContent="Открыть интерактивный пример";button.addEventListener("click",()=>openInteractiveExample(chart));content.append(button);card.append(visual,content);grid.append(card)});
+      charts.forEach(chart=>{const card=document.createElement("article");card.className="chart-card";card.style.setProperty("--category-color",category.color);const visual=document.createElement("div");visual.className="chart-visual";const image=document.createElement("img");image.src=`icons/${chart.img}`;image.alt="";image.loading="lazy";visual.append(image);const content=document.createElement("div");content.className="chart-content";content.innerHTML=`<h4>${chart.chartName}</h4><p>${chart.description||"Краткое описание будет добавлено."}</p>`;const button=document.createElement("button");button.type="button";button.className="example-button";button.textContent="Открыть интерактивный пример";button.addEventListener("click",()=>openInteractiveExample(chart));content.append(button);card.append(visual,content);grid.append(card)});
       document.getElementById("categoryPanel").style.setProperty("--category-color",category.color);
     }
     function pluralize(n,one,few,many){const a=n%10,b=n%100;if(a===1&&b!==11)return one;if(a>=2&&a<=4&&(b<12||b>14))return few;return many}
-    async function init(){renderNavigation();try{const response=await fetch("./chartTypes.csv?v=20260724-block4");if(!response.ok)throw new Error(`HTTP ${response.status}`);state.charts=parseCsv(await response.text());selectCategory(state.activeCategory)}catch(error){document.getElementById("categoryPanel").innerHTML=`<div class="error"><h2>Не удалось загрузить каталог</h2><p>Откройте сайт через локальный веб-сервер или GitHub Pages.</p></div>`;console.error(error)}}
+    async function init(){renderNavigation();try{const response=await fetch("./chartTypes.csv?v=20260724-block5");if(!response.ok)throw new Error(`HTTP ${response.status}`);state.charts=parseCsv(await response.text());selectCategory(state.activeCategory)}catch(error){document.getElementById("categoryPanel").innerHTML=`<div class="error"><h2>Не удалось загрузить каталог</h2><p>Откройте сайт через локальный веб-сервер или GitHub Pages.</p></div>`;console.error(error)}}
     init();
   </script>
 </body>
