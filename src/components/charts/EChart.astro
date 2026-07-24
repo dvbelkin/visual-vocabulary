@@ -1,0 +1,117 @@
+---
+import type { ChartDefinition } from "../../lib/catalog";
+import type { Locale } from "../../lib/i18n";
+
+interface Props {
+    chart: ChartDefinition;
+    locale: Locale;
+    label: string;
+}
+
+const { chart, locale, label } = Astro.props;
+const payload = {
+    kind: chart.kind,
+    title: chart.title[locale],
+    unit: chart.unit[locale],
+    locale,
+    data: chart.data.map((row) => ({
+        label: row.label[locale],
+        value: row.value,
+        value2: row.value2,
+    })),
+};
+---
+
+<div
+    class="chart-shell"
+    data-echart-root
+    role="img"
+    aria-label={`${label}: ${chart.title[locale]}`}
+>
+    <div class="chart-canvas"></div>
+    <script
+        type="application/json"
+        data-echart-payload
+        is:inline
+        set:html={JSON.stringify(payload)}
+    />
+</div>
+
+<script>
+    import { init, use } from "echarts/core";
+    import { BarChart, HeatmapChart, LineChart, PieChart, ScatterChart } from "echarts/charts";
+    import {
+        AriaComponent,
+        GridComponent,
+        LegendComponent,
+        TooltipComponent,
+        VisualMapComponent,
+    } from "echarts/components";
+    import { CanvasRenderer } from "echarts/renderers";
+    import { buildChartOption, type ChartPayload } from "../../lib/charts/options";
+
+    use([
+        AriaComponent,
+        BarChart,
+        CanvasRenderer,
+        GridComponent,
+        HeatmapChart,
+        LegendComponent,
+        LineChart,
+        PieChart,
+        ScatterChart,
+        TooltipComponent,
+        VisualMapComponent,
+    ]);
+
+    const cleanups: Array<() => void> = [];
+
+    document.querySelectorAll<HTMLElement>("[data-echart-root]").forEach((root) => {
+        if (root.dataset.initialized) return;
+
+        const canvas = root.querySelector<HTMLElement>(".chart-canvas");
+        const source = root.querySelector<HTMLScriptElement>("[data-echart-payload]");
+        if (!canvas || !source?.textContent) return;
+
+        root.dataset.initialized = "true";
+        const payload = JSON.parse(source.textContent) as Omit<ChartPayload, "reducedMotion">;
+        const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const chart = init(canvas, undefined, { renderer: "canvas" });
+        chart.setOption(buildChartOption({ ...payload, reducedMotion: media.matches }));
+
+        const observer = new ResizeObserver(() => chart.resize());
+        observer.observe(root);
+        cleanups.push(() => {
+            observer.disconnect();
+            chart.dispose();
+        });
+    });
+
+    document.addEventListener(
+        "astro:before-swap",
+        () => {
+            cleanups.splice(0).forEach((cleanup) => cleanup());
+        },
+        { once: true },
+    );
+</script>
+
+<style>
+    .chart-shell {
+        width: 100%;
+        min-height: 420px;
+    }
+
+    .chart-canvas {
+        width: 100%;
+        height: 420px;
+    }
+
+    @media (max-width: 600px) {
+        .chart-shell,
+        .chart-canvas {
+            min-height: 340px;
+            height: 340px;
+        }
+    }
+</style>
