@@ -508,6 +508,89 @@ const interactiveExamples = (() => {
     };
   }
 
+  function columnTimeline(title) {
+    const values = [72, 86, 79, 104, 118, 111, 136, 149];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      grid: { left: 58, right: 24, top: 62, bottom: 42 },
+      xAxis: { ...axis, type: "category", data: months },
+      yAxis: { ...axis, type: "value", min: 0, name: "Заказы, тыс." },
+      series: [{
+        name: "Заказы",
+        type: "bar",
+        data: values,
+        barMaxWidth: 38,
+        label: { show: true, position: "top" },
+        emphasis: { focus: "series" }
+      }]
+    };
+  }
+
+  function multiAreaTimeline(title) {
+    const seriesData = [
+      { name: "Онлайн", values: [28, 32, 35, 39, 44, 48, 53, 58] },
+      { name: "Магазины", values: [44, 46, 43, 48, 51, 49, 54, 56] },
+      { name: "Партнёры", values: [17, 20, 19, 23, 25, 29, 31, 35] }
+    ];
+    return {
+      ...base(title),
+      tooltip: { trigger: "axis" },
+      legend: { top: 40 },
+      grid: { left: 54, right: 24, top: 82, bottom: 42 },
+      xAxis: { ...axis, type: "category", boundaryGap: false, data: months },
+      yAxis: { ...axis, type: "value", min: 0, name: "Продажи, млн ₽" },
+      series: seriesData.map((item, index) => ({
+        name: item.name,
+        type: "line",
+        stack: "total",
+        symbol: "none",
+        lineStyle: { width: 2 },
+        areaStyle: { opacity: 0.68 },
+        emphasis: { focus: "series" },
+        data: item.values,
+        itemStyle: { color: palette[index] }
+      }))
+    };
+  }
+
+  function connectedScatterTimeline(title) {
+    const years = ["2022", "2023", "2024", "2025", "2026"];
+    const trajectories = [
+      { name: "Регион A", color: palette[0], values: [[34, 62], [39, 66], [47, 69], [56, 75], [64, 81]] },
+      { name: "Регион B", color: palette[1], values: [[62, 43], [58, 49], [55, 57], [51, 66], [45, 72]] },
+      { name: "Регион C", color: palette[2], values: [[28, 35], [35, 39], [43, 47], [52, 51], [61, 58]] }
+    ];
+    return {
+      ...base(title),
+      tooltip: {
+        trigger: "item",
+        formatter: (p) => `${p.seriesName}<br>${years[p.dataIndex]}<br>X: ${p.value[0]}<br>Y: ${p.value[1]}`
+      },
+      legend: { top: 40 },
+      grid: { left: 58, right: 34, top: 82, bottom: 48 },
+      xAxis: { ...axis, type: "value", min: 20, max: 70, name: "Охват, %" },
+      yAxis: { ...axis, type: "value", min: 30, max: 85, name: "Лояльность, %" },
+      series: trajectories.map((trajectory) => ({
+        name: trajectory.name,
+        type: "line",
+        data: trajectory.values,
+        symbol: "circle",
+        symbolSize: 11,
+        lineStyle: { width: 3, color: trajectory.color },
+        itemStyle: { color: trajectory.color, borderColor: "#fff", borderWidth: 2 },
+        endLabel: { show: true, formatter: trajectory.name, color: trajectory.color },
+        label: {
+          show: true,
+          formatter: (p) => years[p.dataIndex],
+          position: "top",
+          fontSize: 10
+        },
+        emphasis: { focus: "series", scale: 1.35 }
+      }))
+    };
+  }
+
   function candlestick(title) {
     const dates = ["15.07","16.07","17.07","18.07","19.07","22.07","23.07","24.07"];
     const prices = [
@@ -613,16 +696,41 @@ const interactiveExamples = (() => {
 
   function circleTimeline(title) {
     const events = [
-      [0,0,18,"Запуск"], [1,1,32,"Релиз"], [2,0,12,"Обновление"], [3,2,46,"Кампания"],
-      [4,1,22,"Партнёрство"], [5,2,35,"Конференция"], [6,0,16,"Обновление"], [7,1,54,"Крупный релиз"]
+      [0,0,18,"Запуск"], [1,1,32,"Релиз"], [2,0,12,"Обновление"], [2,2,26,"Выставка"],
+      [3,2,46,"Кампания"], [4,1,22,"Партнёрство"], [5,2,35,"Конференция"],
+      [6,0,16,"Обновление"], [7,1,54,"Крупный релиз"]
     ];
     return {
       ...base(title),
       tooltip: { formatter: (p) => `${months[p.value[0]]}: ${p.value[3]}<br>Масштаб: ${p.value[2]}` },
-      grid: { left: 88, right: 24, top: 62, bottom: 42 },
-      xAxis: { ...axis, type: "category", data: months },
-      yAxis: { ...axis, type: "category", data: ["Продукт","Бизнес","Коммуникации"] },
-      series: [{ type: "scatter", data: events, symbolSize: (v) => 10 + Math.sqrt(v[2]) * 4, itemStyle: { opacity: .72 }, emphasis: { scale: 1.35 } }]
+      grid: { left: 112, right: 28, top: 68, bottom: 46 },
+      xAxis: {
+        ...axis,
+        type: "category",
+        data: months,
+        boundaryGap: true,
+        axisPointer: { show: true, type: "line" }
+      },
+      yAxis: {
+        ...axis,
+        type: "category",
+        data: ["Продукт","Бизнес","Коммуникации"],
+        splitLine: { show: true, lineStyle: { color: "#e5e5e0" } }
+      },
+      series: [{
+        name: "События",
+        type: "scatter",
+        data: events,
+        symbolSize: (v) => 8 + Math.sqrt(v[2]) * 5,
+        itemStyle: { opacity: .72, borderColor: "#fff", borderWidth: 2 },
+        label: {
+          show: true,
+          formatter: (p) => p.value[2] >= 32 ? p.value[3] : "",
+          position: "top",
+          fontSize: 10
+        },
+        emphasis: { scale: 1.35, label: { show: true, formatter: (p) => p.value[3] } }
+      }]
     };
   }
 
@@ -753,7 +861,10 @@ const interactiveExamples = (() => {
     if (key === "dot-plot.svg") return dotRange(title);
     if (key === "barcode.svg") return barcode(title);
     if (key === "cumulative-curve.svg") return cumulativeCurve(title);
+    if (key === "column-timeline.svg") return columnTimeline(title);
     if (key === "column-line-timeline.svg") return columnLineTimeline(title);
+    if (key === "area.svg") return multiAreaTimeline(title);
+    if (key === "scatterplot-line-timeline.svg") return connectedScatterTimeline(title);
     if (key === "stock-price.svg") return candlestick(title);
     if (key === "slope-timeline.svg") return slopeTimeline(title);
     if (key === "fan.svg") return fanChart(title);
