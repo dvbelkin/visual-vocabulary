@@ -47,6 +47,9 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 payload.kind === "scatter" ||
                 payload.kind === "connected-scatter" ||
                 payload.kind === "bubble" ||
+                payload.kind === "sankey" ||
+                payload.kind === "chord" ||
+                payload.kind === "network" ||
                 payload.kind === "radar"
                     ? "item"
                     : "axis",
@@ -1361,7 +1364,7 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
-    if (payload.kind === "waterfall") {
+    if (payload.kind === "waterfall" || payload.kind === "process-waterfall") {
         const changes = payload.data.slice(0, -1);
         const total = payload.data.at(-1);
         let running = 0;
@@ -1421,6 +1424,81 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                         formatter: ({ data }: { data: { raw: number } }) =>
                             `${data.raw > 0 ? "+" : ""}${data.raw}`,
                     },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "sankey") {
+        const links = payload.data.map((row) => {
+            const [source, target] = row.label.split("|");
+            return { source, target, value: row.value };
+        });
+        const nodeNames = [...new Set(links.flatMap((link) => [link.source, link.target]))];
+        return {
+            ...base,
+            series: [
+                {
+                    type: "sankey",
+                    left: 18,
+                    right: 82,
+                    top: 18,
+                    bottom: 18,
+                    nodeWidth: 18,
+                    nodeGap: 14,
+                    emphasis: { focus: "adjacency" },
+                    lineStyle: { color: "gradient", curveness: 0.5, opacity: 0.5 },
+                    label: { color: ink },
+                    labelLayout: { hideOverlap: true },
+                    data: nodeNames.map((name) => ({ name })),
+                    links,
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "chord" || payload.kind === "network") {
+        const links = payload.data.map((row) => {
+            const [source, target] = row.label.split("|");
+            return { source, target, value: row.value };
+        });
+        const nodeNames = [...new Set(links.flatMap((link) => [link.source, link.target]))];
+        const totals = new Map(
+            nodeNames.map((name) => [
+                name,
+                links
+                    .filter((link) => link.source === name || link.target === name)
+                    .reduce((sum, link) => sum + link.value, 0),
+            ]),
+        );
+        const circular = payload.kind === "chord";
+        return {
+            ...base,
+            series: [
+                {
+                    type: "graph",
+                    layout: circular ? "circular" : "force",
+                    roam: true,
+                    zoom: circular ? 1 : 1.55,
+                    draggable: !circular,
+                    circular: circular ? { rotateLabel: true } : undefined,
+                    force: circular
+                        ? undefined
+                        : { repulsion: 380, edgeLength: [80, 140], gravity: 0.12 },
+                    emphasis: { focus: "adjacency", lineStyle: { width: 5 } },
+                    label: { show: true, position: "right", color: ink },
+                    edgeSymbol: circular ? ["none", "arrow"] : ["none", "none"],
+                    edgeSymbolSize: 7,
+                    lineStyle: { curveness: circular ? 0.28 : 0.08, opacity: 0.58 },
+                    data: nodeNames.map((name) => ({
+                        name,
+                        value: totals.get(name),
+                        symbolSize: 22 + Math.sqrt(totals.get(name) ?? 0) * 4,
+                    })),
+                    links: links.map((link) => ({
+                        ...link,
+                        lineStyle: { width: 1 + Math.sqrt(link.value) },
+                    })),
                 },
             ],
         };

@@ -47,6 +47,10 @@ const astroRoutes = new Map([
     ["correlation:Линия и столбцы", "line-and-columns"],
     ["correlation:Связанная диаграмма рассеяния", "connected-scatterplot"],
     ["correlation:Пузырьковая диаграмма", "bubble-chart"],
+    ["flow:Диаграмма Санки", "sankey-diagram"],
+    ["flow:Водопад процесса", "process-waterfall"],
+    ["flow:Хордовая диаграмма", "chord-diagram"],
+    ["flow:Сетевая диаграмма", "network-diagram"],
 ]);
 
 function parseCsv(text) {
