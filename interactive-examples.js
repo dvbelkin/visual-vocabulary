@@ -735,26 +735,77 @@ const interactiveExamples = (() => {
   }
 
   function seismogram(title) {
-    const values = [3,8,5,18,7,42,11,6,95,14,8,31,5,62,9,17,4,78,12,6,26,4,51,8];
+    const values = [
+      7,12,9,18,6,11,15,8,24,10,14,9,
+      17,6,31,8,20,12,16,13,19,22,18,28,
+      15,34,9,14,21,17,26,13,29,48,37,20,
+      25,33,42,54,36,23,39,47,68,58,49,41
+    ];
+    const observations = values.map((value, index) => ({
+      name: `Наблюдение ${index + 1}`,
+      value: [value, index]
+    }));
     return {
       ...base(title),
-      tooltip: { formatter: (p) => `Событие ${p.dataIndex + 1}<br>Величина: ${p.value[1]}` },
-      grid: { left: 54, right: 24, top: 62, bottom: 42 },
-      xAxis: { ...axis, type: "value", min: 0, max: values.length - 1, name: "Время" },
-      yAxis: { ...axis, type: "value", min: 0, max: 2.2, axisLabel: { show: false }, splitLine: { show: false } },
+      tooltip: {
+        formatter: (p) => `Момент ${p.value[1] + 1}<br>Величина: ${p.value[0]}`
+      },
+      grid: { left: 34, right: 34, top: 58, bottom: 34 },
+      xAxis: {
+        type: "value",
+        min: -75,
+        max: 75,
+        axisLine: { show: true, lineStyle: { color: "#90908a" } },
+        axisLabel: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false }
+      },
+      yAxis: {
+        type: "category",
+        inverse: true,
+        data: observations.map((_, index) => index + 1),
+        axisLine: { show: false },
+        axisLabel: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        name: "Время ↓",
+        nameLocation: "start",
+        nameTextStyle: { color: "#3f3f3b", padding: [0, 0, 6, 0] }
+      },
       series: [{
+        name: "Величина",
         type: "custom",
-        data: values.map((v, i) => [i, Math.log10(v + 1), v]),
+        data: observations,
         renderItem: (params, api) => {
-          const basePoint = api.coord([api.value(0), 0]);
-          const topPoint = api.coord([api.value(0), api.value(1)]);
+          const magnitude = api.value(0);
+          const row = api.value(1);
+          const left = api.coord([-magnitude, row]);
+          const right = api.coord([magnitude, row]);
+          const centerY = left[1];
+          const height = Math.max(2, Math.min(5, api.size([0, 1])[1] * 0.62));
           return {
-            type: "group",
-            children: [
-              { type: "line", shape: { x1: basePoint[0], y1: basePoint[1], x2: topPoint[0], y2: topPoint[1] }, style: { stroke: palette[0], lineWidth: 3 } },
-              { type: "circle", shape: { cx: topPoint[0], cy: topPoint[1], r: 4 }, style: { fill: palette[1] } }
-            ]
+            type: "rect",
+            shape: {
+              x: left[0],
+              y: centerY - height / 2,
+              width: right[0] - left[0],
+              height
+            },
+            style: api.style({ fill: palette[2], opacity: 0.82 }),
+            emphasis: {
+              style: { fill: palette[1], opacity: 1 }
+            }
           };
+        }
+      }],
+      graphic: [{
+        type: "text",
+        right: 20,
+        bottom: 10,
+        style: {
+          text: "Длина полосы = величина",
+          fill: "#626762",
+          font: "11px Inter, sans-serif"
         }
       }]
     };
