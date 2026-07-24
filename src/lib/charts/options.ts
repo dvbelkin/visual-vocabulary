@@ -34,21 +34,24 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         },
         tooltip: {
             trigger:
-                payload.kind === "pie" || payload.kind === "scatter" || payload.kind === "radar"
+                payload.kind === "pie" ||
+                payload.kind === "donut" ||
+                payload.kind === "scatter" ||
+                payload.kind === "radar"
                     ? "item"
                     : "axis",
             confine: true,
         },
     };
 
-    if (payload.kind === "pie") {
+    if (payload.kind === "pie" || payload.kind === "donut") {
         return {
             ...base,
             legend: { bottom: 0, textStyle: { color: muted } },
             series: [
                 {
                     type: "pie",
-                    radius: ["42%", "70%"],
+                    radius: payload.kind === "donut" ? ["42%", "70%"] : ["0%", "70%"],
                     center: ["50%", "44%"],
                     label: { formatter: "{b}\n{d}%" },
                     data: payload.data.map(({ label, value }) => ({ name: label, value })),
@@ -709,6 +712,158 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     symbolSize: [3, 110],
                     data: payload.data.map((row) => [row.value, 0]),
                     itemStyle: { color: green, opacity: 0.72 },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "stacked-bar" || payload.kind === "normalized-stacked") {
+        const normalized = payload.kind === "normalized-stacked";
+        const names =
+            payload.locale === "ru"
+                ? normalized
+                    ? ["Согласны", "Нейтральны", "Не согласны"]
+                    : ["Персонал", "Инфраструктура", "Программы"]
+                : normalized
+                  ? ["Agree", "Neutral", "Disagree"]
+                  : ["Staff", "Facilities", "Programmes"];
+        const values = [
+            payload.data.map((row) => row.value),
+            payload.data.map((row) => row.value2 ?? 0),
+            payload.data.map((row) => row.value3 ?? 0),
+        ];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: normalized ? 108 : 58, right: 30, top: 52, bottom: 48 },
+            xAxis: normalized
+                ? {
+                      type: "value",
+                      min: 0,
+                      max: 100,
+                      axisLabel: { formatter: "{value}%" },
+                      splitLine: { lineStyle: { color: gridLine } },
+                  }
+                : {
+                      type: "category",
+                      data: payload.data.map((row) => row.label),
+                  },
+            yAxis: normalized
+                ? {
+                      type: "category",
+                      inverse: true,
+                      data: payload.data.map((row) => row.label),
+                  }
+                : {
+                      type: "value",
+                      name: payload.unit,
+                      splitLine: { lineStyle: { color: gridLine } },
+                  },
+            series: names.map((name, index) => ({
+                name,
+                type: "bar",
+                stack: "total",
+                data: values[index],
+                label: normalized
+                    ? {
+                          show: true,
+                          formatter: ({ value }: { value: number }) =>
+                              value >= 15 ? `${value}%` : "",
+                      }
+                    : undefined,
+            })),
+        };
+    }
+
+    if (payload.kind === "treemap") {
+        return {
+            ...base,
+            tooltip: {
+                formatter: ({ name, value }: { name: string; value: number }) =>
+                    `${name}: ${value} ${payload.unit}`,
+            },
+            series: [
+                {
+                    type: "treemap",
+                    roam: false,
+                    breadcrumb: { show: false },
+                    nodeClick: false,
+                    label: { show: true, formatter: "{b}\n{c}", lineHeight: 18 },
+                    upperLabel: { show: false },
+                    itemStyle: {
+                        borderColor: "#fbfcfa",
+                        borderWidth: 3,
+                        gapWidth: 2,
+                    },
+                    data: payload.data.map((row) => ({
+                        name: row.label,
+                        value: row.value,
+                    })),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "waterfall") {
+        const changes = payload.data.slice(0, -1);
+        const total = payload.data.at(-1);
+        let running = 0;
+        const bases = changes.map((row, index) => {
+            if (index === 0) {
+                running = row.value;
+                return 0;
+            }
+            const baseValue = row.value >= 0 ? running : running + row.value;
+            running += row.value;
+            return baseValue;
+        });
+        return {
+            ...base,
+            grid: { left: 58, right: 28, top: 28, bottom: 58 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisLabel: { interval: 0 },
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    name: "base",
+                    type: "bar",
+                    stack: "waterfall",
+                    data: [...bases, 0],
+                    itemStyle: { color: "transparent", opacity: 0 },
+                    emphasis: { disabled: true },
+                    silent: true,
+                },
+                {
+                    name: payload.locale === "ru" ? "Изменение" : "Change",
+                    type: "bar",
+                    stack: "waterfall",
+                    data: [
+                        ...changes.map((row, index) => ({
+                            value: Math.abs(row.value),
+                            raw: row.value,
+                            itemStyle: {
+                                color: index === 0 ? green : row.value >= 0 ? "#2f6fb0" : orange,
+                            },
+                        })),
+                        {
+                            value: total?.value ?? running,
+                            raw: total?.value ?? running,
+                            itemStyle: { color: green },
+                        },
+                    ],
+                    label: {
+                        show: true,
+                        position: "top",
+                        formatter: ({ data }: { data: { raw: number } }) =>
+                            `${data.raw > 0 ? "+" : ""}${data.raw}`,
+                    },
                 },
             ],
         };
