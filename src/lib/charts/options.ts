@@ -321,6 +321,209 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "timeline-bar") {
+        return {
+            ...base,
+            grid: { left: 56, right: 28, top: 28, bottom: 52 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisTick: { alignWithLabel: true },
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "bar",
+                    data: payload.data.map((row) => row.value),
+                    barMaxWidth: 42,
+                    itemStyle: { color: green },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "combo") {
+        const names =
+            payload.locale === "ru"
+                ? ["Заявки", "Доля одобрения"]
+                : ["Applications", "Approval rate"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 58, right: 58, top: 52, bottom: 48 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: [
+                {
+                    type: "value",
+                    name: payload.locale === "ru" ? "Заявки" : "Applications",
+                    splitLine: { lineStyle: { color: gridLine } },
+                },
+                {
+                    type: "value",
+                    name: "%",
+                    min: 0,
+                    max: 100,
+                    splitLine: { show: false },
+                },
+            ],
+            series: [
+                {
+                    name: names[0],
+                    type: "bar",
+                    data: payload.data.map((row) => row.value),
+                    barMaxWidth: 42,
+                },
+                {
+                    name: names[1],
+                    type: "line",
+                    yAxisIndex: 1,
+                    data: payload.data.map((row) => row.value2),
+                    symbolSize: 9,
+                    lineStyle: { width: 3 },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "slope") {
+        return {
+            ...base,
+            legend: { bottom: 0 },
+            grid: { left: 58, right: 100, top: 28, bottom: 58 },
+            xAxis: {
+                type: "category",
+                data: ["2022", "2026"],
+                boundaryGap: false,
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                min: 40,
+                max: 90,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: payload.data.map((row) => ({
+                name: row.label,
+                type: "line",
+                data: [row.value, row.value2],
+                symbolSize: 10,
+                lineStyle: { width: 3 },
+                label: {
+                    show: true,
+                    position: "right",
+                    formatter: ({ dataIndex }: { dataIndex: number }) =>
+                        dataIndex === 1 ? row.label : "",
+                },
+                emphasis: { focus: "series" },
+            })),
+        };
+    }
+
+    if (payload.kind === "stacked-area") {
+        const names = payload.locale === "ru" ? ["Солнце", "Ветер"] : ["Solar", "Wind"];
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 56, right: 28, top: 52, bottom: 46 },
+            xAxis: {
+                type: "category",
+                boundaryGap: false,
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    name: names[0],
+                    type: "line",
+                    stack: "total",
+                    symbol: "none",
+                    lineStyle: { width: 2 },
+                    areaStyle: { opacity: 0.7 },
+                    data: payload.data.map((row) => row.value),
+                },
+                {
+                    name: names[1],
+                    type: "line",
+                    stack: "total",
+                    symbol: "none",
+                    lineStyle: { width: 2 },
+                    areaStyle: { opacity: 0.62 },
+                    data: payload.data.map((row) => row.value2),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "calendar") {
+        return {
+            ...base,
+            tooltip: {
+                formatter: ({ value }: { value: [string, number] }) =>
+                    `${value[0]}<br>${value[1]} ${payload.unit}`,
+            },
+            visualMap: {
+                min: Math.min(...payload.data.map((row) => row.value)),
+                max: Math.max(...payload.data.map((row) => row.value)),
+                calculable: true,
+                orient: "horizontal",
+                left: "center",
+                bottom: 0,
+                inRange: { color: ["#e8f2ec", green] },
+            },
+            calendar: {
+                top: 48,
+                left: 40,
+                right: 24,
+                cellSize: ["auto", 24],
+                range: ["2026-01-01", "2026-03-31"],
+                itemStyle: { borderColor: "#fbfcfa", borderWidth: 3 },
+                yearLabel: { show: false },
+                dayLabel: {
+                    firstDay: 1,
+                    nameMap:
+                        payload.locale === "ru" ? ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"] : "EN",
+                },
+                monthLabel: {
+                    nameMap:
+                        payload.locale === "ru"
+                            ? [
+                                  "Янв",
+                                  "Фев",
+                                  "Мар",
+                                  "Апр",
+                                  "Май",
+                                  "Июн",
+                                  "Июл",
+                                  "Авг",
+                                  "Сен",
+                                  "Окт",
+                                  "Ноя",
+                                  "Дек",
+                              ]
+                            : "EN",
+                },
+            },
+            series: [
+                {
+                    type: "heatmap",
+                    coordinateSystem: "calendar",
+                    data: payload.data.map((row) => [row.label, row.value]),
+                },
+            ],
+        };
+    }
+
     if (payload.kind === "heatmap") {
         const pairs = payload.data.map((row) => row.label.split("|"));
         const x = [...new Set(pairs.map(([day]) => day))];

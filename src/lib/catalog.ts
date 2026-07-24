@@ -23,7 +23,12 @@ export type ChartKind =
     | "lollipop"
     | "rank-change"
     | "bullet"
-    | "radar";
+    | "radar"
+    | "timeline-bar"
+    | "combo"
+    | "slope"
+    | "stacked-area"
+    | "calendar";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -399,6 +404,151 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Гибкость", en: "Flexibility" }, value: 71, value2: 84 },
             { label: { ru: "Надёжность", en: "Reliability" }, value: 90, value2: 78 },
         ],
+    },
+    {
+        id: "timeline-columns",
+        category: "change-time",
+        kind: "timeline-bar",
+        title: { ru: "Столбцы по времени", en: "Columns over time" },
+        description: {
+            ru: "Отдельные столбцы показывают величину последовательных дискретных периодов.",
+            en: "Separate columns show the magnitude of consecutive discrete periods.",
+        },
+        useWhen: {
+            ru: "Данные собраны по регулярным периодам, а отдельные значения важны не меньше тренда.",
+            en: "Data uses regular periods and individual values matter as much as the trend.",
+        },
+        avoidWhen: {
+            ru: "Наблюдений очень много или интервалы между ними нерегулярны.",
+            en: "There are many observations or intervals between them are irregular.",
+        },
+        unit: { ru: "тыс. поездок", en: "thousand trips" },
+        data: [
+            { label: { ru: "Янв", en: "Jan" }, value: 42 },
+            { label: { ru: "Фев", en: "Feb" }, value: 46 },
+            { label: { ru: "Мар", en: "Mar" }, value: 58 },
+            { label: { ru: "Апр", en: "Apr" }, value: 64 },
+            { label: { ru: "Май", en: "May" }, value: 71 },
+            { label: { ru: "Июн", en: "Jun" }, value: 69 },
+            { label: { ru: "Июл", en: "Jul" }, value: 78 },
+            { label: { ru: "Авг", en: "Aug" }, value: 74 },
+        ],
+    },
+    {
+        id: "column-line-timeline",
+        category: "change-time",
+        kind: "combo",
+        title: { ru: "Столбцы и линия по времени", en: "Columns and line over time" },
+        description: {
+            ru: "Столбцы показывают объём, а линия — связанный относительный показатель.",
+            en: "Columns show volume while a line tracks a related rate.",
+        },
+        useWhen: {
+            ru: "Нужно сопоставить абсолютный объём с показателем другой размерности по тем же периодам.",
+            en: "You need to compare an absolute volume with a rate across the same periods.",
+        },
+        avoidWhen: {
+            ru: "Две шкалы создают ложное впечатление связи или показатели можно привести к одной шкале.",
+            en: "Two axes would imply a misleading relationship or measures can share one scale.",
+        },
+        unit: { ru: "заявки и %", en: "applications and %" },
+        valueLabels: {
+            primary: { ru: "Заявки", en: "Applications" },
+            secondary: { ru: "Доля одобрения, %", en: "Approval rate, %" },
+        },
+        data: [
+            { label: { ru: "Янв", en: "Jan" }, value: 420, value2: 54 },
+            { label: { ru: "Фев", en: "Feb" }, value: 460, value2: 57 },
+            { label: { ru: "Мар", en: "Mar" }, value: 510, value2: 55 },
+            { label: { ru: "Апр", en: "Apr" }, value: 580, value2: 61 },
+            { label: { ru: "Май", en: "May" }, value: 620, value2: 64 },
+            { label: { ru: "Июн", en: "Jun" }, value: 590, value2: 68 },
+        ],
+    },
+    {
+        id: "slope-timeline",
+        category: "change-time",
+        kind: "slope",
+        title: { ru: "График наклона", en: "Slope chart" },
+        description: {
+            ru: "Две точки и соединяющая линия подчёркивают направление и величину изменения.",
+            en: "Two points and a connecting line emphasise the direction and size of change.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить значения нескольких объектов ровно в двух моментах.",
+            en: "You need to compare several objects at exactly two moments.",
+        },
+        avoidWhen: {
+            ru: "Промежуточная траектория содержит важные колебания или точек времени больше трёх.",
+            en: "The path between endpoints contains important variation or there are more than three dates.",
+        },
+        unit: { ru: "% выпускников", en: "% of graduates" },
+        valueLabels: {
+            primary: { ru: "2022", en: "2022" },
+            secondary: { ru: "2026", en: "2026" },
+        },
+        data: [
+            { label: { ru: "Инженерия", en: "Engineering" }, value: 62, value2: 78 },
+            { label: { ru: "Экономика", en: "Economics" }, value: 71, value2: 68 },
+            { label: { ru: "Дизайн", en: "Design" }, value: 55, value2: 73 },
+            { label: { ru: "Биология", en: "Biology" }, value: 66, value2: 70 },
+        ],
+    },
+    {
+        id: "stacked-area",
+        category: "change-time",
+        kind: "stacked-area",
+        title: { ru: "Диаграмма с областями", en: "Area chart" },
+        description: {
+            ru: "Заполненные области показывают изменение общего объёма и вклад компонентов.",
+            en: "Filled areas show how a total and its components change over time.",
+        },
+        useWhen: {
+            ru: "Важен общий объём во времени, а компонентов немного и они образуют целое.",
+            en: "The changing total matters and a few components form the whole.",
+        },
+        avoidWhen: {
+            ru: "Нужно точно сравнить внутренние компоненты, не лежащие на общей базовой линии.",
+            en: "Readers need precise comparison of internal components without a shared baseline.",
+        },
+        unit: { ru: "ГВт·ч", en: "GWh" },
+        valueLabels: {
+            primary: { ru: "Солнце", en: "Solar" },
+            secondary: { ru: "Ветер", en: "Wind" },
+        },
+        data: [
+            { label: { ru: "Янв", en: "Jan" }, value: 18, value2: 34 },
+            { label: { ru: "Фев", en: "Feb" }, value: 24, value2: 31 },
+            { label: { ru: "Мар", en: "Mar" }, value: 35, value2: 29 },
+            { label: { ru: "Апр", en: "Apr" }, value: 48, value2: 27 },
+            { label: { ru: "Май", en: "May" }, value: 59, value2: 24 },
+            { label: { ru: "Июн", en: "Jun" }, value: 66, value2: 22 },
+        ],
+    },
+    {
+        id: "calendar-heatmap",
+        category: "change-time",
+        kind: "calendar",
+        title: { ru: "Календарная тепловая карта", en: "Calendar heatmap" },
+        description: {
+            ru: "Каждый день занимает знакомое место в календаре, а цвет кодирует интенсивность.",
+            en: "Each day occupies a familiar calendar position while colour encodes intensity.",
+        },
+        useWhen: {
+            ru: "Нужно найти недельные, сезонные циклы и необычные дни в ежедневном ряду.",
+            en: "You need to find weekly or seasonal cycles and unusual days in daily data.",
+        },
+        avoidWhen: {
+            ru: "Точная динамика и последовательность значений важнее календарного рисунка.",
+            en: "Exact trend and sequential comparison matter more than the calendar pattern.",
+        },
+        unit: { ru: "посещений в день", en: "visits per day" },
+        data: Array.from({ length: 90 }, (_, index) => {
+            const date = new Date(Date.UTC(2026, 0, index + 1));
+            const iso = date.toISOString().slice(0, 10);
+            const value = Math.round(28 + 24 * Math.abs(Math.sin(index / 8)) + (index % 7) * 3);
+            return { label: { ru: iso, en: iso }, value };
+        }),
     },
 ];
 
