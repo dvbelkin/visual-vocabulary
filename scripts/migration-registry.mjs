@@ -124,7 +124,7 @@ function legacyStatuses(markdown) {
     const statuses = new Map();
     const content = markdown.slice(markdown.indexOf("## "));
 
-    for (const match of content.matchAll(/^- ([✅🔎⬜]) (.+)$/gm)) {
+    for (const match of content.matchAll(/^- ([✅🔎⬜]) (.+)$/gmu)) {
         const [, marker, name] = match;
         statuses.set(
             name.trim(),
