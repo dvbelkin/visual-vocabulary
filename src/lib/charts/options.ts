@@ -719,6 +719,107 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "grouped-column") {
+        return {
+            ...base,
+            legend: { top: 0 },
+            grid: { left: 58, right: 28, top: 52, bottom: 48 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisTick: { alignWithLabel: true },
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                min: 0,
+                max: 100,
+                axisLabel: { formatter: "{value}%" },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    name: "2024",
+                    type: "bar",
+                    data: payload.data.map((row) => row.value),
+                    barMaxWidth: 34,
+                },
+                {
+                    name: "2025",
+                    type: "bar",
+                    data: payload.data.map((row) => row.value2 ?? 0),
+                    barMaxWidth: 34,
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "pictogram") {
+        const maximum = Math.max(...payload.data.map((row) => row.value));
+        return {
+            ...base,
+            grid: { left: 114, right: 34, top: 28, bottom: 42 },
+            xAxis: {
+                type: "value",
+                max: maximum,
+                interval: 1,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    type: "pictorialBar",
+                    symbol: "circle",
+                    symbolRepeat: true,
+                    symbolSize: 15,
+                    symbolMargin: 4,
+                    symbolClip: true,
+                    data: payload.data.map((row) => row.value),
+                    itemStyle: { color: green },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "parallel") {
+        const axisNames =
+            payload.locale === "ru"
+                ? ["Транспорт", "Зелень", "Услуги", "Жильё", "Культура"]
+                : ["Transport", "Green space", "Services", "Housing", "Culture"];
+        return {
+            ...base,
+            parallel: {
+                left: 64,
+                right: 52,
+                top: 42,
+                bottom: 42,
+                parallelAxisDefault: {
+                    type: "value",
+                    min: 0,
+                    max: 100,
+                    nameLocation: "end",
+                    nameGap: 14,
+                },
+            },
+            parallelAxis: axisNames.map((name, dim) => ({ dim, name })),
+            series: payload.data.map((row, index) => ({
+                name: row.label,
+                type: "parallel",
+                data: [row.values ?? []],
+                lineStyle: {
+                    width: 3,
+                    opacity: 0.72,
+                    color: [green, orange, "#2f6fb0", "#8f5ca6"][index],
+                },
+                emphasis: { lineStyle: { width: 6, opacity: 1 } },
+            })),
+        };
+    }
+
     if (payload.kind === "lollipop") {
         return {
             ...base,

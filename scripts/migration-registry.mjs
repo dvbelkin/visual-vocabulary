@@ -51,6 +51,15 @@ const astroRoutes = new Map([
     ["flow:Водопад процесса", "process-waterfall"],
     ["flow:Хордовая диаграмма", "chord-diagram"],
     ["flow:Сетевая диаграмма", "network-diagram"],
+    ["magnitude:Вертикальные столбцы", "magnitude-columns"],
+    ["magnitude:Горизонтальные столбцы", "magnitude-bars"],
+    ["magnitude:Сгруппированные вертикальные столбцы", "grouped-vertical-columns"],
+    ["magnitude:Состав и величина", "composition-and-magnitude"],
+    ["magnitude:Пропорциональные символы", "magnitude-proportional-symbols"],
+    ["magnitude:Пиктограмма", "pictogram"],
+    ["magnitude:Горизонтальный лоллипоп", "magnitude-horizontal-lollipop"],
+    ["magnitude:Вертикальный лоллипоп", "magnitude-vertical-lollipop"],
+    ["magnitude:Параллельные координаты", "parallel-coordinates"],
 ]);
 
 function parseCsv(text) {

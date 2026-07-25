@@ -55,7 +55,10 @@ export type ChartKind =
     | "sankey"
     | "process-waterfall"
     | "chord"
-    | "network";
+    | "network"
+    | "grouped-column"
+    | "pictogram"
+    | "parallel";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1374,6 +1377,249 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Команда Б|Данные", en: "Team B|Data" }, value: 5 },
             { label: { ru: "Лаборатория|Данные", en: "Lab|Data" }, value: 7 },
             { label: { ru: "Дизайн|Данные", en: "Design|Data" }, value: 4 },
+        ],
+    },
+    {
+        id: "magnitude-columns",
+        category: "magnitude",
+        kind: "vertical-bar",
+        title: { ru: "Вертикальные столбцы", en: "Vertical bars" },
+        description: {
+            ru: "Общая нулевая линия помогает точно сравнить величины нескольких категорий.",
+            en: "A shared zero baseline supports accurate comparison across categories.",
+        },
+        useWhen: {
+            ru: "Категорий немного, подписи короткие и важна величина различий.",
+            en: "There are few categories, labels are short, and difference magnitude matters.",
+        },
+        avoidWhen: {
+            ru: "Категорий много или их названия не помещаются по горизонтали.",
+            en: "There are many categories or their labels do not fit horizontally.",
+        },
+        unit: { ru: "тыс. книг", en: "thousand books" },
+        data: [
+            { label: { ru: "История", en: "History" }, value: 48 },
+            { label: { ru: "Наука", en: "Science" }, value: 71 },
+            { label: { ru: "Искусство", en: "Arts" }, value: 39 },
+            { label: { ru: "Общество", en: "Society" }, value: 57 },
+            { label: { ru: "Техника", en: "Technology" }, value: 64 },
+        ],
+    },
+    {
+        id: "magnitude-bars",
+        category: "magnitude",
+        kind: "bar",
+        title: { ru: "Горизонтальные столбцы", en: "Horizontal bars" },
+        description: {
+            ru: "Горизонтальная компоновка оставляет место для длинных названий категорий.",
+            en: "A horizontal layout leaves room for long category names.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить величины категорий с длинными подписями.",
+            en: "You need to compare categories with long labels.",
+        },
+        avoidWhen: {
+            ru: "Категории образуют временную последовательность.",
+            en: "The categories form a time sequence.",
+        },
+        unit: { ru: "посещений в месяц", en: "visits per month" },
+        data: [
+            {
+                label: { ru: "Центр современной культуры", en: "Contemporary culture centre" },
+                value: 8200,
+            },
+            { label: { ru: "Музей городской истории", en: "City history museum" }, value: 6900 },
+            { label: { ru: "Научная библиотека", en: "Science library" }, value: 11300 },
+            { label: { ru: "Молодёжный театр", en: "Youth theatre" }, value: 5400 },
+        ],
+    },
+    {
+        id: "grouped-vertical-columns",
+        category: "magnitude",
+        kind: "grouped-column",
+        title: { ru: "Сгруппированные вертикальные столбцы", en: "Grouped vertical bars" },
+        description: {
+            ru: "Соседние столбцы сравнивают две связанные величины внутри каждой категории.",
+            en: "Adjacent bars compare two related measures within each category.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить небольшое число серий в одних и тех же категориях.",
+            en: "You need to compare a small number of series across shared categories.",
+        },
+        avoidWhen: {
+            ru: "Серий больше трёх или важнее суммарный состав.",
+            en: "There are more than three series or total composition matters more.",
+        },
+        unit: { ru: "% выпускников", en: "% of graduates" },
+        valueLabels: {
+            primary: { ru: "2024", en: "2024" },
+            secondary: { ru: "2025", en: "2025" },
+        },
+        data: [
+            { label: { ru: "Инженерия", en: "Engineering" }, value: 78, value2: 84 },
+            { label: { ru: "Экономика", en: "Economics" }, value: 72, value2: 75 },
+            { label: { ru: "Педагогика", en: "Education" }, value: 81, value2: 86 },
+            { label: { ru: "Дизайн", en: "Design" }, value: 68, value2: 74 },
+        ],
+    },
+    {
+        id: "composition-and-magnitude",
+        category: "magnitude",
+        kind: "stacked-bar",
+        title: { ru: "Состав и величина", en: "Composition and magnitude" },
+        description: {
+            ru: "Общая длина показывает итог, а сегменты — вклад компонентов.",
+            en: "Total bar length shows magnitude while segments show component contributions.",
+        },
+        useWhen: {
+            ru: "Нужно одновременно сравнить итоги и их несложный состав.",
+            en: "You need to compare totals and their simple composition at once.",
+        },
+        avoidWhen: {
+            ru: "Нужно точно сравнить каждый внутренний сегмент между категориями.",
+            en: "Every internal segment must be compared precisely across categories.",
+        },
+        unit: { ru: "ГВт·ч", en: "GWh" },
+        valueLabels: {
+            primary: { ru: "Солнце", en: "Solar" },
+            secondary: { ru: "Ветер", en: "Wind" },
+            tertiary: { ru: "Гидро", en: "Hydro" },
+        },
+        data: [
+            { label: { ru: "Север", en: "North" }, value: 18, value2: 42, value3: 26 },
+            { label: { ru: "Центр", en: "Central" }, value: 35, value2: 24, value3: 12 },
+            { label: { ru: "Юг", en: "South" }, value: 54, value2: 19, value3: 8 },
+            { label: { ru: "Восток", en: "East" }, value: 22, value2: 31, value3: 37 },
+        ],
+    },
+    {
+        id: "magnitude-proportional-symbols",
+        category: "magnitude",
+        kind: "proportional-symbols",
+        title: { ru: "Пропорциональные символы", en: "Proportional symbols" },
+        description: {
+            ru: "Площадь круга кодирует величину, позволяя компактно показать большой диапазон.",
+            en: "Circle area encodes magnitude, compactly displaying a wide range.",
+        },
+        useWhen: {
+            ru: "Нужен обзор сильных различий, а точное считывание вторично.",
+            en: "You need an overview of large differences and exact reading is secondary.",
+        },
+        avoidWhen: {
+            ru: "Значения близки: длину столбцов сравнивать точнее, чем площадь.",
+            en: "Values are similar; bar length is easier to compare than area.",
+        },
+        unit: { ru: "тыс. м²", en: "thousand m²" },
+        data: [
+            { label: { ru: "Главный парк", en: "Central Park" }, value: 92 },
+            { label: { ru: "Речной сквер", en: "Riverside Garden" }, value: 38 },
+            { label: { ru: "Лесной массив", en: "Urban Forest" }, value: 146 },
+            { label: { ru: "Сад искусств", en: "Arts Garden" }, value: 24 },
+            { label: { ru: "Спортивный парк", en: "Sports Park" }, value: 61 },
+        ],
+    },
+    {
+        id: "pictogram",
+        category: "magnitude",
+        kind: "pictogram",
+        title: { ru: "Пиктограмма", en: "Pictogram" },
+        description: {
+            ru: "Повторяющиеся символы превращают небольшие целые значения в наглядный счёт.",
+            en: "Repeated symbols turn small whole-number values into a visible count.",
+        },
+        useWhen: {
+            ru: "Значения небольшие, целые и важна дружелюбная учебная подача.",
+            en: "Values are small whole numbers and an approachable presentation is useful.",
+        },
+        avoidWhen: {
+            ru: "Нужна высокая точность, есть дроби или значения очень велики.",
+            en: "High precision is needed, values include fractions, or counts are very large.",
+        },
+        unit: { ru: "десятков деревьев", en: "tens of trees" },
+        data: [
+            { label: { ru: "Школьные дворы", en: "School grounds" }, value: 8 },
+            { label: { ru: "Улицы", en: "Streets" }, value: 12 },
+            { label: { ru: "Скверы", en: "Pocket parks" }, value: 6 },
+            { label: { ru: "Набережная", en: "Waterfront" }, value: 10 },
+        ],
+    },
+    {
+        id: "magnitude-horizontal-lollipop",
+        category: "magnitude",
+        kind: "lollipop",
+        title: { ru: "Горизонтальный лоллипоп", en: "Horizontal lollipop" },
+        description: {
+            ru: "Тонкая линия и точка облегчают сравнение при менее тяжёлом визуальном весе.",
+            en: "A thin stem and dot support comparison with less visual weight than bars.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить несколько положительных величин в лёгкой композиции.",
+            en: "You need to compare several positive values in a light composition.",
+        },
+        avoidWhen: {
+            ru: "Важно подчеркнуть объём или значения начинаются не от нуля.",
+            en: "Volume should be emphasised or values do not start from zero.",
+        },
+        unit: { ru: "минут", en: "minutes" },
+        data: [
+            { label: { ru: "Автобус", en: "Bus" }, value: 34 },
+            { label: { ru: "Трамвай", en: "Tram" }, value: 28 },
+            { label: { ru: "Велосипед", en: "Bicycle" }, value: 22 },
+            { label: { ru: "Пешком", en: "Walking" }, value: 46 },
+        ],
+    },
+    {
+        id: "magnitude-vertical-lollipop",
+        category: "magnitude",
+        kind: "vertical-lollipop",
+        title: { ru: "Вертикальный лоллипоп", en: "Vertical lollipop" },
+        description: {
+            ru: "Вертикальные стебли и точки показывают величины короткого ряда категорий.",
+            en: "Vertical stems and dots show values for a short set of categories.",
+        },
+        useWhen: {
+            ru: "Категорий мало, подписи короткие и хочется уменьшить массу столбцов.",
+            en: "There are few categories, labels are short, and bars feel too heavy.",
+        },
+        avoidWhen: {
+            ru: "Категорий много или названия длинные.",
+            en: "There are many categories or labels are long.",
+        },
+        unit: { ru: "кг отходов на человека", en: "kg waste per person" },
+        data: [
+            { label: { ru: "Бумага", en: "Paper" }, value: 18 },
+            { label: { ru: "Стекло", en: "Glass" }, value: 11 },
+            { label: { ru: "Пластик", en: "Plastic" }, value: 23 },
+            { label: { ru: "Металл", en: "Metal" }, value: 7 },
+            { label: { ru: "Органика", en: "Organic" }, value: 31 },
+        ],
+    },
+    {
+        id: "parallel-coordinates",
+        category: "magnitude",
+        kind: "parallel",
+        title: { ru: "Параллельные координаты", en: "Parallel coordinates" },
+        description: {
+            ru: "Каждая линия объединяет несколько показателей одного наблюдения на параллельных осях.",
+            en: "Each line connects several measures for one observation across parallel axes.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить многомерные профили небольшого числа объектов.",
+            en: "You need to compare multivariate profiles for a small number of observations.",
+        },
+        avoidWhen: {
+            ru: "Линий слишком много или порядок и масштабы осей не объяснены.",
+            en: "There are too many lines or axis order and scales are unexplained.",
+        },
+        unit: { ru: "индексы 0–100", en: "indices 0–100" },
+        valueLabels: {
+            primary: { ru: "Средний индекс", en: "Average index" },
+        },
+        data: [
+            { label: { ru: "Район А", en: "District A" }, value: 70, values: [82, 61, 74, 68, 65] },
+            { label: { ru: "Район Б", en: "District B" }, value: 64, values: [59, 78, 66, 71, 46] },
+            { label: { ru: "Район В", en: "District C" }, value: 76, values: [74, 69, 88, 57, 91] },
+            { label: { ru: "Район Г", en: "District D" }, value: 58, values: [67, 52, 49, 84, 38] },
         ],
     },
 ];
