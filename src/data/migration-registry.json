@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 53,
+  "astroReadyCount": 59,
   "entries": [
     {
       "id": "bar-diverging",
@@ -161,8 +161,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "candlestick-chart"
     },
     {
       "id": "slope-timeline",
@@ -197,8 +197,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "fan-chart"
     },
     {
       "id": "scatterplot-line-timeline",
@@ -209,8 +209,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "connected-scatter-timeline"
     },
     {
       "id": "calendar-heatmap",
@@ -233,8 +233,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "priestley-timeline"
     },
     {
       "id": "circle-timeline",
@@ -245,8 +245,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "circles-on-timeline"
     },
     {
       "id": "seismogram",
@@ -257,8 +257,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "seismogram"
     },
     {
       "id": "bar-ordered",

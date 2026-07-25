@@ -58,7 +58,13 @@ export type ChartKind =
     | "network"
     | "grouped-column"
     | "pictogram"
-    | "parallel";
+    | "parallel"
+    | "candlestick"
+    | "fan"
+    | "timeline-connected"
+    | "priestley"
+    | "circle-timeline"
+    | "seismogram";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1620,6 +1626,185 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Район Б", en: "District B" }, value: 64, values: [59, 78, 66, 71, 46] },
             { label: { ru: "Район В", en: "District C" }, value: 76, values: [74, 69, 88, 57, 91] },
             { label: { ru: "Район Г", en: "District D" }, value: 58, values: [67, 52, 49, 84, 38] },
+        ],
+    },
+    {
+        id: "candlestick-chart",
+        category: "change-time",
+        kind: "candlestick",
+        title: { ru: "Биржевые свечи", en: "Candlestick chart" },
+        description: {
+            ru: "Тело и тени свечи показывают открытие, закрытие, минимум и максимум периода.",
+            en: "The candle body and wicks show each period's open, close, low, and high.",
+        },
+        useWhen: {
+            ru: "Нужно компактно показать четыре согласованных значения финансового ряда.",
+            en: "You need to compactly show four related values in a financial time series.",
+        },
+        avoidWhen: {
+            ru: "У ряда есть только одно значение на период или аудитория не знает соглашений свечей.",
+            en: "There is only one value per period or readers do not know candlestick conventions.",
+        },
+        unit: { ru: "условных единиц", en: "index points" },
+        valueLabels: { primary: { ru: "Закрытие", en: "Close" } },
+        data: [
+            { label: { ru: "Пн", en: "Mon" }, value: 104, values: [100, 104, 97, 107] },
+            { label: { ru: "Вт", en: "Tue" }, value: 101, values: [104, 101, 99, 108] },
+            { label: { ru: "Ср", en: "Wed" }, value: 109, values: [101, 109, 100, 112] },
+            { label: { ru: "Чт", en: "Thu" }, value: 115, values: [109, 115, 106, 118] },
+            { label: { ru: "Пт", en: "Fri" }, value: 112, values: [115, 112, 110, 120] },
+            { label: { ru: "Сб", en: "Sat" }, value: 118, values: [112, 118, 111, 121] },
+        ],
+    },
+    {
+        id: "fan-chart",
+        category: "change-time",
+        kind: "fan",
+        title: { ru: "Веерная диаграмма", en: "Fan chart" },
+        description: {
+            ru: "Центральная линия показывает прогноз, а расширяющиеся полосы — диапазоны неопределённости.",
+            en: "A central line shows the forecast while widening bands show uncertainty ranges.",
+        },
+        useWhen: {
+            ru: "Нужно честно показать прогноз вместе с растущей неопределённостью.",
+            en: "You need to communicate a forecast together with increasing uncertainty.",
+        },
+        avoidWhen: {
+            ru: "Диапазоны не основаны на определённой вероятностной модели.",
+            en: "The ranges are not based on a defined probabilistic model.",
+        },
+        unit: { ru: "индекс спроса", en: "demand index" },
+        valueLabels: {
+            primary: { ru: "Прогноз", en: "Forecast" },
+            secondary: { ru: "Нижняя граница", en: "Lower bound" },
+            tertiary: { ru: "Верхняя граница", en: "Upper bound" },
+        },
+        data: [
+            { label: { ru: "2025", en: "2025" }, value: 100, value2: 100, value3: 100 },
+            { label: { ru: "2026", en: "2026" }, value: 104, value2: 98, value3: 110 },
+            { label: { ru: "2027", en: "2027" }, value: 108, value2: 96, value3: 120 },
+            { label: { ru: "2028", en: "2028" }, value: 111, value2: 92, value3: 130 },
+            { label: { ru: "2029", en: "2029" }, value: 115, value2: 88, value3: 142 },
+            { label: { ru: "2030", en: "2030" }, value: 119, value2: 83, value3: 155 },
+        ],
+    },
+    {
+        id: "connected-scatter-timeline",
+        category: "change-time",
+        kind: "timeline-connected",
+        title: {
+            ru: "Связанная диаграмма рассеяния во времени",
+            en: "Connected scatterplot over time",
+        },
+        description: {
+            ru: "Траектория показывает, как совместно менялись два показателя по периодам.",
+            en: "A trajectory shows how two measures changed together over successive periods.",
+        },
+        useWhen: {
+            ru: "Важны и связь двух показателей, и последовательность движения.",
+            en: "Both the relationship between two measures and the sequence of movement matter.",
+        },
+        avoidWhen: {
+            ru: "Траектория самопересекается слишком часто или периоды нельзя различить.",
+            en: "The trajectory crosses itself too often or periods cannot be distinguished.",
+        },
+        unit: { ru: "индексы мобильности и выбросов", en: "mobility and emissions indices" },
+        valueLabels: {
+            primary: { ru: "Мобильность", en: "Mobility" },
+            secondary: { ru: "Выбросы", en: "Emissions" },
+        },
+        data: [
+            { label: { ru: "2020", en: "2020" }, value: 62, value2: 78 },
+            { label: { ru: "2021", en: "2021" }, value: 55, value2: 66 },
+            { label: { ru: "2022", en: "2022" }, value: 71, value2: 72 },
+            { label: { ru: "2023", en: "2023" }, value: 79, value2: 68 },
+            { label: { ru: "2024", en: "2024" }, value: 86, value2: 61 },
+            { label: { ru: "2025", en: "2025" }, value: 91, value2: 55 },
+        ],
+    },
+    {
+        id: "priestley-timeline",
+        category: "change-time",
+        kind: "priestley",
+        title: { ru: "Временная шкала Пристли", en: "Priestley timeline" },
+        description: {
+            ru: "Горизонтальные интервалы показывают начало, конец и перекрытие событий.",
+            en: "Horizontal intervals show the start, end, and overlap of events.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить длительности небольшого числа процессов на общей шкале.",
+            en: "You need to compare durations of a small number of processes on one scale.",
+        },
+        avoidWhen: {
+            ru: "Событий много или важны сложные зависимости между ними.",
+            en: "There are many events or complex dependencies between them matter.",
+        },
+        unit: { ru: "годы", en: "years" },
+        data: [
+            { label: { ru: "Исследование", en: "Research" }, value: 2018, value2: 2021 },
+            { label: { ru: "Проектирование", en: "Design" }, value: 2020, value2: 2023 },
+            { label: { ru: "Строительство", en: "Construction" }, value: 2022, value2: 2025 },
+            { label: { ru: "Тестирование", en: "Testing" }, value: 2024, value2: 2026 },
+        ],
+    },
+    {
+        id: "circles-on-timeline",
+        category: "change-time",
+        kind: "circle-timeline",
+        title: { ru: "Круги на временной шкале", en: "Circles on a timeline" },
+        description: {
+            ru: "Положение показывает время события, а площадь круга — его величину.",
+            en: "Position shows event time while circle area encodes its magnitude.",
+        },
+        useWhen: {
+            ru: "События дискретны и нужно сопоставить их время и масштаб.",
+            en: "Events are discrete and both their timing and magnitude should be compared.",
+        },
+        avoidWhen: {
+            ru: "События плотные и круги сильно перекрываются.",
+            en: "Events are dense and circles overlap heavily.",
+        },
+        unit: { ru: "участников", en: "participants" },
+        data: [
+            { label: { ru: "Янв", en: "Jan" }, value: 120 },
+            { label: { ru: "Мар", en: "Mar" }, value: 340 },
+            { label: { ru: "Апр", en: "Apr" }, value: 210 },
+            { label: { ru: "Июл", en: "Jul" }, value: 520 },
+            { label: { ru: "Сен", en: "Sep" }, value: 280 },
+            { label: { ru: "Дек", en: "Dec" }, value: 430 },
+        ],
+    },
+    {
+        id: "seismogram",
+        category: "change-time",
+        kind: "seismogram",
+        title: { ru: "Сейсмограмма", en: "Seismogram" },
+        description: {
+            ru: "Плотная линия подчёркивает амплитуду быстрых колебаний вокруг базовой оси.",
+            en: "A dense line emphasises the amplitude of rapid oscillations around a baseline.",
+        },
+        useWhen: {
+            ru: "Нужно показать форму сигнала, всплески и затухание во времени.",
+            en: "You need to show signal shape, spikes, and decay over time.",
+        },
+        avoidWhen: {
+            ru: "Важны отдельные точные значения, а не рисунок сигнала.",
+            en: "Individual exact values matter more than the signal pattern.",
+        },
+        unit: { ru: "мм/с", en: "mm/s" },
+        data: [
+            { label: { ru: "0,0", en: "0.0" }, value: 0 },
+            { label: { ru: "0,1", en: "0.1" }, value: 3 },
+            { label: { ru: "0,2", en: "0.2" }, value: -5 },
+            { label: { ru: "0,3", en: "0.3" }, value: 14 },
+            { label: { ru: "0,4", en: "0.4" }, value: -22 },
+            { label: { ru: "0,5", en: "0.5" }, value: 31 },
+            { label: { ru: "0,6", en: "0.6" }, value: -18 },
+            { label: { ru: "0,7", en: "0.7" }, value: 11 },
+            { label: { ru: "0,8", en: "0.8" }, value: -7 },
+            { label: { ru: "0,9", en: "0.9" }, value: 4 },
+            { label: { ru: "1,0", en: "1.0" }, value: -2 },
+            { label: { ru: "1,1", en: "1.1" }, value: 0 },
         ],
     },
 ];

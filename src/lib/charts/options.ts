@@ -1188,6 +1188,224 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
+    if (payload.kind === "candlestick") {
+        return {
+            ...base,
+            grid: { left: 58, right: 28, top: 28, bottom: 48 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                boundaryGap: true,
+            },
+            yAxis: {
+                type: "value",
+                scale: true,
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "candlestick",
+                    data: payload.data.map((row) => row.values ?? []),
+                    itemStyle: {
+                        color: green,
+                        color0: orange,
+                        borderColor: green,
+                        borderColor0: orange,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "fan") {
+        return {
+            ...base,
+            legend: {
+                top: 0,
+                data: [
+                    payload.locale === "ru" ? "Диапазон" : "Range",
+                    payload.locale === "ru" ? "Прогноз" : "Forecast",
+                ],
+            },
+            grid: { left: 58, right: 28, top: 52, bottom: 46 },
+            xAxis: {
+                type: "category",
+                boundaryGap: false,
+                data: payload.data.map((row) => row.label),
+            },
+            yAxis: {
+                type: "value",
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "line",
+                    stack: "confidence",
+                    symbol: "none",
+                    lineStyle: { opacity: 0 },
+                    areaStyle: { opacity: 0 },
+                    data: payload.data.map((row) => row.value2 ?? 0),
+                    silent: true,
+                },
+                {
+                    name: payload.locale === "ru" ? "Диапазон" : "Range",
+                    type: "line",
+                    stack: "confidence",
+                    symbol: "none",
+                    lineStyle: { opacity: 0 },
+                    areaStyle: { color: "rgba(47, 111, 176, .28)" },
+                    data: payload.data.map((row) => (row.value3 ?? 0) - (row.value2 ?? 0)),
+                },
+                {
+                    name: payload.locale === "ru" ? "Прогноз" : "Forecast",
+                    type: "line",
+                    data: payload.data.map((row) => row.value),
+                    symbolSize: 8,
+                    lineStyle: { width: 3, color: green },
+                    itemStyle: { color: green },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "timeline-connected") {
+        return {
+            ...base,
+            grid: { left: 58, right: 32, top: 28, bottom: 54 },
+            xAxis: {
+                type: "value",
+                name: payload.locale === "ru" ? "Мобильность" : "Mobility",
+                nameLocation: "middle",
+                nameGap: 32,
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "value",
+                name: payload.locale === "ru" ? "Выбросы" : "Emissions",
+                scale: true,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "line",
+                    data: payload.data.map((row) => ({
+                        name: row.label,
+                        value: [row.value, row.value2 ?? 0],
+                    })),
+                    symbolSize: 10,
+                    lineStyle: { width: 3 },
+                    label: { show: true, position: "top", formatter: "{b}" },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "priestley") {
+        const minimum = Math.min(...payload.data.map((row) => row.value));
+        return {
+            ...base,
+            grid: { left: 116, right: 32, top: 28, bottom: 48 },
+            xAxis: {
+                type: "value",
+                min: minimum - 1,
+                max: Math.max(...payload.data.map((row) => row.value2 ?? row.value)) + 1,
+                minInterval: 1,
+                axisLabel: { formatter: (value: number) => String(Math.round(value)) },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: {
+                type: "category",
+                inverse: true,
+                data: payload.data.map((row) => row.label),
+            },
+            series: [
+                {
+                    type: "bar",
+                    stack: "duration",
+                    data: payload.data.map((row) => row.value - (minimum - 1)),
+                    itemStyle: { color: "transparent" },
+                    silent: true,
+                },
+                {
+                    type: "bar",
+                    stack: "duration",
+                    data: payload.data.map((row) => (row.value2 ?? row.value) - row.value),
+                    itemStyle: { color: green, borderRadius: 6 },
+                    label: {
+                        show: true,
+                        position: "inside",
+                        formatter: ({ dataIndex }: { dataIndex: number }) =>
+                            `${payload.data[dataIndex].value}–${payload.data[dataIndex].value2}`,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "circle-timeline") {
+        const maximum = Math.max(...payload.data.map((row) => row.value));
+        return {
+            ...base,
+            grid: { left: 36, right: 36, top: 44, bottom: 54 },
+            xAxis: {
+                type: "category",
+                data: payload.data.map((row) => row.label),
+                axisLine: { lineStyle: { color: ink, width: 2 } },
+            },
+            yAxis: { type: "value", min: -1, max: 1, show: false },
+            series: [
+                {
+                    type: "scatter",
+                    data: payload.data.map((row) => [row.label, 0, row.value]),
+                    symbolSize: (value: [string, number, number]) =>
+                        18 + Math.sqrt(value[2] / maximum) * 58,
+                    label: {
+                        show: true,
+                        position: "top",
+                        formatter: ({ value }: { value: [string, number, number] }) =>
+                            `${value[2]}`,
+                    },
+                    itemStyle: { color: green, opacity: 0.8 },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "seismogram") {
+        const maximum = Math.max(...payload.data.map((row) => Math.abs(row.value)));
+        return {
+            ...base,
+            grid: { left: 58, right: 28, top: 28, bottom: 48 },
+            xAxis: {
+                type: "category",
+                boundaryGap: false,
+                data: payload.data.map((row) => row.label),
+                name: payload.locale === "ru" ? "секунды" : "seconds",
+                nameLocation: "middle",
+                nameGap: 30,
+            },
+            yAxis: {
+                type: "value",
+                min: -maximum,
+                max: maximum,
+                name: payload.unit,
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            series: [
+                {
+                    type: "line",
+                    data: payload.data.map((row) => row.value),
+                    symbol: "none",
+                    lineStyle: { width: 2, color: ink },
+                    areaStyle: { color: "rgba(23, 107, 77, .12)" },
+                },
+            ],
+        };
+    }
+
     if (payload.kind === "population-pyramid") {
         const names = payload.locale === "ru" ? ["Мужчины", "Женщины"] : ["Men", "Women"];
         const max =
