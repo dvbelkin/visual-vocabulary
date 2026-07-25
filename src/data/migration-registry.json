@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 44,
+  "astroReadyCount": 52,
   "entries": [
     {
       "id": "bar-diverging",
@@ -737,8 +737,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "choropleth-map"
     },
     {
       "id": "proportional-symbol",
@@ -749,8 +749,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "proportional-symbol-map"
     },
     {
       "id": "flow",
@@ -761,8 +761,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "map-flows"
     },
     {
       "id": "contour",
@@ -773,8 +773,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "contour-map"
     },
     {
       "id": "equalised-cartogram",
@@ -785,8 +785,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "equalized-cartogram"
     },
     {
       "id": "scaled-cartogram-value",
@@ -797,8 +797,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "scaled-cartogram"
     },
     {
       "id": "dot-density",
@@ -809,8 +809,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "dot-density-map"
     },
     {
       "id": "heat-map",
@@ -821,8 +821,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "spatial-heatmap"
     },
     {
       "id": "sankey",
