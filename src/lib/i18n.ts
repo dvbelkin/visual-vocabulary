@@ -63,6 +63,33 @@ const messages = {
     },
 } as const;
 
+type MessageKey = keyof (typeof messages)["ru"];
+const messageContract: Record<Locale, Record<MessageKey, string>> = messages;
+
+function assertMessageParity(dictionaries: Record<Locale, Record<MessageKey, string>>) {
+    const referenceKeys = Object.keys(dictionaries[defaultLocale]).sort();
+
+    for (const locale of locales) {
+        const dictionary = dictionaries[locale];
+        const keys = Object.keys(dictionary).sort();
+        if (
+            keys.length !== referenceKeys.length ||
+            keys.some((key, index) => key !== referenceKeys[index])
+        ) {
+            throw new Error(`Translation keys for "${locale}" do not match "${defaultLocale}"`);
+        }
+
+        for (const key of referenceKeys) {
+            const value = dictionary[key as MessageKey];
+            if (!value.trim()) {
+                throw new Error(`Translation "${locale}.${key}" must not be empty`);
+            }
+        }
+    }
+}
+
+assertMessageParity(messageContract);
+
 export function t(locale: Locale) {
     return messages[locale];
 }
