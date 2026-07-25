@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { assertChartCatalog } from "../src/lib/catalog-validation";
 import { charts, type ChartDefinition } from "../src/lib/catalog";
 import { buildChartOption } from "../src/lib/charts/options";
+import { mountChart } from "../src/lib/charts/lifecycle";
 import { locales, t } from "../src/lib/i18n";
 
 describe("chart catalog contract", () => {
@@ -57,4 +58,58 @@ describe("ECharts option factories", () => {
             expect(option).toMatchObject({ animation: false });
         },
     );
+});
+
+describe("ECharts lifecycle", () => {
+    it("resizes, reapplies reduced motion, and releases resources", () => {
+        let motionListener: (() => void) | undefined;
+        let resizeListener: (() => void) | undefined;
+        let reducedMotion = false;
+        const calls = { resize: 0, dispose: 0, disconnect: 0, options: [] as unknown[] };
+        const chart = {
+            resize: () => calls.resize++,
+            dispose: () => calls.dispose++,
+            setOption: (option: unknown) => calls.options.push(option),
+        };
+        const motionPreference = {
+            get matches() {
+                return reducedMotion;
+            },
+            addEventListener: (_type: "change", listener: () => void) => {
+                motionListener = listener;
+            },
+            removeEventListener: (_type: "change", listener: () => void) => {
+                if (motionListener === listener) motionListener = undefined;
+            },
+        };
+
+        const cleanup = mountChart({
+            root: {} as Element,
+            chart,
+            payload: { id: "example" },
+            motionPreference,
+            createOption: (_payload, prefersReducedMotion) => ({
+                animation: !prefersReducedMotion,
+            }),
+            createResizeObserver: (listener) => {
+                resizeListener = listener;
+                return {
+                    observe: () => undefined,
+                    disconnect: () => calls.disconnect++,
+                };
+            },
+        });
+
+        expect(calls.options).toEqual([{ animation: true }]);
+        resizeListener?.();
+        expect(calls.resize).toBe(1);
+
+        reducedMotion = true;
+        motionListener?.();
+        expect(calls.options).toEqual([{ animation: true }, { animation: false }]);
+
+        cleanup();
+        expect(calls).toMatchObject({ dispose: 1, disconnect: 1 });
+        expect(motionListener).toBeUndefined();
+    });
 });

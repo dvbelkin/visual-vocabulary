@@ -42,7 +42,7 @@ const rows = chart.data.map((row) => ({
                 </p>
                 <h1>{chart.title[activeLocale]}</h1>
             </div>
-            <p>{chart.description[activeLocale]}</p>
+            <p id="chart-description">{chart.description[activeLocale]}</p>
         </header>
 
         <section class="chart-stage" aria-labelledby="chart-title">
@@ -53,7 +53,12 @@ const rows = chart.data.map((row) => ({
                 </div>
                 <span class="unit">{chart.unit[activeLocale]}</span>
             </div>
-            <EChart chart={chart} locale={activeLocale} label={copy.chartLabel} />
+            <EChart
+                chart={chart}
+                locale={activeLocale}
+                label={copy.chartLabel}
+                descriptionId="chart-description"
+            />
         </section>
 
         <div class="learning-grid">
@@ -84,22 +89,15 @@ const rows = chart.data.map((row) => ({
                     <table>
                         <thead>
                             <tr>
-                                <th scope="col"
-                                    >{activeLocale === "ru" ? "Наблюдение" : "Observation"}</th
-                                >
+                                <th scope="col">{copy.observation}</th>
                                 <th scope="col">
-                                    {
-                                        chart.valueLabels?.primary[activeLocale] ??
-                                            (activeLocale === "ru" ? "Значение" : "Value")
-                                    }
+                                    {chart.valueLabels?.primary[activeLocale] ?? copy.value}
                                 </th>
                                 {
                                     rows.some((row) => row.value2 !== undefined) && (
                                         <th scope="col">
                                             {chart.valueLabels?.secondary?.[activeLocale] ??
-                                                (activeLocale === "ru"
-                                                    ? "Второе значение"
-                                                    : "Second value")}
+                                                copy.secondValue}
                                         </th>
                                     )
                                 }
@@ -107,9 +105,7 @@ const rows = chart.data.map((row) => ({
                                     rows.some((row) => row.value3 !== undefined) && (
                                         <th scope="col">
                                             {chart.valueLabels?.tertiary?.[activeLocale] ??
-                                                (activeLocale === "ru"
-                                                    ? "Третье значение"
-                                                    : "Third value")}
+                                                copy.thirdValue}
                                         </th>
                                     )
                                 }

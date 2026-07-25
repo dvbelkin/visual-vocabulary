@@ -6,9 +6,10 @@ interface Props {
     chart: ChartDefinition;
     locale: Locale;
     label: string;
+    descriptionId: string;
 }
 
-const { chart, locale, label } = Astro.props;
+const { chart, locale, label, descriptionId } = Astro.props;
 const payload = {
     kind: chart.kind,
     title: chart.title[locale],
@@ -29,6 +30,7 @@ const payload = {
     data-echart-root
     role="img"
     aria-label={`${label}: ${chart.title[locale]}`}
+    aria-describedby={descriptionId}
 >
     <div class="chart-canvas"></div>
     <script
@@ -41,23 +43,7 @@ const payload = {
 
 <script>
     import { init, use } from "echarts/core";
-    import {
-        BarChart,
-        BoxplotChart,
-        CandlestickChart,
-        CustomChart,
-        GraphChart,
-        HeatmapChart,
-        LineChart,
-        ParallelChart,
-        PieChart,
-        PictorialBarChart,
-        RadarChart,
-        ScatterChart,
-        SankeyChart,
-        SunburstChart,
-        TreemapChart,
-    } from "echarts/charts";
+    import { BarChart, HeatmapChart, LineChart, ScatterChart } from "echarts/charts";
     import {
         AriaComponent,
         CalendarComponent,
@@ -70,37 +56,69 @@ const payload = {
     } from "echarts/components";
     import { CanvasRenderer } from "echarts/renderers";
     import { buildChartOption, type ChartPayload } from "../../lib/charts/options";
+    import { mountChart } from "../../lib/charts/lifecycle";
 
     use([
         AriaComponent,
         BarChart,
-        BoxplotChart,
-        CandlestickChart,
         CalendarComponent,
         CanvasRenderer,
-        CustomChart,
-        GraphChart,
         GridComponent,
         HeatmapChart,
         LegendComponent,
         LineChart,
-        ParallelChart,
         ParallelComponent,
-        PieChart,
-        PictorialBarChart,
-        RadarChart,
         RadarComponent,
         ScatterChart,
-        SankeyChart,
-        SunburstChart,
         TooltipComponent,
-        TreemapChart,
         VisualMapComponent,
     ]);
 
     const cleanups: Array<() => void> = [];
+    const basicKinds = new Set([
+        "bar",
+        "line",
+        "scatter",
+        "histogram",
+        "heatmap",
+        "diverging-bar",
+        "grouped-bar",
+        "lollipop",
+        "rank-change",
+        "bullet",
+        "timeline-bar",
+        "combo",
+        "slope",
+        "stacked-area",
+        "calendar",
+        "population-pyramid",
+        "dot-range",
+        "cumulative",
+        "observation-strip",
+        "barcode",
+        "stacked-bar",
+        "normalized-stacked",
+        "waterfall",
+        "diverging-stacked",
+        "spine",
+        "vertical-bar",
+        "proportional-symbols",
+        "dot-strip",
+        "vertical-lollipop",
+        "bump",
+        "correlation-combo",
+        "connected-scatter",
+        "bubble",
+        "process-waterfall",
+        "grouped-column",
+        "fan",
+        "timeline-connected",
+        "circle-timeline",
+        "seismogram",
+        "symbol-grid",
+    ]);
 
-    document.querySelectorAll<HTMLElement>("[data-echart-root]").forEach((root) => {
+    document.querySelectorAll<HTMLElement>("[data-echart-root]").forEach(async (root) => {
         if (root.dataset.initialized) return;
 
         const canvas = root.querySelector<HTMLElement>(".chart-canvas");
@@ -109,16 +127,24 @@ const payload = {
 
         root.dataset.initialized = "true";
         const payload = JSON.parse(source.textContent) as Omit<ChartPayload, "reducedMotion">;
+        if (!basicKinds.has(payload.kind)) {
+            const { registerSpecializedCharts } =
+                await import("../../lib/charts/register-specialized");
+            registerSpecializedCharts();
+        }
         const media = window.matchMedia("(prefers-reduced-motion: reduce)");
         const chart = init(canvas, undefined, { renderer: "canvas" });
-        chart.setOption(buildChartOption({ ...payload, reducedMotion: media.matches }));
-
-        const observer = new ResizeObserver(() => chart.resize());
-        observer.observe(root);
-        cleanups.push(() => {
-            observer.disconnect();
-            chart.dispose();
-        });
+        cleanups.push(
+            mountChart({
+                root,
+                chart,
+                payload,
+                motionPreference: media,
+                createOption: (currentPayload, reducedMotion) =>
+                    buildChartOption({ ...currentPayload, reducedMotion }),
+                createResizeObserver: (callback) => new ResizeObserver(callback),
+            }),
+        );
     });
 
     document.addEventListener(
