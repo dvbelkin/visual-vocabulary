@@ -23,7 +23,12 @@ const searchText = [
     .toLocaleLowerCase(locale);
 ---
 
-<article class="chart-card" data-chart-card data-search-text={searchText}>
+<article
+    class="chart-card"
+    data-chart-card
+    data-search-text={searchText}
+    data-chart-category={chart.category}
+>
     <div class="chart-card__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
     <p class="chart-card__category">{categoryNames[chart.category][locale]}</p>
     <h3><a href={localePath(locale, `charts/${chart.id}`)}>{chart.title[locale]}</a></h3>
