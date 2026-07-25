@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 59,
+  "astroReadyCount": 61,
   "entries": [
     {
       "id": "bar-diverging",
@@ -233,8 +233,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "priestley-timeline"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "circle-timeline",
@@ -533,8 +533,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "sunburst-chart"
     },
     {
       "id": "arc",
@@ -545,8 +545,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "semicircle-chart"
     },
     {
       "id": "gridplot",
@@ -557,8 +557,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "symbol-grid"
     },
     {
       "id": "venn",

@@ -62,9 +62,11 @@ export type ChartKind =
     | "candlestick"
     | "fan"
     | "timeline-connected"
-    | "priestley"
     | "circle-timeline"
-    | "seismogram";
+    | "seismogram"
+    | "sunburst"
+    | "semi-donut"
+    | "symbol-grid";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1723,31 +1725,6 @@ export const charts: readonly ChartDefinition[] = [
         ],
     },
     {
-        id: "priestley-timeline",
-        category: "change-time",
-        kind: "priestley",
-        title: { ru: "Временная шкала Пристли", en: "Priestley timeline" },
-        description: {
-            ru: "Горизонтальные интервалы показывают начало, конец и перекрытие событий.",
-            en: "Horizontal intervals show the start, end, and overlap of events.",
-        },
-        useWhen: {
-            ru: "Нужно сравнить длительности небольшого числа процессов на общей шкале.",
-            en: "You need to compare durations of a small number of processes on one scale.",
-        },
-        avoidWhen: {
-            ru: "Событий много или важны сложные зависимости между ними.",
-            en: "There are many events or complex dependencies between them matter.",
-        },
-        unit: { ru: "годы", en: "years" },
-        data: [
-            { label: { ru: "Исследование", en: "Research" }, value: 2018, value2: 2021 },
-            { label: { ru: "Проектирование", en: "Design" }, value: 2020, value2: 2023 },
-            { label: { ru: "Строительство", en: "Construction" }, value: 2022, value2: 2025 },
-            { label: { ru: "Тестирование", en: "Testing" }, value: 2024, value2: 2026 },
-        ],
-    },
-    {
         id: "circles-on-timeline",
         category: "change-time",
         kind: "circle-timeline",
@@ -1805,6 +1782,82 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "0,9", en: "0.9" }, value: 4 },
             { label: { ru: "1,0", en: "1.0" }, value: -2 },
             { label: { ru: "1,1", en: "1.1" }, value: 0 },
+        ],
+    },
+    {
+        id: "sunburst-chart",
+        category: "part-whole",
+        kind: "sunburst",
+        title: { ru: "Солнечная диаграмма", en: "Sunburst chart" },
+        description: {
+            ru: "Концентрические кольца показывают уровни иерархии и доли ветвей в целом.",
+            en: "Concentric rings show hierarchy levels and branch shares of the whole.",
+        },
+        useWhen: {
+            ru: "Нужно дать компактный обзор иерархии из двух-трёх уровней.",
+            en: "You need a compact overview of a hierarchy with two or three levels.",
+        },
+        avoidWhen: {
+            ru: "Важно точно сравнить узлы из разных ветвей или уровней слишком много.",
+            en: "Nodes across branches need precise comparison or there are too many levels.",
+        },
+        unit: { ru: "% расходов", en: "% of spending" },
+        data: [
+            { label: { ru: "Обучение|Программы", en: "Teaching|Programmes" }, value: 28 },
+            { label: { ru: "Обучение|Библиотека", en: "Teaching|Library" }, value: 14 },
+            { label: { ru: "Исследования|Лаборатории", en: "Research|Laboratories" }, value: 22 },
+            { label: { ru: "Исследования|Гранты", en: "Research|Grants" }, value: 16 },
+            { label: { ru: "Кампус|Здания", en: "Campus|Buildings" }, value: 12 },
+            { label: { ru: "Кампус|Среда", en: "Campus|Environment" }, value: 8 },
+        ],
+    },
+    {
+        id: "semicircle-chart",
+        category: "part-whole",
+        kind: "semi-donut",
+        title: { ru: "Полукруг", en: "Semicircle chart" },
+        description: {
+            ru: "Полукольцо показывает несколько крупных долей одного целого в компактной форме.",
+            en: "A half donut shows a few large shares of one whole in a compact form.",
+        },
+        useWhen: {
+            ru: "Долей мало, они заметно различаются и точное сравнение не главное.",
+            en: "There are few clearly different shares and exact comparison is secondary.",
+        },
+        avoidWhen: {
+            ru: "Долей много или значения близки — столбцы будут точнее.",
+            en: "There are many similar shares; bars will be more accurate.",
+        },
+        unit: { ru: "% поездок", en: "% of trips" },
+        data: [
+            { label: { ru: "Общественный транспорт", en: "Public transport" }, value: 42 },
+            { label: { ru: "Автомобиль", en: "Car" }, value: 31 },
+            { label: { ru: "Пешком", en: "Walking" }, value: 18 },
+            { label: { ru: "Велосипед", en: "Bicycle" }, value: 9 },
+        ],
+    },
+    {
+        id: "symbol-grid",
+        category: "part-whole",
+        kind: "symbol-grid",
+        title: { ru: "Сетка из символов", en: "Symbol grid" },
+        description: {
+            ru: "Сто одинаковых ячеек превращают процентные доли в наглядный дискретный счёт.",
+            en: "One hundred equal cells turn percentage shares into a visible discrete count.",
+        },
+        useWhen: {
+            ru: "Нужно объяснить доли широкой аудитории на основе понятного знаменателя.",
+            en: "You need to explain shares to a broad audience using a clear denominator.",
+        },
+        avoidWhen: {
+            ru: "Нужна высокая точность для дробных процентов или категорий слишком много.",
+            en: "Fractional percentages require precision or there are too many categories.",
+        },
+        unit: { ru: "% ответов", en: "% of responses" },
+        data: [
+            { label: { ru: "Поддерживают", en: "Support" }, value: 47 },
+            { label: { ru: "Не определились", en: "Undecided" }, value: 29 },
+            { label: { ru: "Не поддерживают", en: "Oppose" }, value: 24 },
         ],
     },
 ];

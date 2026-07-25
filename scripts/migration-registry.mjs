@@ -63,9 +63,11 @@ const astroRoutes = new Map([
     ["change-time:Биржевые свечи", "candlestick-chart"],
     ["change-time:Веерная диаграмма", "fan-chart"],
     ["change-time:Связанная диаграмма рассеяния во времени", "connected-scatter-timeline"],
-    ["change-time:Временная шкала Пристли", "priestley-timeline"],
     ["change-time:Круги на временной шкале", "circles-on-timeline"],
     ["change-time:Сейсмограмма", "seismogram"],
+    ["part-whole:Солнечная диаграмма", "sunburst-chart"],
+    ["part-whole:Полукруг", "semicircle-chart"],
+    ["part-whole:Сетка из символов", "symbol-grid"],
 ]);
 
 function parseCsv(text) {

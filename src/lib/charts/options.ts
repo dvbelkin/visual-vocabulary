@@ -1303,48 +1303,6 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         };
     }
 
-    if (payload.kind === "priestley") {
-        const minimum = Math.min(...payload.data.map((row) => row.value));
-        return {
-            ...base,
-            grid: { left: 116, right: 32, top: 28, bottom: 48 },
-            xAxis: {
-                type: "value",
-                min: minimum - 1,
-                max: Math.max(...payload.data.map((row) => row.value2 ?? row.value)) + 1,
-                minInterval: 1,
-                axisLabel: { formatter: (value: number) => String(Math.round(value)) },
-                splitLine: { lineStyle: { color: gridLine } },
-            },
-            yAxis: {
-                type: "category",
-                inverse: true,
-                data: payload.data.map((row) => row.label),
-            },
-            series: [
-                {
-                    type: "bar",
-                    stack: "duration",
-                    data: payload.data.map((row) => row.value - (minimum - 1)),
-                    itemStyle: { color: "transparent" },
-                    silent: true,
-                },
-                {
-                    type: "bar",
-                    stack: "duration",
-                    data: payload.data.map((row) => (row.value2 ?? row.value) - row.value),
-                    itemStyle: { color: green, borderRadius: 6 },
-                    label: {
-                        show: true,
-                        position: "inside",
-                        formatter: ({ dataIndex }: { dataIndex: number }) =>
-                            `${payload.data[dataIndex].value}–${payload.data[dataIndex].value2}`,
-                    },
-                },
-            ],
-        };
-    }
-
     if (payload.kind === "circle-timeline") {
         const maximum = Math.max(...payload.data.map((row) => row.value));
         return {
@@ -1401,6 +1359,104 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     symbol: "none",
                     lineStyle: { width: 2, color: ink },
                     areaStyle: { color: "rgba(23, 107, 77, .12)" },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "sunburst") {
+        const branches = new Map<string, Array<{ name: string; value: number }>>();
+        payload.data.forEach((row) => {
+            const [parent, child] = row.label.split("|");
+            const children = branches.get(parent) ?? [];
+            children.push({ name: child, value: row.value });
+            branches.set(parent, children);
+        });
+        return {
+            ...base,
+            series: [
+                {
+                    type: "sunburst",
+                    radius: ["12%", "88%"],
+                    nodeClick: false,
+                    sort: undefined,
+                    emphasis: { focus: "ancestor" },
+                    label: { rotate: "radial", minAngle: 8 },
+                    data: [...branches].map(([name, children]) => ({ name, children })),
+                    levels: [
+                        {},
+                        { r0: "12%", r: "48%", label: { rotate: 0 } },
+                        { r0: "48%", r: "88%" },
+                    ],
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "semi-donut") {
+        return {
+            ...base,
+            legend: { bottom: 0 },
+            series: [
+                {
+                    type: "pie",
+                    radius: ["48%", "78%"],
+                    center: ["50%", "72%"],
+                    startAngle: 180,
+                    endAngle: 360,
+                    label: { formatter: "{b}\n{d}%" },
+                    data: payload.data.map((row) => ({
+                        name: row.label,
+                        value: row.value,
+                    })),
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "symbol-grid") {
+        const colors = [green, "#d4a72c", orange];
+        const points: Array<{
+            value: [number, number];
+            name: string;
+            itemStyle: { color: string };
+        }> = [];
+        let offset = 0;
+        payload.data.forEach((row, categoryIndex) => {
+            for (let index = 0; index < row.value; index += 1) {
+                const position = offset + index;
+                points.push({
+                    value: [position % 10, 9 - Math.floor(position / 10)],
+                    name: row.label,
+                    itemStyle: { color: colors[categoryIndex] },
+                });
+            }
+            offset += row.value;
+        });
+        return {
+            ...base,
+            legend: {
+                bottom: 0,
+                data: payload.data.map((row, index) => ({
+                    name: row.label,
+                    itemStyle: { color: colors[index] },
+                })),
+            },
+            grid: { left: "center", width: 280, top: 24, bottom: 68 },
+            xAxis: { type: "value", min: -0.5, max: 9.5, show: false },
+            yAxis: { type: "value", min: -0.5, max: 9.5, show: false },
+            series: [
+                ...payload.data.map((row, index) => ({
+                    name: row.label,
+                    type: "scatter" as const,
+                    data: [] as number[][],
+                    itemStyle: { color: colors[index] },
+                })),
+                {
+                    type: "scatter",
+                    data: points,
+                    symbol: "roundRect",
+                    symbolSize: 22,
                 },
             ],
         };
