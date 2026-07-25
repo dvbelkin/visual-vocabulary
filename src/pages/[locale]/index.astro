@@ -2,7 +2,7 @@
 import ChartCard from "../../components/catalog/ChartCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import migrationRegistry from "../../data/migration-registry.json";
-import { charts } from "../../lib/catalog";
+import { categoryNames, charts } from "../../lib/catalog";
 import { isLocale, locales, t, type Locale } from "../../lib/i18n";
 
 export function getStaticPaths() {
@@ -15,6 +15,7 @@ if (!isLocale(localeParam)) {
 }
 const locale: Locale = localeParam;
 const copy = t(locale);
+const visibleCategories = [...new Set(charts.map((chart) => chart.category))];
 ---
 
 <BaseLayout locale={locale}>
@@ -65,6 +66,23 @@ const copy = t(locale);
                 {copy.searchResults}: {charts.length}
             </p>
         </form>
+        <div
+            class="category-filters"
+            role="group"
+            aria-label={copy.categoryFilter}
+            data-category-filters
+        >
+            <button type="button" class="is-active" data-category-filter="all" aria-pressed="true">
+                {copy.allCategories}
+            </button>
+            {
+                visibleCategories.map((category) => (
+                    <button type="button" data-category-filter={category} aria-pressed="false">
+                        {categoryNames[category][locale]}
+                    </button>
+                ))
+            }
+        </div>
         <div class="chart-grid" data-chart-grid>
             {
                 charts.map((chart, index) => (
@@ -83,6 +101,10 @@ const copy = t(locale);
     const grid = document.querySelector<HTMLElement>("[data-chart-grid]");
     const empty = document.querySelector<HTMLElement>("[data-catalog-empty]");
     const cards = [...document.querySelectorAll<HTMLElement>("[data-chart-card]")];
+    const categoryButtons = [
+        ...document.querySelectorAll<HTMLButtonElement>("[data-category-filter]"),
+    ];
+    let activeCategory = "all";
 
     if (search && query && status && grid && empty) {
         const label = status.textContent?.split(":")[0]?.trim() ?? "";
@@ -91,7 +113,10 @@ const copy = t(locale);
             let visible = 0;
 
             cards.forEach((card) => {
-                const matches = !value || card.dataset.searchText?.includes(value);
+                const matchesSearch = !value || card.dataset.searchText?.includes(value);
+                const matchesCategory =
+                    activeCategory === "all" || card.dataset.chartCategory === activeCategory;
+                const matches = matchesSearch && matchesCategory;
                 card.hidden = !matches;
                 if (matches) visible += 1;
             });
@@ -103,5 +128,16 @@ const copy = t(locale);
 
         query.addEventListener("input", filter);
         search.addEventListener("reset", () => requestAnimationFrame(filter));
+        categoryButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                activeCategory = button.dataset.categoryFilter ?? "all";
+                categoryButtons.forEach((candidate) => {
+                    const active = candidate === button;
+                    candidate.classList.toggle("is-active", active);
+                    candidate.setAttribute("aria-pressed", String(active));
+                });
+                filter();
+            });
+        });
     }
 </script>
