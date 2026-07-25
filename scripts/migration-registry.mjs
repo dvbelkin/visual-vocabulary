@@ -60,6 +60,12 @@ const astroRoutes = new Map([
     ["magnitude:Горизонтальный лоллипоп", "magnitude-horizontal-lollipop"],
     ["magnitude:Вертикальный лоллипоп", "magnitude-vertical-lollipop"],
     ["magnitude:Параллельные координаты", "parallel-coordinates"],
+    ["change-time:Биржевые свечи", "candlestick-chart"],
+    ["change-time:Веерная диаграмма", "fan-chart"],
+    ["change-time:Связанная диаграмма рассеяния во времени", "connected-scatter-timeline"],
+    ["change-time:Временная шкала Пристли", "priestley-timeline"],
+    ["change-time:Круги на временной шкале", "circles-on-timeline"],
+    ["change-time:Сейсмограмма", "seismogram"],
 ]);
 
 function parseCsv(text) {
