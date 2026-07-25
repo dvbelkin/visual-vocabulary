@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { assertChartCatalog } from "./catalog-validation";
 
 export type CategoryId =
     | "deviation"
@@ -1861,6 +1862,8 @@ export const charts: readonly ChartDefinition[] = [
         ],
     },
 ];
+
+assertChartCatalog(charts);
 
 export function getChart(id: string) {
     return charts.find((chart) => chart.id === id);
