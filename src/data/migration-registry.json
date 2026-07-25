@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 52,
+  "astroReadyCount": 53,
   "entries": [
     {
       "id": "bar-diverging",
@@ -593,8 +593,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "magnitude-columns"
     },
     {
       "id": "bar-magnitude",
@@ -605,8 +605,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "magnitude-bars"
     },
     {
       "id": "column-grouped",
@@ -617,8 +617,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "grouped-vertical-columns"
     },
     {
       "id": "bar-grouped-magnitude",
@@ -641,8 +641,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "composition-and-magnitude"
     },
     {
       "id": "symbol-proportional",
@@ -653,8 +653,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "magnitude-proportional-symbols"
     },
     {
       "id": "isotope",
@@ -665,8 +665,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "pictogram"
     },
     {
       "id": "lollipop-h-magnitude",
@@ -677,8 +677,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "magnitude-horizontal-lollipop"
     },
     {
       "id": "lollipop-v-magnitude",
@@ -689,8 +689,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "magnitude-vertical-lollipop"
     },
     {
       "id": "radar",
@@ -725,8 +725,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "parallel-coordinates"
     },
     {
       "id": "basic-choropleth",
@@ -737,8 +737,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "choropleth-map"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "proportional-symbol",
@@ -749,8 +749,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "proportional-symbol-map"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "flow",
@@ -761,8 +761,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "map-flows"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "contour",
@@ -773,8 +773,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "contour-map"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "equalised-cartogram",
@@ -785,8 +785,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "equalized-cartogram"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "scaled-cartogram-value",
@@ -797,8 +797,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "scaled-cartogram"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "dot-density",
@@ -809,8 +809,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "dot-density-map"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "heat-map",
@@ -821,8 +821,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "ready",
-      "astroRouteId": "spatial-heatmap"
+      "astroStatus": "missing",
+      "astroRouteId": null
     },
     {
       "id": "sankey",
