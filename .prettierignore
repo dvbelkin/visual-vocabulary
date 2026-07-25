@@ -1,7 +1,6 @@
 dist/
 node_modules/
 **/d3.min.js
-shared/d3.v4.js
 interactive-examples.js
 interactive-dialog.js
 v2-data.js
