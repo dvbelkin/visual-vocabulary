@@ -248,6 +248,52 @@ p {
     color: var(--color-muted);
 }
 
+.catalog-search {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr) auto;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.catalog-search label {
+    font-weight: 750;
+}
+
+.catalog-search input {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+}
+
+.catalog-search input:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-focus) 42%, transparent);
+    outline-offset: 2px;
+}
+
+.catalog-search__status {
+    min-width: 7rem;
+    margin: 0;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.catalog-empty {
+    min-height: 14rem;
+    margin: 0;
+    padding: 4rem 2rem;
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-muted);
+    font-size: 1.15rem;
+    text-align: center;
+}
+
 .chart-card {
     position: relative;
     min-height: 22rem;
@@ -502,6 +548,14 @@ tbody th {
     .learning-grid,
     .migration-progress {
         grid-template-columns: 1fr;
+    }
+
+    .catalog-search {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-search__status {
+        text-align: left;
     }
 
     .chart-card {

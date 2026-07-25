@@ -12,9 +12,18 @@ interface Props {
 
 const { chart, locale, index } = Astro.props;
 const copy = t(locale);
+const searchText = [
+    chart.title[locale],
+    chart.description[locale],
+    chart.useWhen[locale],
+    chart.avoidWhen[locale],
+    categoryNames[chart.category][locale],
+]
+    .join(" ")
+    .toLocaleLowerCase(locale);
 ---
 
-<article class="chart-card">
+<article class="chart-card" data-chart-card data-search-text={searchText}>
     <div class="chart-card__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
     <p class="chart-card__category">{categoryNames[chart.category][locale]}</p>
     <h3><a href={localePath(locale, `charts/${chart.id}`)}>{chart.title[locale]}</a></h3>

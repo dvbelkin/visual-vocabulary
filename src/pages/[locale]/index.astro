@@ -51,12 +51,57 @@ const copy = t(locale);
                 </dd>
             </div>
         </dl>
-        <div class="chart-grid">
+        <form class="catalog-search" role="search" data-catalog-search>
+            <label for="catalog-query">{copy.searchLabel}</label>
+            <input
+                id="catalog-query"
+                type="search"
+                name="query"
+                placeholder={copy.searchPlaceholder}
+                autocomplete="off"
+                data-catalog-query
+            />
+            <p class="catalog-search__status" aria-live="polite" data-search-status>
+                {copy.searchResults}: {charts.length}
+            </p>
+        </form>
+        <div class="chart-grid" data-chart-grid>
             {
                 charts.map((chart, index) => (
                     <ChartCard chart={chart} locale={locale} index={index} />
                 ))
             }
         </div>
+        <p class="catalog-empty" data-catalog-empty hidden>{copy.noResults}</p>
     </section>
 </BaseLayout>
+
+<script>
+    const search = document.querySelector<HTMLElement>("[data-catalog-search]");
+    const query = search?.querySelector<HTMLInputElement>("[data-catalog-query]");
+    const status = search?.querySelector<HTMLElement>("[data-search-status]");
+    const grid = document.querySelector<HTMLElement>("[data-chart-grid]");
+    const empty = document.querySelector<HTMLElement>("[data-catalog-empty]");
+    const cards = [...document.querySelectorAll<HTMLElement>("[data-chart-card]")];
+
+    if (search && query && status && grid && empty) {
+        const label = status.textContent?.split(":")[0]?.trim() ?? "";
+        const filter = () => {
+            const value = query.value.trim().toLocaleLowerCase(document.documentElement.lang);
+            let visible = 0;
+
+            cards.forEach((card) => {
+                const matches = !value || card.dataset.searchText?.includes(value);
+                card.hidden = !matches;
+                if (matches) visible += 1;
+            });
+
+            status.textContent = `${label}: ${visible}`;
+            empty.hidden = visible > 0;
+            grid.hidden = visible === 0;
+        };
+
+        query.addEventListener("input", filter);
+        search.addEventListener("reset", () => requestAnimationFrame(filter));
+    }
+</script>
