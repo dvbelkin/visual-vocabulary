@@ -312,53 +312,81 @@ function createCanvasOverlay(
     };
 }
 
-async function addTimeHeatmap(map: Map) {
-    const collection = await loadEarthquakes("significant-earthquakes-2015.geojson");
-    collection.features.forEach((item) => {
-        item.properties.month = new Date(item.properties.time ?? 0).getUTCMonth() + 1;
-    });
-    map.addSource("earthquakes-time", { type: "geojson", data: collection });
-    map.addLayer({
-        id: "earthquakes-heat",
-        type: "heatmap",
-        source: "earthquakes-time",
-        paint: {
-            "heatmap-weight": ["interpolate", ["linear"], ["get", "mag"], 5, 0.25, 8, 1],
-            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 7, 3],
-            "heatmap-color": [
-                "interpolate",
-                ["linear"],
-                ["heatmap-density"],
-                0,
-                "rgba(47,111,176,0)",
-                0.25,
-                "#9cc9df",
-                0.5,
-                "#ffe2a8",
-                0.75,
-                "#ee8d4d",
-                1,
-                "#9e2a2b",
-            ],
-            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 9, 7, 28],
-            "heatmap-opacity": 0.88,
+function createHeatCanvasOverlay(
+    map: Map,
+    collection: FeatureCollection<Point, EarthquakeProperties>,
+) {
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText =
+        "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2";
+    map.getContainer().append(canvas);
+    let month = 1;
+
+    const draw = () => {
+        const ratio = window.devicePixelRatio || 1;
+        const width = map.getContainer().clientWidth;
+        const height = map.getContainer().clientHeight;
+        if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+        }
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        context.clearRect(0, 0, width, height);
+        context.globalCompositeOperation = "multiply";
+
+        collection.features
+            .filter((item) => item.properties.month === month)
+            .forEach((item) => {
+                const point = map.project([
+                    item.geometry.coordinates[0],
+                    item.geometry.coordinates[1],
+                ]);
+                if (
+                    point.x < -60 ||
+                    point.x > width + 60 ||
+                    point.y < -60 ||
+                    point.y > height + 60
+                ) {
+                    return;
+                }
+                const magnitude = item.properties.mag ?? 6;
+                const radius = 30 + Math.max(0, magnitude - 6) * 13;
+                const gradient = context.createRadialGradient(
+                    point.x,
+                    point.y,
+                    0,
+                    point.x,
+                    point.y,
+                    radius,
+                );
+                gradient.addColorStop(0, "rgba(158, 42, 43, 0.92)");
+                gradient.addColorStop(0.28, "rgba(238, 141, 77, 0.7)");
+                gradient.addColorStop(0.62, "rgba(255, 226, 168, 0.42)");
+                gradient.addColorStop(1, "rgba(47, 111, 176, 0)");
+                context.beginPath();
+                context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+                context.fillStyle = gradient;
+                context.fill();
+            });
+        context.globalCompositeOperation = "source-over";
+    };
+
+    map.on("move", draw);
+    map.on("resize", draw);
+    draw();
+    return {
+        setMonth(value: number) {
+            month = value;
+            draw();
         },
-        filter: ["==", ["get", "month"], 1],
-    });
-    map.addLayer({
-        id: "heat-points",
-        type: "circle",
-        source: "earthquakes-time",
-        minzoom: 3,
-        paint: {
-            "circle-radius": ["interpolate", ["linear"], ["get", "mag"], 5, 3, 8, 10],
-            "circle-color": "#9e2a2b",
-            "circle-opacity": 0.72,
-            "circle-stroke-color": "#ffffff",
-            "circle-stroke-width": 1,
+        cleanup() {
+            map.off("move", draw);
+            map.off("resize", draw);
+            canvas.remove();
         },
-        filter: ["==", ["get", "month"], 1],
-    });
+    };
 }
 
 export async function renderMapLibreExample(root: HTMLElement) {
@@ -370,8 +398,8 @@ export async function renderMapLibreExample(root: HTMLElement) {
     const map = new Map({
         container: canvas,
         style,
-        center: kind === "proportional-symbol" ? [10, 15] : [-105, 35],
-        zoom: kind === "proportional-symbol" ? 0.7 : 1.7,
+        center: kind === "dot-density" ? [-105, 35] : [10, 15],
+        zoom: kind === "dot-density" ? 1.7 : 0.7,
         cooperativeGestures: true,
         attributionControl: {},
         fadeDuration: reducedMotion ? 0 : 300,
@@ -445,8 +473,12 @@ export async function renderMapLibreExample(root: HTMLElement) {
                 : `${collection.features.length.toLocaleString("en")} events loaded; nearby points are clustered.`,
         );
     } else {
-        await addTimeHeatmap(map);
-        cleanups.push(attachPointPopup(map, root, "heat-points", locale, popup));
+        const collection = await loadEarthquakes("significant-earthquakes-2015.geojson");
+        collection.features.forEach((item) => {
+            item.properties.month = new Date(item.properties.time ?? 0).getUTCMonth() + 1;
+        });
+        const overlay = createHeatCanvasOverlay(map, collection);
+        cleanups.push(overlay.cleanup);
         const slider = root.querySelector<HTMLInputElement>("[data-month-slider]");
         const output = root.querySelector<HTMLOutputElement>("[data-month-output]");
         const monthNames =
@@ -481,9 +513,7 @@ export async function renderMapLibreExample(root: HTMLElement) {
                   ];
         const onMonth = () => {
             const month = Number(slider?.value ?? 1);
-            const filter: ["==", ["get", string], number] = ["==", ["get", "month"], month];
-            map.setFilter("earthquakes-heat", filter);
-            map.setFilter("heat-points", filter);
+            overlay.setMonth(month);
             if (output) output.textContent = monthNames[month - 1];
             status(
                 root,
