@@ -1,6 +1,7 @@
 ---
 import EChart from "../../../components/charts/EChart.astro";
 import D3Map from "../../../components/charts/D3Map.astro";
+import DeckMap from "../../../components/charts/DeckMap.astro";
 import MapLibreMap from "../../../components/charts/MapLibreMap.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { categoryNames, charts } from "../../../lib/catalog";
@@ -26,6 +27,7 @@ const rows = chart.data.map((row) => ({
 }));
 const usesD3Map = chart.id === "basic-choropleth" || chart.id === "scaled-cartogram-value";
 const usesMapLibre = ["proportional-symbol", "dot-density", "heat-map"].includes(chart.id);
+const usesDeck = ["flow", "contour", "equalised-cartogram"].includes(chart.id);
 ---
 
 <BaseLayout
@@ -69,6 +71,13 @@ const usesMapLibre = ["proportional-symbol", "dot-density", "heat-map"].includes
                     />
                 ) : usesMapLibre ? (
                     <MapLibreMap
+                        chart={chart}
+                        locale={activeLocale}
+                        label={copy.chartLabel}
+                        descriptionId="chart-description"
+                    />
+                ) : usesDeck ? (
+                    <DeckMap
                         chart={chart}
                         locale={activeLocale}
                         label={copy.chartLabel}

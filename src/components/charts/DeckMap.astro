@@ -1,0 +1,125 @@
+---
+import type { ChartDefinition } from "../../lib/catalog";
+import type { Locale } from "../../lib/i18n";
+
+interface Props {
+    chart: ChartDefinition;
+    locale: Locale;
+    label: string;
+    descriptionId: string;
+}
+
+const { chart, locale, label, descriptionId } = Astro.props;
+---
+
+<div
+    class="deck-example"
+    data-deck-map={chart.id}
+    data-locale={locale}
+    role="group"
+    aria-label={`${label}: ${chart.title[locale]}`}
+    aria-describedby={descriptionId}
+>
+    {
+        chart.id === "equalised-cartogram" && (
+            <div class="deck-example__controls">
+                <button type="button" data-trip-toggle>
+                    {locale === "ru" ? "Пауза" : "Pause"}
+                </button>
+                <label>
+                    {locale === "ru" ? "Время" : "Time"}
+                    <input type="range" min="0" max="1800" value="0" step="10" data-trip-time />
+                </label>
+            </div>
+        )
+    }
+    <div class="deck-example__canvas"></div>
+    <p class="deck-example__status" aria-live="polite">
+        {
+            locale === "ru"
+                ? "Карту можно перемещать, наклонять и масштабировать."
+                : "Pan, tilt, and zoom the map to explore."
+        }
+    </p>
+</div>
+
+<script>
+    import { renderDeckExample } from "../../lib/charts/deck-maps";
+
+    const cleanups: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>("[data-deck-map]").forEach(async (root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = "true";
+        try {
+            cleanups.push(await renderDeckExample(root));
+        } catch (error) {
+            const status = root.querySelector<HTMLElement>(".deck-example__status");
+            if (status) {
+                status.textContent =
+                    root.dataset.locale === "ru"
+                        ? "Не удалось загрузить слой данных карты."
+                        : "The map data layer could not be loaded.";
+            }
+            console.error(error);
+        }
+    });
+
+    document.addEventListener(
+        "astro:before-swap",
+        () => cleanups.splice(0).forEach((cleanup) => cleanup()),
+        { once: true },
+    );
+</script>
+
+<style>
+    .deck-example__canvas {
+        width: 100%;
+        height: 480px;
+        overflow: hidden;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-sm);
+        background: #e8edf0;
+    }
+
+    .deck-example__controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .deck-example__controls label {
+        display: grid;
+        grid-template-columns: auto minmax(12rem, 28rem);
+        gap: 0.75rem;
+        align-items: center;
+        flex: 1;
+        font-weight: 700;
+    }
+
+    .deck-example__controls input {
+        width: 100%;
+    }
+
+    .deck-example__status {
+        min-height: 1.6em;
+        margin: 0.55rem 0 0;
+        color: var(--color-muted);
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 600px) {
+        .deck-example__canvas {
+            height: 380px;
+        }
+
+        .deck-example__controls {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .deck-example__controls label {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
