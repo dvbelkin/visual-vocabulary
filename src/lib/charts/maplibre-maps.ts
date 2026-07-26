@@ -50,6 +50,24 @@ function formatMagnitude(value: unknown, locale: Locale) {
         : "—";
 }
 
+async function loadEarthquakes(file: string) {
+    const response = await fetch(`${dataBase}${file}`);
+    if (!response.ok) throw new Error(`Unable to load ${file}: ${response.status}`);
+    const source = (await response.json()) as FeatureCollection<Point, EarthquakeProperties>;
+    return {
+        type: "FeatureCollection",
+        features: source.features.map((item) => ({
+            type: "Feature",
+            id: item.id,
+            properties: { ...item.properties },
+            geometry: {
+                type: "Point",
+                coordinates: [item.geometry.coordinates[0], item.geometry.coordinates[1]],
+            },
+        })),
+    } satisfies FeatureCollection<Point, EarthquakeProperties>;
+}
+
 function attachPointPopup(
     map: Map,
     root: HTMLElement,
@@ -88,17 +106,17 @@ function attachPointPopup(
     };
 }
 
-function addSymbolLayer(map: Map) {
+function addSymbolLayer(map: Map, collection: FeatureCollection<Point, EarthquakeProperties>) {
     map.addSource("significant-earthquakes", {
         type: "geojson",
-        data: `${dataBase}significant-earthquakes-2015.geojson`,
+        data: collection,
     });
     map.addLayer({
         id: "earthquake-symbols",
         type: "circle",
         source: "significant-earthquakes",
         paint: {
-            "circle-radius": ["*", 0.72, ["sqrt", ["get", "sig"]]],
+            "circle-radius": ["interpolate", ["linear"], ["get", "sig"], 500, 7, 1200, 24],
             "circle-color": ["interpolate", ["linear"], ["get", "mag"], 5, "#f1b77c", 8, "#9e2a2b"],
             "circle-opacity": 0.76,
             "circle-stroke-color": "#ffffff",
@@ -107,16 +125,15 @@ function addSymbolLayer(map: Map) {
     });
 }
 
-function addClusterLayers(map: Map) {
-    const sourceUrl = `${dataBase}earthquakes.geojson`;
+function addClusterLayers(map: Map, collection: FeatureCollection<Point, EarthquakeProperties>) {
     map.addSource("earthquakes-clustered", {
         type: "geojson",
-        data: sourceUrl,
+        data: collection,
         cluster: true,
         clusterMaxZoom: 7,
         clusterRadius: 42,
     });
-    map.addSource("earthquakes-points", { type: "geojson", data: sourceUrl });
+    map.addSource("earthquakes-points", { type: "geojson", data: collection });
     map.addLayer({
         id: "clusters",
         type: "circle",
@@ -175,10 +192,128 @@ function addClusterLayers(map: Map) {
     });
 }
 
+function createCanvasOverlay(
+    map: Map,
+    collection: FeatureCollection<Point, EarthquakeProperties>,
+    kind: "symbols" | "clusters",
+) {
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText =
+        "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2";
+    map.getContainer().append(canvas);
+    let pointMode: "clusters" | "points" = "clusters";
+
+    const circle = (
+        context: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        radius: number,
+        fill: string,
+    ) => {
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fillStyle = fill;
+        context.fill();
+        context.strokeStyle = "#ffffff";
+        context.lineWidth = 1.25;
+        context.stroke();
+    };
+
+    const draw = () => {
+        const ratio = window.devicePixelRatio || 1;
+        const width = map.getContainer().clientWidth;
+        const height = map.getContainer().clientHeight;
+        if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+        }
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        context.clearRect(0, 0, width, height);
+        const visible = collection.features
+            .map((item) => ({
+                item,
+                point: map.project([item.geometry.coordinates[0], item.geometry.coordinates[1]]),
+            }))
+            .filter(
+                ({ point }) =>
+                    point.x >= -30 &&
+                    point.x <= width + 30 &&
+                    point.y >= -30 &&
+                    point.y <= height + 30,
+            );
+
+        if (kind === "symbols") {
+            visible.forEach(({ item, point }) => {
+                const significance = item.properties.sig ?? 500;
+                const radius = Math.max(7, Math.min(24, 7 + ((significance - 500) / 700) * 17));
+                circle(context, point.x, point.y, radius, "rgba(158, 42, 43, 0.78)");
+            });
+            return;
+        }
+        if (pointMode === "points") {
+            visible.forEach(({ point }) =>
+                circle(context, point.x, point.y, 2.6, "rgba(219, 107, 53, 0.72)"),
+            );
+            return;
+        }
+
+        const cells = new globalThis.Map<string, { x: number; y: number; count: number }>();
+        visible.forEach(({ point }) => {
+            const key = `${Math.floor(point.x / 44)}:${Math.floor(point.y / 44)}`;
+            const cell = cells.get(key);
+            if (cell) {
+                cell.x += point.x;
+                cell.y += point.y;
+                cell.count += 1;
+            } else {
+                cells.set(key, { x: point.x, y: point.y, count: 1 });
+            }
+        });
+        cells.forEach((cell) => {
+            const x = cell.x / cell.count;
+            const y = cell.y / cell.count;
+            const radius = Math.min(30, 7 + Math.sqrt(cell.count) * 1.35);
+            circle(
+                context,
+                x,
+                y,
+                radius,
+                cell.count > 100 ? "#176b4d" : cell.count > 20 ? "#3b9780" : "#8fc8bd",
+            );
+            if (cell.count > 1) {
+                context.fillStyle = cell.count > 20 ? "#ffffff" : "#17201c";
+                context.font = "700 11px system-ui";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(
+                    cell.count > 999 ? `${Math.round(cell.count / 100) / 10}k` : String(cell.count),
+                    x,
+                    y,
+                );
+            }
+        });
+    };
+
+    map.on("move", draw);
+    map.on("resize", draw);
+    draw();
+    return {
+        setMode(value: "clusters" | "points") {
+            pointMode = value;
+            draw();
+        },
+        cleanup() {
+            map.off("move", draw);
+            map.off("resize", draw);
+            canvas.remove();
+        },
+    };
+}
+
 async function addTimeHeatmap(map: Map) {
-    const response = await fetch(`${dataBase}significant-earthquakes-2015.geojson`);
-    if (!response.ok) throw new Error(`Unable to load earthquake data: ${response.status}`);
-    const collection = (await response.json()) as FeatureCollection<Point, EarthquakeProperties>;
+    const collection = await loadEarthquakes("significant-earthquakes-2015.geojson");
     collection.features.forEach((item) => {
         item.properties.month = new Date(item.properties.time ?? 0).getUTCMonth() + 1;
     });
@@ -257,10 +392,22 @@ export async function renderMapLibreExample(root: HTMLElement) {
     });
 
     if (kind === "proportional-symbol") {
-        addSymbolLayer(map);
+        const collection = await loadEarthquakes("significant-earthquakes-2015.geojson");
+        addSymbolLayer(map, collection);
+        const overlay = createCanvasOverlay(map, collection, "symbols");
+        cleanups.push(overlay.cleanup);
         cleanups.push(attachPointPopup(map, root, "earthquake-symbols", locale, popup));
+        status(
+            root,
+            locale === "ru"
+                ? `Показано ${collection.features.length} значительных землетрясений за 2015 год.`
+                : `${collection.features.length} significant earthquakes in 2015 are shown.`,
+        );
     } else if (kind === "dot-density") {
-        addClusterLayers(map);
+        const collection = await loadEarthquakes("earthquakes.geojson");
+        addClusterLayers(map, collection);
+        const overlay = createCanvasOverlay(map, collection, "clusters");
+        cleanups.push(overlay.cleanup);
         cleanups.push(
             attachPointPopup(map, root, "unclustered-points", locale, popup),
             attachPointPopup(map, root, "all-points", locale, popup),
@@ -268,6 +415,7 @@ export async function renderMapLibreExample(root: HTMLElement) {
         const inputs = [...root.querySelectorAll<HTMLInputElement>('input[name^="point-mode-"]')];
         const onMode = (event: Event) => {
             const mode = (event.target as HTMLInputElement).value;
+            overlay.setMode(mode as "clusters" | "points");
             const clusterVisibility = mode === "clusters" ? "visible" : "none";
             map.setLayoutProperty("clusters", "visibility", clusterVisibility);
             map.setLayoutProperty("cluster-count", "visibility", clusterVisibility);
@@ -290,6 +438,12 @@ export async function renderMapLibreExample(root: HTMLElement) {
         };
         inputs.forEach((input) => input.addEventListener("change", onMode));
         cleanups.push(() => inputs.forEach((input) => input.removeEventListener("change", onMode)));
+        status(
+            root,
+            locale === "ru"
+                ? `Загружено ${collection.features.length.toLocaleString("ru")} событий; близкие точки объединены в кластеры.`
+                : `${collection.features.length.toLocaleString("en")} events loaded; nearby points are clustered.`,
+        );
     } else {
         await addTimeHeatmap(map);
         cleanups.push(attachPointPopup(map, root, "heat-points", locale, popup));

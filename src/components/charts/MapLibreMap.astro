@@ -71,7 +71,18 @@ const { chart, locale, label, descriptionId } = Astro.props;
     document.querySelectorAll<HTMLElement>("[data-maplibre-map]").forEach(async (root) => {
         if (root.dataset.initialized) return;
         root.dataset.initialized = "true";
-        cleanups.push(await renderMapLibreExample(root));
+        try {
+            cleanups.push(await renderMapLibreExample(root));
+        } catch (error) {
+            const status = root.querySelector<HTMLElement>(".maplibre-example__status");
+            if (status) {
+                status.textContent =
+                    root.dataset.locale === "ru"
+                        ? "Не удалось загрузить слой данных карты."
+                        : "The map data layer could not be loaded.";
+            }
+            console.error(error);
+        }
     });
 
     document.addEventListener(
