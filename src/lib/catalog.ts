@@ -1441,7 +1441,7 @@ export const charts: readonly ChartDefinition[] = [
         },
         avoidWhen: {
             ru: "Категории образуют временную последовательность.",
-            en: "The categories form a time sequence.",
+            en: "The categories form a meaningful time sequence that should retain its order.",
         },
         unit: { ru: "посещений в месяц", en: "visits per month" },
         data: [
@@ -1568,7 +1568,10 @@ export const charts: readonly ChartDefinition[] = [
         id: "magnitude-horizontal-lollipop",
         category: "magnitude",
         kind: "lollipop",
-        title: { ru: "Горизонтальный лоллипоп", en: "Horizontal lollipop" },
+        title: {
+            ru: "Горизонтальный лоллипоп величин",
+            en: "Horizontal magnitude lollipop",
+        },
         description: {
             ru: "Тонкая линия и точка облегчают сравнение при менее тяжёлом визуальном весе.",
             en: "A thin stem and dot support comparison with less visual weight than bars.",
@@ -1593,7 +1596,10 @@ export const charts: readonly ChartDefinition[] = [
         id: "magnitude-vertical-lollipop",
         category: "magnitude",
         kind: "vertical-lollipop",
-        title: { ru: "Вертикальный лоллипоп", en: "Vertical lollipop" },
+        title: {
+            ru: "Вертикальный лоллипоп величин",
+            en: "Vertical magnitude lollipop",
+        },
         description: {
             ru: "Вертикальные стебли и точки показывают величины короткого ряда категорий.",
             en: "Vertical stems and dots show values for a short set of categories.",
@@ -1603,8 +1609,8 @@ export const charts: readonly ChartDefinition[] = [
             en: "There are few categories, labels are short, and bars feel too heavy.",
         },
         avoidWhen: {
-            ru: "Категорий много или названия длинные.",
-            en: "There are many categories or labels are long.",
+            ru: "Категорий много или длинные названия не помещаются вдоль горизонтальной оси.",
+            en: "There are many categories or long labels cannot fit along the horizontal axis.",
         },
         unit: { ru: "кг отходов на человека", en: "kg waste per person" },
         data: [
@@ -2061,6 +2067,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Too many nearby points will overlap, and small area differences are hard to judge.",
         },
         unit: { ru: "млн пассажиров", en: "million passengers" },
+        valueLabels: {
+            primary: { ru: "Пассажиры", en: "Passengers" },
+            secondary: { ru: "Долгота", en: "Longitude" },
+            tertiary: { ru: "Широта", en: "Latitude" },
+        },
         data: [
             { label: { ru: "Лондон", en: "London" }, value: 82, value2: -0.13, value3: 51.51 },
             { label: { ru: "Париж", en: "Paris" }, value: 71, value2: 2.35, value3: 48.86 },
@@ -2140,6 +2151,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Do not interpolate sparse points when sharp unknown changes may occur between them.",
         },
         unit: { ru: "°C", en: "°C" },
+        valueLabels: {
+            primary: { ru: "Температура", en: "Temperature" },
+            secondary: { ru: "Долгота", en: "Longitude" },
+            tertiary: { ru: "Широта", en: "Latitude" },
+        },
         data: [
             { label: { ru: "Лиссабон", en: "Lisbon" }, value: 29, value2: -9.14, value3: 38.72 },
             { label: { ru: "Мадрид", en: "Madrid" }, value: 31, value2: -3.7, value3: 40.42 },
@@ -2175,6 +2191,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Boundary shape and precise geography are important to the conclusion.",
         },
         unit: { ru: "% городских поездок на велосипеде", en: "% of urban trips by bicycle" },
+        valueLabels: {
+            primary: { ru: "Доля поездок", en: "Share of trips" },
+            secondary: { ru: "Колонка плитки", en: "Tile column" },
+            tertiary: { ru: "Строка плитки", en: "Tile row" },
+        },
         data: [
             {
                 key: "PT",
@@ -2233,6 +2254,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Do not use it for exact boundaries, distances, or adjacency: circles move to avoid overlap.",
         },
         unit: { ru: "тыс. студентов", en: "thousand students" },
+        valueLabels: {
+            primary: { ru: "Студенты", en: "Students" },
+            secondary: { ru: "Исходная долгота", en: "Original longitude" },
+            tertiary: { ru: "Исходная широта", en: "Original latitude" },
+        },
         data: [
             {
                 key: "ES",
@@ -2324,6 +2350,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Exact locations are sensitive or dots are so numerous that they merge.",
         },
         unit: { ru: "1 точка = 1 объект", en: "1 dot = 1 site" },
+        valueLabels: {
+            primary: { ru: "Объекты", en: "Sites" },
+            secondary: { ru: "Долгота", en: "Longitude" },
+            tertiary: { ru: "Широта", en: "Latitude" },
+        },
         data: [
             { label: { ru: "Пиренеи 1", en: "Pyrenees 1" }, value: 1, value2: -1.2, value3: 42.7 },
             { label: { ru: "Пиренеи 2", en: "Pyrenees 2" }, value: 1, value2: 0.7, value3: 42.6 },
@@ -2397,6 +2428,11 @@ export const charts: readonly ChartDefinition[] = [
             en: "Exact point values or administrative territory comparisons are required.",
         },
         unit: { ru: "индекс интенсивности", en: "intensity index" },
+        valueLabels: {
+            primary: { ru: "Интенсивность", en: "Intensity" },
+            secondary: { ru: "Долгота", en: "Longitude" },
+            tertiary: { ru: "Широта", en: "Latitude" },
+        },
         data: [
             { label: { ru: "Запад", en: "West" }, value: 42, value2: -2.5, value3: 48.2 },
             {

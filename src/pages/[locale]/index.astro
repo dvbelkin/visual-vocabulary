@@ -1,7 +1,6 @@
 ---
 import ChartCard from "../../components/catalog/ChartCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import migrationRegistry from "../../data/migration-registry.json";
 import { categoryNames, charts } from "../../lib/catalog";
 import { isLocale, locales, t, type Locale } from "../../lib/i18n";
 
@@ -40,15 +39,8 @@ const visibleCategories = [...new Set(charts.map((chart) => chart.category))];
             <div>
                 <dt>{copy.progressLabel}</dt>
                 <dd>
-                    <strong>{migrationRegistry.astroReadyCount}</strong>
-                    <span>/ {migrationRegistry.chartCount}</span>
-                </dd>
-            </div>
-            <div>
-                <dt>{copy.legacyLabel}</dt>
-                <dd>
-                    <strong>{migrationRegistry.legacyReadyCount}</strong>
-                    <span>/ {migrationRegistry.chartCount}</span>
+                    <strong>{charts.length}</strong>
+                    <span>/ {charts.length}</span>
                 </dd>
             </div>
         </dl>

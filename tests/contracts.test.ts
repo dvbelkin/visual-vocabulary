@@ -27,6 +27,63 @@ describe("chart catalog contract", () => {
         invalid[0].data[0].value = Number.NaN;
         expect(() => assertChartCatalog(invalid)).toThrow(/finite number/);
     });
+
+    it("contains 72 editorially complete bilingual examples", () => {
+        expect(charts).toHaveLength(72);
+        const issues: string[] = [];
+
+        for (const locale of locales) {
+            const titles = charts.map((chart) => chart.title[locale]);
+            if (new Set(titles).size !== titles.length) {
+                issues.push(`duplicate ${locale} titles`);
+            }
+        }
+
+        for (const chart of charts) {
+            for (const locale of locales) {
+                const fields = [
+                    chart.description[locale],
+                    chart.useWhen[locale],
+                    chart.avoidWhen[locale],
+                ];
+                if (new Set(fields).size !== fields.length) {
+                    issues.push(`${chart.id} repeats ${locale} editorial copy`);
+                }
+                fields.forEach((text) => {
+                    const minimumLength = locale === "ru" ? 45 : 40;
+                    if (text.length < minimumLength) {
+                        issues.push(`${chart.id} has short ${locale} copy: "${text}"`);
+                    }
+                    if (!/[.!?:]$/u.test(text)) {
+                        issues.push(`${chart.id} has unfinished ${locale} copy: "${text}"`);
+                    }
+                });
+
+                const labels = chart.data.map((row) => row.label[locale]);
+                if (new Set(labels).size !== labels.length) {
+                    issues.push(`${chart.id} repeats ${locale} data labels`);
+                }
+            }
+
+            if (chart.data.length < 3) {
+                issues.push(`${chart.id} has too few observations`);
+            }
+            if (
+                chart.data.some((row) => row.value2 !== undefined) &&
+                !chart.valueLabels?.secondary
+            ) {
+                issues.push(`${chart.id} does not name its secondary value`);
+            }
+            if (
+                chart.data.some((row) => row.value3 !== undefined) &&
+                !chart.valueLabels?.tertiary
+            ) {
+                issues.push(`${chart.id} does not name its tertiary value`);
+            }
+        }
+
+        expect(issues).toEqual([]);
+    });
 });
 
 describe("translation contract", () => {

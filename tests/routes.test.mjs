@@ -1,25 +1,17 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
-const registry = JSON.parse(
-    await readFile(new URL("../src/data/migration-registry.json", import.meta.url), "utf8"),
-);
-const readyEntries = registry.entries.filter((entry) => entry.astroStatus === "ready");
-
-test("every ready chart has a generated RU and EN route", async () => {
-    const checks = readyEntries.flatMap((entry) =>
-        ["ru", "en"].map(async (locale) => {
-            const route = new URL(
-                `../dist/${locale}/charts/${entry.astroRouteId}/index.html`,
-                import.meta.url,
-            );
-            await access(route);
-        }),
+test("both locales generate the same 72 chart routes", async () => {
+    const routes = await Promise.all(
+        ["ru", "en"].map((locale) =>
+            readdir(new URL(`../dist/${locale}/charts/`, import.meta.url)),
+        ),
     );
 
-    await Promise.all(checks);
-    assert.equal(checks.length, registry.astroReadyCount * 2);
+    assert.equal(routes[0].length, 72);
+    assert.equal(routes[1].length, 72);
+    assert.deepEqual(routes[0].sort(), routes[1].sort());
 });
 
 test("localized routes expose complete language and SEO metadata", async () => {

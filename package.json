@@ -5,14 +5,13 @@
     "type": "module",
     "scripts": {
         "dev": "astro dev",
-        "build": "npm run registry:check && npm run legacy:check && astro check && astro build && npm run test:routes",
+        "build": "npm run legacy:check && astro check && astro build && npm run performance:check && npm run test:routes",
         "preview": "astro preview",
         "check": "astro check",
         "lint": "eslint src scripts tests astro.config.mjs eslint.config.mjs --max-warnings=0",
-        "registry:check": "node scripts/migration-registry.mjs check",
-        "registry:generate": "node scripts/migration-registry.mjs write",
         "legacy:check": "node scripts/check-legacy-d3.mjs",
-        "test": "npm run legacy:check && node --test tests/migration-registry.test.mjs && vitest run tests/contracts.test.ts",
+        "performance:check": "node scripts/check-performance.mjs",
+        "test": "npm run legacy:check && vitest run tests/contracts.test.ts",
         "test:routes": "node --test tests/routes.test.mjs",
         "format": "prettier --write \"src/**/*.{astro,css,ts}\" \"scripts/**/*.mjs\" \"tests/**/*.{mjs,ts}\" package.json tsconfig.json astro.config.mjs eslint.config.mjs .prettierrc.mjs AGENTS.md PLAN.md",
         "format:check": "prettier --check \"src/**/*.{astro,css,ts}\" \"scripts/**/*.mjs\" \"tests/**/*.{mjs,ts}\" package.json tsconfig.json astro.config.mjs eslint.config.mjs .prettierrc.mjs AGENTS.md PLAN.md"

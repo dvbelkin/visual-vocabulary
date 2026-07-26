@@ -39,7 +39,8 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         color: [green, orange, "#2f6fb0", "#8f5ca6", "#d4a72c"],
         textStyle: {
             color: ink,
-            fontFamily: 'Inter, "Segoe UI", system-ui, sans-serif',
+            fontFamily:
+                'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
         },
         tooltip: {
             trigger:

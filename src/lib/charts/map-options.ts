@@ -54,7 +54,11 @@ function geoBase(payload: ChartPayload) {
                     ? `${payload.title}. Синтетические данные, ${payload.unit}.`
                     : `${payload.title}. Synthetic data, ${payload.unit}.`,
         },
-        textStyle: { color: ink, fontFamily: 'Inter, "Segoe UI", system-ui, sans-serif' },
+        textStyle: {
+            color: ink,
+            fontFamily:
+                'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+        },
         tooltip: { trigger: "item", confine: true },
         geo: {
             map: mapName,

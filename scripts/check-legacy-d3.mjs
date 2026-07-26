@@ -4,11 +4,6 @@ import process from "node:process";
 
 const root = process.cwd();
 const ignoredDirectories = new Set([".git", "dist", "node_modules"]);
-const retainedReferenceDirectories = new Set([
-    "map-us-choropleth",
-    "uk-constituency-cartogram-2017",
-    "uk-constituency-map-2017",
-]);
 const allowedAlgorithmImports = new Map([
     ["src/lib/charts/options.ts", ['from "d3-delaunay"']],
     ["src/lib/charts/map-options.ts", ['from "d3-contour"', 'from "d3-force"']],
@@ -25,9 +20,6 @@ async function visit(directory) {
 
         const absolutePath = resolve(directory, entry.name);
         const repositoryPath = relative(root, absolutePath).split(sep).join("/");
-        const topLevelDirectory = repositoryPath.split("/")[0];
-
-        if (retainedReferenceDirectories.has(topLevelDirectory)) continue;
         if (repositoryPath === "scripts/check-legacy-d3.mjs") continue;
 
         if (entry.isDirectory()) {

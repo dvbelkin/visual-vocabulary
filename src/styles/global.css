@@ -206,7 +206,7 @@ p {
 
 .migration-progress {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     margin: 0 0 2.5rem;
     border-top: 1px solid var(--color-line-strong);
     border-left: 1px solid var(--color-line-strong);
@@ -361,6 +361,8 @@ p {
     font-size: 1.55rem;
     letter-spacing: -0.03em;
     line-height: 1.12;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
 
 .chart-card h3 a::after {
@@ -610,5 +612,99 @@ tbody th {
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
+    }
+}
+
+@media print {
+    @page {
+        margin: 15mm;
+    }
+
+    html,
+    body {
+        background: white;
+        color: black;
+    }
+
+    body {
+        font-size: 10.5pt;
+    }
+
+    .skip-link,
+    .site-header,
+    .site-footer,
+    .back-link,
+    .hero__motif,
+    .catalog-search,
+    .category-filters,
+    .migration-progress {
+        display: none;
+    }
+
+    .container {
+        width: 100%;
+    }
+
+    .hero,
+    .catalog,
+    .chart-page {
+        min-height: 0;
+        padding-block: 0;
+    }
+
+    .hero h1,
+    .chart-page__header h1 {
+        max-width: none;
+        font-size: 30pt;
+        line-height: 1;
+    }
+
+    .chart-page__header,
+    .section-heading {
+        grid-template-columns: 1fr;
+        margin-bottom: 8mm;
+    }
+
+    .chart-stage {
+        padding: 5mm;
+        border-color: #777;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .learning-grid {
+        margin-block: 8mm;
+        break-inside: avoid;
+    }
+
+    .learning-grid section {
+        min-height: 0;
+        padding: 5mm;
+    }
+
+    .learning-grid__marker {
+        margin-bottom: 3mm;
+    }
+
+    .chart-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-card {
+        min-height: 0;
+        padding: 5mm;
+        break-inside: avoid;
+    }
+
+    .chart-card__number {
+        margin-bottom: 8mm;
+    }
+
+    .text-link {
+        display: none;
+    }
+
+    a {
+        text-decoration: none;
     }
 }
