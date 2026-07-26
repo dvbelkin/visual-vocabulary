@@ -13,7 +13,7 @@ const messages = {
         lead: "Разберитесь, какая связь в данных важнее всего, выберите подходящую форму и изучите её на небольшом интерактивном примере.",
         catalogTitle: "Каталог учебных примеров",
         catalogLead:
-            "64 интерактивных примера уже перенесены на ECharts. Пространственные формы отмечены как следующий этап.",
+            "Все 72 интерактивных примера перенесены. Картографическое семейство использует локальную географическую основу.",
         progressLabel: "Перенесено в Astro",
         legacyLabel: "Проверено в прежней версии",
         searchLabel: "Поиск по каталогу",
@@ -48,7 +48,7 @@ const messages = {
         lead: "Identify the relationship that matters most, choose a suitable form, and explore it through a small interactive example.",
         catalogTitle: "Catalogue of learning examples",
         catalogLead:
-            "64 interactive examples now run on ECharts. Spatial forms are clearly marked as the next stage.",
+            "All 72 interactive examples are now migrated. The map family uses a local geographic base.",
         progressLabel: "Migrated to Astro",
         legacyLabel: "Audited in the legacy version",
         searchLabel: "Search the catalogue",

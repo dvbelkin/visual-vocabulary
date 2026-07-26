@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { assertChartCatalog } from "../src/lib/catalog-validation";
 import { charts, type ChartDefinition } from "../src/lib/catalog";
 import { buildChartOption } from "../src/lib/charts/options";
+import { buildMapOption } from "../src/lib/charts/map-options";
 import { mountChart } from "../src/lib/charts/lifecycle";
 import { locales, t } from "../src/lib/i18n";
 
@@ -39,7 +40,7 @@ describe("ECharts option factories", () => {
     it.each(charts.map((chart) => [chart.id, chart] as const))(
         "builds an option for %s",
         (_id, chart) => {
-            const option = buildChartOption({
+            const payload = {
                 kind: chart.kind,
                 title: chart.title.en,
                 unit: chart.unit.en,
@@ -52,7 +53,9 @@ describe("ECharts option factories", () => {
                     values: row.values,
                 })),
                 reducedMotion: true,
-            });
+            };
+            const option =
+                chart.category === "spatial" ? buildMapOption(payload) : buildChartOption(payload);
 
             expect(option).toHaveProperty("series");
             expect(option).toMatchObject({ animation: false });

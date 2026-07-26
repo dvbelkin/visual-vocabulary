@@ -70,12 +70,21 @@ export type ChartKind =
     | "symbol-grid"
     | "priestley"
     | "voronoi"
-    | "venn";
+    | "venn"
+    | "choropleth-map"
+    | "symbol-map"
+    | "flow-map"
+    | "contour-map"
+    | "tile-cartogram"
+    | "dorling-cartogram"
+    | "dot-density-map"
+    | "spatial-heatmap";
 
 type LocalizedText = Record<Locale, string>;
 
 export interface DataRow {
     label: LocalizedText;
+    key?: string;
     value: number;
     value2?: number;
     value3?: number;
@@ -1997,6 +2006,427 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Музыка ∩ Спорт", en: "Music ∩ Sport" }, value: 5 },
             { label: { ru: "Театр ∩ Спорт", en: "Theatre ∩ Sport" }, value: 4 },
             { label: { ru: "Все три", en: "All three" }, value: 2 },
+        ],
+    },
+    {
+        id: "basic-choropleth",
+        category: "spatial",
+        kind: "choropleth-map",
+        title: { ru: "Хороплетная карта", en: "Choropleth map" },
+        description: {
+            ru: "Цвет территории показывает относительный показатель — долю электроэнергии из возобновляемых источников.",
+            en: "Territory colour represents a relative measure: the share of electricity from renewable sources.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить нормированный показатель между территориями с известными границами.",
+            en: "You need to compare a normalised measure across territories with known boundaries.",
+        },
+        avoidWhen: {
+            ru: "Не кодируйте цветом абсолютные итоги: крупные и малые территории будут сравниваться нечестно.",
+            en: "Do not encode absolute totals by colour: large and small territories would be compared unfairly.",
+        },
+        unit: { ru: "% электроэнергии", en: "% of electricity" },
+        data: [
+            { key: "Portugal", label: { ru: "Португалия", en: "Portugal" }, value: 62 },
+            { key: "Spain", label: { ru: "Испания", en: "Spain" }, value: 51 },
+            { key: "France", label: { ru: "Франция", en: "France" }, value: 28 },
+            {
+                key: "United Kingdom",
+                label: { ru: "Великобритания", en: "United Kingdom" },
+                value: 44,
+            },
+            { key: "Germany", label: { ru: "Германия", en: "Germany" }, value: 48 },
+            { key: "Poland", label: { ru: "Польша", en: "Poland" }, value: 24 },
+            { key: "Norway", label: { ru: "Норвегия", en: "Norway" }, value: 91 },
+            { key: "Sweden", label: { ru: "Швеция", en: "Sweden" }, value: 76 },
+            { key: "Italy", label: { ru: "Италия", en: "Italy" }, value: 39 },
+            { key: "Greece", label: { ru: "Греция", en: "Greece" }, value: 46 },
+        ],
+    },
+    {
+        id: "proportional-symbol",
+        category: "spatial",
+        kind: "symbol-map",
+        title: { ru: "Карта пропорциональных символов", en: "Proportional symbol map" },
+        description: {
+            ru: "Площадь круга показывает абсолютное число пассажиров железнодорожных вокзалов, а положение — город.",
+            en: "Circle area represents an absolute passenger total, while position identifies the city.",
+        },
+        useWhen: {
+            ru: "Нужно показать абсолютные величины в конкретных географических точках.",
+            en: "You need to show absolute magnitudes at specific geographic locations.",
+        },
+        avoidWhen: {
+            ru: "Слишком много близких точек перекроют друг друга; небольшие различия площадей также читаются плохо.",
+            en: "Too many nearby points will overlap, and small area differences are hard to judge.",
+        },
+        unit: { ru: "млн пассажиров", en: "million passengers" },
+        data: [
+            { label: { ru: "Лондон", en: "London" }, value: 82, value2: -0.13, value3: 51.51 },
+            { label: { ru: "Париж", en: "Paris" }, value: 71, value2: 2.35, value3: 48.86 },
+            { label: { ru: "Мадрид", en: "Madrid" }, value: 34, value2: -3.7, value3: 40.42 },
+            { label: { ru: "Берлин", en: "Berlin" }, value: 39, value2: 13.41, value3: 52.52 },
+            { label: { ru: "Варшава", en: "Warsaw" }, value: 27, value2: 21.01, value3: 52.23 },
+            { label: { ru: "Рим", en: "Rome" }, value: 31, value2: 12.5, value3: 41.9 },
+            {
+                label: { ru: "Стокгольм", en: "Stockholm" },
+                value: 18,
+                value2: 18.07,
+                value3: 59.33,
+            },
+        ],
+    },
+    {
+        id: "flow",
+        category: "spatial",
+        kind: "flow-map",
+        title: { ru: "Потоки на карте", en: "Flow map" },
+        description: {
+            ru: "Линии показывают направления ночных железнодорожных маршрутов между европейскими городами.",
+            en: "Lines show the direction of overnight rail routes between European cities.",
+        },
+        useWhen: {
+            ru: "Важны одновременно место отправления, место назначения и направление перемещения.",
+            en: "Origin, destination, and movement direction all matter.",
+        },
+        avoidWhen: {
+            ru: "Большое число пересекающихся маршрутов превращает карту в клубок; тогда нужны фильтры или агрегация.",
+            en: "Many crossing routes create a tangle; use filtering or aggregation instead.",
+        },
+        unit: { ru: "тыс. поездок в месяц", en: "thousand trips per month" },
+        data: [
+            {
+                label: { ru: "Париж → Берлин", en: "Paris → Berlin" },
+                value: 48,
+                values: [2.35, 48.86, 13.41, 52.52],
+            },
+            {
+                label: { ru: "Берлин → Варшава", en: "Berlin → Warsaw" },
+                value: 36,
+                values: [13.41, 52.52, 21.01, 52.23],
+            },
+            {
+                label: { ru: "Вена → Рим", en: "Vienna → Rome" },
+                value: 29,
+                values: [16.37, 48.21, 12.5, 41.9],
+            },
+            {
+                label: { ru: "Стокгольм → Копенгаген", en: "Stockholm → Copenhagen" },
+                value: 24,
+                values: [18.07, 59.33, 12.57, 55.68],
+            },
+            {
+                label: { ru: "Мадрид → Париж", en: "Madrid → Paris" },
+                value: 31,
+                values: [-3.7, 40.42, 2.35, 48.86],
+            },
+        ],
+    },
+    {
+        id: "contour",
+        category: "spatial",
+        kind: "contour-map",
+        title: { ru: "Контурная карта", en: "Contour map" },
+        description: {
+            ru: "Цветные полосы соединяют места с близкой расчётной температурой независимо от государственных границ.",
+            en: "Coloured bands connect places with similar estimated temperatures regardless of national boundaries.",
+        },
+        useWhen: {
+            ru: "Показатель меняется непрерывно в пространстве, например температура, высота или давление.",
+            en: "A measure varies continuously over space, such as temperature, elevation, or pressure.",
+        },
+        avoidWhen: {
+            ru: "Не интерполируйте редкие точки, если между ними возможны резкие неизвестные изменения.",
+            en: "Do not interpolate sparse points when sharp unknown changes may occur between them.",
+        },
+        unit: { ru: "°C", en: "°C" },
+        data: [
+            { label: { ru: "Лиссабон", en: "Lisbon" }, value: 29, value2: -9.14, value3: 38.72 },
+            { label: { ru: "Мадрид", en: "Madrid" }, value: 31, value2: -3.7, value3: 40.42 },
+            { label: { ru: "Париж", en: "Paris" }, value: 24, value2: 2.35, value3: 48.86 },
+            { label: { ru: "Рим", en: "Rome" }, value: 30, value2: 12.5, value3: 41.9 },
+            { label: { ru: "Берлин", en: "Berlin" }, value: 22, value2: 13.41, value3: 52.52 },
+            { label: { ru: "Варшава", en: "Warsaw" }, value: 21, value2: 21.01, value3: 52.23 },
+            {
+                label: { ru: "Стокгольм", en: "Stockholm" },
+                value: 17,
+                value2: 18.07,
+                value3: 59.33,
+            },
+            { label: { ru: "Хельсинки", en: "Helsinki" }, value: 16, value2: 24.94, value3: 60.17 },
+            { label: { ru: "Афины", en: "Athens" }, value: 33, value2: 23.73, value3: 37.98 },
+        ],
+    },
+    {
+        id: "equalised-cartogram",
+        category: "spatial",
+        kind: "tile-cartogram",
+        title: { ru: "Эквализированная картограмма", en: "Equalised cartogram" },
+        description: {
+            ru: "Каждая страна заменена одинаковой плиткой: площадь территории больше не влияет на сравнение.",
+            en: "Every country is replaced by an equal tile, removing territory area from the comparison.",
+        },
+        useWhen: {
+            ru: "Все территории должны иметь одинаковый визуальный вес, но приблизительное соседство желательно сохранить.",
+            en: "Every territory needs equal visual weight while approximate neighbourhoods remain useful.",
+        },
+        avoidWhen: {
+            ru: "Форма границ и точная география важны для вывода.",
+            en: "Boundary shape and precise geography are important to the conclusion.",
+        },
+        unit: { ru: "% городских поездок на велосипеде", en: "% of urban trips by bicycle" },
+        data: [
+            {
+                key: "PT",
+                label: { ru: "Португалия", en: "Portugal" },
+                value: 8,
+                value2: 0,
+                value3: 4,
+            },
+            { key: "ES", label: { ru: "Испания", en: "Spain" }, value: 12, value2: 1, value3: 4 },
+            { key: "FR", label: { ru: "Франция", en: "France" }, value: 17, value2: 2, value3: 3 },
+            {
+                key: "GB",
+                label: { ru: "Великобритания", en: "United Kingdom" },
+                value: 15,
+                value2: 1,
+                value3: 2,
+            },
+            {
+                key: "NL",
+                label: { ru: "Нидерланды", en: "Netherlands" },
+                value: 64,
+                value2: 3,
+                value3: 2,
+            },
+            {
+                key: "DE",
+                label: { ru: "Германия", en: "Germany" },
+                value: 31,
+                value2: 3,
+                value3: 3,
+            },
+            { key: "DK", label: { ru: "Дания", en: "Denmark" }, value: 48, value2: 3, value3: 1 },
+            { key: "SE", label: { ru: "Швеция", en: "Sweden" }, value: 36, value2: 4, value3: 0 },
+            { key: "PL", label: { ru: "Польша", en: "Poland" }, value: 22, value2: 4, value3: 3 },
+            { key: "AT", label: { ru: "Австрия", en: "Austria" }, value: 29, value2: 4, value3: 4 },
+            { key: "IT", label: { ru: "Италия", en: "Italy" }, value: 19, value2: 3, value3: 5 },
+            { key: "CZ", label: { ru: "Чехия", en: "Czechia" }, value: 27, value2: 5, value3: 3 },
+            { key: "GR", label: { ru: "Греция", en: "Greece" }, value: 11, value2: 5, value3: 5 },
+        ],
+    },
+    {
+        id: "scaled-cartogram-value",
+        category: "spatial",
+        kind: "dorling-cartogram",
+        title: { ru: "Картограмма Дорлинга", en: "Dorling cartogram" },
+        description: {
+            ru: "Страны заменены кругами: площадь круга пропорциональна числу студентов, а расположение приблизительно сохраняет географию.",
+            en: "Countries become circles whose area represents student totals while approximate geography is retained.",
+        },
+        useWhen: {
+            ru: "Нужно сравнить абсолютные итоги территорий, не позволяя физической площади доминировать.",
+            en: "You need to compare territorial totals without letting physical land area dominate.",
+        },
+        avoidWhen: {
+            ru: "Не используйте для чтения точных границ, расстояний или соседства: круги смещены для устранения наложений.",
+            en: "Do not use it for exact boundaries, distances, or adjacency: circles move to avoid overlap.",
+        },
+        unit: { ru: "тыс. студентов", en: "thousand students" },
+        data: [
+            {
+                key: "ES",
+                label: { ru: "Испания", en: "Spain" },
+                value: 190,
+                value2: -3.7,
+                value3: 40.4,
+            },
+            {
+                key: "FR",
+                label: { ru: "Франция", en: "France" },
+                value: 245,
+                value2: 2.4,
+                value3: 46.5,
+            },
+            {
+                key: "GB",
+                label: { ru: "Великобритания", en: "United Kingdom" },
+                value: 215,
+                value2: -1.5,
+                value3: 53.5,
+            },
+            {
+                key: "DE",
+                label: { ru: "Германия", en: "Germany" },
+                value: 310,
+                value2: 10.4,
+                value3: 51.1,
+            },
+            {
+                key: "IT",
+                label: { ru: "Италия", en: "Italy" },
+                value: 205,
+                value2: 12.5,
+                value3: 42.8,
+            },
+            {
+                key: "PL",
+                label: { ru: "Польша", en: "Poland" },
+                value: 155,
+                value2: 19.1,
+                value3: 52.1,
+            },
+            {
+                key: "SE",
+                label: { ru: "Швеция", en: "Sweden" },
+                value: 88,
+                value2: 16.2,
+                value3: 62.2,
+            },
+            {
+                key: "NL",
+                label: { ru: "Нидерланды", en: "Netherlands" },
+                value: 92,
+                value2: 5.3,
+                value3: 52.1,
+            },
+            {
+                key: "CZ",
+                label: { ru: "Чехия", en: "Czechia" },
+                value: 74,
+                value2: 15.5,
+                value3: 49.8,
+            },
+            {
+                key: "GR",
+                label: { ru: "Греция", en: "Greece" },
+                value: 61,
+                value2: 22.1,
+                value3: 39.1,
+            },
+        ],
+    },
+    {
+        id: "dot-density",
+        category: "spatial",
+        kind: "dot-density-map",
+        title: { ru: "Карта плотности точек", en: "Dot density map" },
+        description: {
+            ru: "Каждая точка обозначает один синтетический охраняемый природный объект; скопления показывают концентрацию.",
+            en: "Each dot represents one synthetic protected natural site; clusters reveal concentration.",
+        },
+        useWhen: {
+            ru: "Нужно показать размещение отдельных однотипных объектов и заметить пространственные скопления.",
+            en: "You need to show individual like-for-like locations and reveal spatial clusters.",
+        },
+        avoidWhen: {
+            ru: "Точные адреса нельзя раскрывать или точки настолько многочисленны, что сливаются.",
+            en: "Exact locations are sensitive or dots are so numerous that they merge.",
+        },
+        unit: { ru: "1 точка = 1 объект", en: "1 dot = 1 site" },
+        data: [
+            { label: { ru: "Пиренеи 1", en: "Pyrenees 1" }, value: 1, value2: -1.2, value3: 42.7 },
+            { label: { ru: "Пиренеи 2", en: "Pyrenees 2" }, value: 1, value2: 0.7, value3: 42.6 },
+            { label: { ru: "Пиренеи 3", en: "Pyrenees 3" }, value: 1, value2: 2.1, value3: 42.5 },
+            { label: { ru: "Альпы 1", en: "Alps 1" }, value: 1, value2: 6.8, value3: 45.6 },
+            { label: { ru: "Альпы 2", en: "Alps 2" }, value: 1, value2: 8.2, value3: 46.2 },
+            { label: { ru: "Альпы 3", en: "Alps 3" }, value: 1, value2: 10.4, value3: 46.5 },
+            { label: { ru: "Альпы 4", en: "Alps 4" }, value: 1, value2: 12.1, value3: 47.0 },
+            {
+                label: { ru: "Карпаты 1", en: "Carpathians 1" },
+                value: 1,
+                value2: 19.2,
+                value3: 49.1,
+            },
+            {
+                label: { ru: "Карпаты 2", en: "Carpathians 2" },
+                value: 1,
+                value2: 21.4,
+                value3: 48.4,
+            },
+            {
+                label: { ru: "Карпаты 3", en: "Carpathians 3" },
+                value: 1,
+                value2: 23.5,
+                value3: 47.5,
+            },
+            {
+                label: { ru: "Скандинавия 1", en: "Scandinavia 1" },
+                value: 1,
+                value2: 8.3,
+                value3: 61.2,
+            },
+            {
+                label: { ru: "Скандинавия 2", en: "Scandinavia 2" },
+                value: 1,
+                value2: 12.2,
+                value3: 63.8,
+            },
+            {
+                label: { ru: "Скандинавия 3", en: "Scandinavia 3" },
+                value: 1,
+                value2: 16.4,
+                value3: 65.1,
+            },
+            {
+                label: { ru: "Скандинавия 4", en: "Scandinavia 4" },
+                value: 1,
+                value2: 20.5,
+                value3: 67.2,
+            },
+            { label: { ru: "Балканы 1", en: "Balkans 1" }, value: 1, value2: 19.1, value3: 43.2 },
+            { label: { ru: "Балканы 2", en: "Balkans 2" }, value: 1, value2: 21.3, value3: 42.5 },
+            { label: { ru: "Балканы 3", en: "Balkans 3" }, value: 1, value2: 23.2, value3: 41.7 },
+        ],
+    },
+    {
+        id: "heat-map",
+        category: "spatial",
+        kind: "spatial-heatmap",
+        title: { ru: "Пространственная тепловая карта", en: "Spatial heat map" },
+        description: {
+            ru: "Размытые цветовые пятна показывают интенсивность синтетических измерений загрязнения воздуха без привязки к границам.",
+            en: "Blurred colour fields show synthetic air-pollution intensity independently of boundaries.",
+        },
+        useWhen: {
+            ru: "Нужно увидеть горячие зоны непрерывной или очень плотной пространственной величины.",
+            en: "You need to reveal hotspots in a continuous or very dense spatial measure.",
+        },
+        avoidWhen: {
+            ru: "Нужны точные значения отдельных точек или сравнение административных территорий.",
+            en: "Exact point values or administrative territory comparisons are required.",
+        },
+        unit: { ru: "индекс интенсивности", en: "intensity index" },
+        data: [
+            { label: { ru: "Запад", en: "West" }, value: 42, value2: -2.5, value3: 48.2 },
+            {
+                label: { ru: "Парижский узел", en: "Paris cluster" },
+                value: 76,
+                value2: 2.4,
+                value3: 48.9,
+            },
+            { label: { ru: "Бенилюкс", en: "Benelux" }, value: 68, value2: 4.8, value3: 51.0 },
+            { label: { ru: "Рейн", en: "Rhine" }, value: 73, value2: 7.1, value3: 50.4 },
+            {
+                label: { ru: "Север Италии", en: "Northern Italy" },
+                value: 79,
+                value2: 9.4,
+                value3: 45.3,
+            },
+            {
+                label: { ru: "Берлинский узел", en: "Berlin cluster" },
+                value: 54,
+                value2: 13.4,
+                value3: 52.5,
+            },
+            { label: { ru: "Силезия", en: "Silesia" }, value: 71, value2: 18.8, value3: 50.2 },
+            {
+                label: { ru: "Центральная Испания", en: "Central Spain" },
+                value: 48,
+                value2: -3.7,
+                value3: 40.4,
+            },
+            { label: { ru: "Балканы", en: "Balkans" }, value: 45, value2: 21.2, value3: 44.1 },
         ],
     },
 ];

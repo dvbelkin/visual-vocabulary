@@ -9,7 +9,10 @@ const retainedReferenceDirectories = new Set([
     "uk-constituency-cartogram-2017",
     "uk-constituency-map-2017",
 ]);
-const allowedAlgorithmFiles = new Set(["src/lib/charts/options.ts"]);
+const allowedAlgorithmImports = new Map([
+    ["src/lib/charts/options.ts", ['from "d3-delaunay"']],
+    ["src/lib/charts/map-options.ts", ['from "d3-contour"', 'from "d3-force"']],
+]);
 const runtimeExtensions = new Set([".astro", ".html", ".js", ".mjs", ".ts"]);
 const d3RuntimePattern =
     /(?:<script[^>]+(?:d3(?:\.min)?\.js|d3\.v\d)|(?:from|import)\s*["'][^"']*d3|\bd3\.(?:select|scale|axis|time|geo|layout|svg|csv|json|nest|range|extent|format|sum|ascending|descending)\b)/i;
@@ -40,9 +43,9 @@ async function visit(directory) {
         if (!runtimeExtensions.has(extname(entry.name))) continue;
 
         const source = await readFile(absolutePath, "utf8");
+        const allowedImports = allowedAlgorithmImports.get(repositoryPath);
         if (
-            allowedAlgorithmFiles.has(repositoryPath) &&
-            source.includes('from "d3-delaunay"') &&
+            allowedImports?.every((moduleImport) => source.includes(moduleImport)) &&
             !/\bd3\./i.test(source)
         ) {
             continue;
@@ -63,6 +66,6 @@ if (violations.length > 0) {
     process.exitCode = 1;
 } else {
     console.log(
-        "Старый D3 runtime отсутствует; разрешён только d3-delaunay для геометрии Вороного.",
+        "Старый D3 runtime отсутствует; разрешены только согласованные модульные алгоритмы D3.",
     );
 }

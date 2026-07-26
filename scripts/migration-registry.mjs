@@ -71,6 +71,14 @@ const astroRoutes = new Map([
     ["change-time:Временная шкала Пристли", "priestley-timeline"],
     ["part-whole:Диаграмма Вороного", "voronoi"],
     ["part-whole:Диаграмма Венна", "venn"],
+    ["spatial:Хороплетная карта", "basic-choropleth"],
+    ["spatial:Карта пропорциональных символов", "proportional-symbol"],
+    ["spatial:Потоки на карте", "flow"],
+    ["spatial:Контурная карта", "contour"],
+    ["spatial:Эквализированная картограмма", "equalised-cartogram"],
+    ["spatial:Масштабированная картограмма", "scaled-cartogram-value"],
+    ["spatial:Карта плотности точек", "dot-density"],
+    ["spatial:Пространственная тепловая карта", "heat-map"],
 ]);
 
 function parseCsv(text) {

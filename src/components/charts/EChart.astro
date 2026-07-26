@@ -17,6 +17,7 @@ const payload = {
     locale,
     data: chart.data.map((row) => ({
         label: row.label[locale],
+        key: row.key,
         value: row.value,
         value2: row.value2,
         value3: row.value3,
@@ -75,6 +76,16 @@ const payload = {
     ]);
 
     const cleanups: Array<() => void> = [];
+    const mapKinds = new Set([
+        "choropleth-map",
+        "symbol-map",
+        "flow-map",
+        "contour-map",
+        "tile-cartogram",
+        "dorling-cartogram",
+        "dot-density-map",
+        "spatial-heatmap",
+    ]);
     const basicKinds = new Set([
         "bar",
         "line",
@@ -127,7 +138,12 @@ const payload = {
 
         root.dataset.initialized = "true";
         const payload = JSON.parse(source.textContent) as Omit<ChartPayload, "reducedMotion">;
-        if (!basicKinds.has(payload.kind)) {
+        let createChartOption = buildChartOption;
+        if (mapKinds.has(payload.kind)) {
+            const mapModule = await import("../../lib/charts/map-options");
+            mapModule.registerMapCharts();
+            createChartOption = mapModule.buildMapOption;
+        } else if (!basicKinds.has(payload.kind)) {
             const { registerSpecializedCharts } =
                 await import("../../lib/charts/register-specialized");
             registerSpecializedCharts();
@@ -141,7 +157,7 @@ const payload = {
                 payload,
                 motionPreference: media,
                 createOption: (currentPayload, reducedMotion) =>
-                    buildChartOption({ ...currentPayload, reducedMotion }),
+                    createChartOption({ ...currentPayload, reducedMotion }),
                 createResizeObserver: (callback) => new ResizeObserver(callback),
             }),
         );
