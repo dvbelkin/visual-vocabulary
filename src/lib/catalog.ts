@@ -1944,8 +1944,8 @@ export const charts: readonly ChartDefinition[] = [
         kind: "voronoi",
         title: { ru: "Диаграмма Вороного", en: "Voronoi diagram" },
         description: {
-            ru: "На учебном плане города каждая цветная область показывает, какая библиотека находится ближе всего к этому месту.",
-            en: "On this synthetic city map, each coloured area shows which library is closest to that location.",
+            ru: "Карта разделена на зоны вокруг библиотек. Для любой позиции внутри цветной зоны ближайшей будет библиотека, отмеченная точкой в этой зоне.",
+            en: "The map is divided into zones around libraries. From anywhere inside a coloured zone, the nearest library is the point marked within that zone.",
         },
         useWhen: {
             ru: "Нужно разделить территорию между ближайшими магазинами, станциями, школами или другими точками.",
