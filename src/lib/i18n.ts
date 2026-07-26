@@ -13,7 +13,7 @@ const messages = {
         lead: "Разберитесь, какая связь в данных важнее всего, выберите подходящую форму и изучите её на небольшом интерактивном примере.",
         catalogTitle: "Каталог учебных примеров",
         catalogLead:
-            "61 интерактивный пример уже перенесён на ECharts. Карты и специальные геометрические формы отмечены как следующий этап.",
+            "64 интерактивных примера уже перенесены на ECharts. Пространственные формы отмечены как следующий этап.",
         progressLabel: "Перенесено в Astro",
         legacyLabel: "Проверено в прежней версии",
         searchLabel: "Поиск по каталогу",
@@ -48,7 +48,7 @@ const messages = {
         lead: "Identify the relationship that matters most, choose a suitable form, and explore it through a small interactive example.",
         catalogTitle: "Catalogue of learning examples",
         catalogLead:
-            "61 interactive examples now run on ECharts. Maps and specialist geometric forms are clearly marked as the next stage.",
+            "64 interactive examples now run on ECharts. Spatial forms are clearly marked as the next stage.",
         progressLabel: "Migrated to Astro",
         legacyLabel: "Audited in the legacy version",
         searchLabel: "Search the catalogue",

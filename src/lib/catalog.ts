@@ -67,7 +67,10 @@ export type ChartKind =
     | "seismogram"
     | "sunburst"
     | "semi-donut"
-    | "symbol-grid";
+    | "symbol-grid"
+    | "priestley"
+    | "voronoi"
+    | "venn";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -1859,6 +1862,141 @@ export const charts: readonly ChartDefinition[] = [
             { label: { ru: "Поддерживают", en: "Support" }, value: 47 },
             { label: { ru: "Не определились", en: "Undecided" }, value: 29 },
             { label: { ru: "Не поддерживают", en: "Oppose" }, value: 24 },
+        ],
+    },
+    {
+        id: "priestley-timeline",
+        category: "change-time",
+        kind: "priestley",
+        title: { ru: "Временная шкала Пристли", en: "Priestley timeline" },
+        description: {
+            ru: "Горизонтальные интервалы показывают начало, конец и одновременность длительных событий.",
+            en: "Horizontal intervals show the start, end, and overlap of long-running events.",
+        },
+        useWhen: {
+            ru: "Главный вопрос связан с продолжительностью событий и тем, какие из них происходили одновременно.",
+            en: "The main question concerns event duration and which events overlapped.",
+        },
+        avoidWhen: {
+            ru: "Важны отдельные даты без продолжительности или требуется сравнить точные числовые значения.",
+            en: "Events have no meaningful duration or exact numerical comparison is required.",
+        },
+        unit: { ru: "год", en: "year" },
+        valueLabels: {
+            primary: { ru: "Начало", en: "Start" },
+            secondary: { ru: "Окончание", en: "End" },
+            tertiary: { ru: "Дорожка", en: "Lane" },
+        },
+        data: [
+            {
+                label: { ru: "Антонин Дворжак", en: "Antonín Dvořák" },
+                value: 1841,
+                value2: 1904,
+                value3: 0,
+            },
+            {
+                label: { ru: "Густав Малер", en: "Gustav Mahler" },
+                value: 1860,
+                value2: 1911,
+                value3: 1,
+            },
+            {
+                label: { ru: "Клод Дебюсси", en: "Claude Debussy" },
+                value: 1862,
+                value2: 1918,
+                value3: 2,
+            },
+            {
+                label: { ru: "Жан Сибелиус", en: "Jean Sibelius" },
+                value: 1865,
+                value2: 1957,
+                value3: 3,
+            },
+            {
+                label: { ru: "Морис Равель", en: "Maurice Ravel" },
+                value: 1875,
+                value2: 1937,
+                value3: 4,
+            },
+            {
+                label: { ru: "Бела Барток", en: "Béla Bartók" },
+                value: 1881,
+                value2: 1945,
+                value3: 5,
+            },
+            {
+                label: { ru: "Игорь Стравинский", en: "Igor Stravinsky" },
+                value: 1882,
+                value2: 1971,
+                value3: 6,
+            },
+            {
+                label: { ru: "Сергей Прокофьев", en: "Sergei Prokofiev" },
+                value: 1891,
+                value2: 1953,
+                value3: 7,
+            },
+        ],
+    },
+    {
+        id: "voronoi",
+        category: "part-whole",
+        kind: "voronoi",
+        title: { ru: "Диаграмма Вороного", en: "Voronoi diagram" },
+        description: {
+            ru: "Плоскость делится на области ближайшего центра: любая точка ячейки ближе к своему объекту, чем к остальным.",
+            en: "The plane is partitioned by nearest centre: every point in a cell is closest to its own object.",
+        },
+        useWhen: {
+            ru: "Нужно показать зоны ближайшего обслуживания, влияния или принадлежности для набора точек.",
+            en: "You need to show nearest-service, influence, or ownership areas around a set of points.",
+        },
+        avoidWhen: {
+            ru: "Размер области должен кодировать заранее заданную долю — обычная диаграмма Вороного этого не гарантирует.",
+            en: "Cell area must encode a predefined share; an ordinary Voronoi tessellation does not guarantee that.",
+        },
+        unit: { ru: "условные координаты", en: "arbitrary coordinates" },
+        valueLabels: {
+            primary: { ru: "X", en: "X" },
+            secondary: { ru: "Y", en: "Y" },
+            tertiary: { ru: "Посещений, тыс.", en: "Visits, thousands" },
+        },
+        data: [
+            { label: { ru: "Северная", en: "North" }, value: 22, value2: 78, value3: 18 },
+            { label: { ru: "Речная", en: "Riverside" }, value: 48, value2: 72, value3: 26 },
+            { label: { ru: "Восточная", en: "East" }, value: 78, value2: 67, value3: 21 },
+            { label: { ru: "Центральная", en: "Central" }, value: 52, value2: 48, value3: 42 },
+            { label: { ru: "Парковая", en: "Park" }, value: 25, value2: 35, value3: 24 },
+            { label: { ru: "Южная", en: "South" }, value: 57, value2: 20, value3: 17 },
+            { label: { ru: "Озёрная", en: "Lakeside" }, value: 82, value2: 28, value3: 15 },
+        ],
+    },
+    {
+        id: "venn",
+        category: "part-whole",
+        kind: "venn",
+        title: { ru: "Диаграмма Венна", en: "Venn diagram" },
+        description: {
+            ru: "Перекрывающиеся области показывают принадлежность объектов одному, двум или трём множествам.",
+            en: "Overlapping regions show membership in one, two, or three sets.",
+        },
+        useWhen: {
+            ru: "Нужно объяснить логические пересечения двух или трёх множеств небольшой аудитории.",
+            en: "You need to explain logical intersections among two or three sets to a general audience.",
+        },
+        avoidWhen: {
+            ru: "Множеств больше трёх или требуется точно сравнивать размеры пересечений.",
+            en: "There are more than three sets or intersection sizes require precise comparison.",
+        },
+        unit: { ru: "студентов", en: "students" },
+        data: [
+            { label: { ru: "Музыка", en: "Music" }, value: 18 },
+            { label: { ru: "Театр", en: "Theatre" }, value: 14 },
+            { label: { ru: "Спорт", en: "Sport" }, value: 21 },
+            { label: { ru: "Музыка ∩ Театр", en: "Music ∩ Theatre" }, value: 7 },
+            { label: { ru: "Музыка ∩ Спорт", en: "Music ∩ Sport" }, value: 5 },
+            { label: { ru: "Театр ∩ Спорт", en: "Theatre ∩ Sport" }, value: 4 },
+            { label: { ru: "Все три", en: "All three" }, value: 2 },
         ],
     },
 ];

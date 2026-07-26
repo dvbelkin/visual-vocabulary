@@ -6,7 +6,7 @@
   "chartCount": 72,
   "legacyReadyCount": 67,
   "legacyReviewCount": 5,
-  "astroReadyCount": 61,
+  "astroReadyCount": 64,
   "entries": [
     {
       "id": "bar-diverging",
@@ -233,8 +233,8 @@
       "originalAvailability": true,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "priestley-timeline"
     },
     {
       "id": "circle-timeline",
@@ -521,8 +521,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "voronoi"
     },
     {
       "id": "sunburst",
@@ -569,8 +569,8 @@
       "originalAvailability": false,
       "legacySource": "interactive-examples.js",
       "legacyStatus": "ready",
-      "astroStatus": "missing",
-      "astroRouteId": null
+      "astroStatus": "ready",
+      "astroRouteId": "venn"
     },
     {
       "id": "waterfall",

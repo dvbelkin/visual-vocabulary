@@ -68,6 +68,9 @@ const astroRoutes = new Map([
     ["part-whole:Солнечная диаграмма", "sunburst-chart"],
     ["part-whole:Полукруг", "semicircle-chart"],
     ["part-whole:Сетка из символов", "symbol-grid"],
+    ["change-time:Временная шкала Пристли", "priestley-timeline"],
+    ["part-whole:Диаграмма Вороного", "voronoi"],
+    ["part-whole:Диаграмма Венна", "venn"],
 ]);
 
 function parseCsv(text) {

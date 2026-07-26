@@ -1,4 +1,5 @@
 import type { EChartsCoreOption } from "echarts/core";
+import { Delaunay } from "d3-delaunay";
 import type { ChartKind, DataRow } from "../catalog";
 
 export interface ChartPayload {
@@ -56,6 +57,227 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
             confine: true,
         },
     };
+
+    if (payload.kind === "priestley") {
+        const minYear = Math.min(...payload.data.map((row) => row.value)) - 5;
+        const maxYear = Math.max(...payload.data.map((row) => row.value2 ?? row.value)) + 5;
+        return {
+            ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ dataIndex }: { dataIndex: number }) => {
+                    const row = payload.data[dataIndex];
+                    return `${row.label}: ${row.value}–${row.value2}`;
+                },
+            },
+            grid: { left: 28, right: 28, top: 24, bottom: 46 },
+            xAxis: {
+                type: "value",
+                min: minYear,
+                max: maxYear,
+                axisLabel: { formatter: "{value}" },
+                splitLine: { lineStyle: { color: gridLine } },
+            },
+            yAxis: { type: "value", min: -0.6, max: 7.6, show: false },
+            series: [
+                {
+                    type: "custom",
+                    data: payload.data.map((row, index) => [
+                        row.value,
+                        row.value2 ?? row.value,
+                        row.value3 ?? index,
+                        index,
+                    ]),
+                    renderItem: (
+                        _params: unknown,
+                        api: {
+                            value: (dimension: number) => number;
+                            coord: (point: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const start = api.coord([api.value(0), api.value(2)]);
+                        const end = api.coord([api.value(1), api.value(2)]);
+                        const index = api.value(3);
+                        const height = 30;
+                        return {
+                            type: "group",
+                            children: [
+                                {
+                                    type: "rect",
+                                    shape: {
+                                        x: start[0],
+                                        y: start[1] - height / 2,
+                                        width: Math.max(2, end[0] - start[0]),
+                                        height,
+                                        r: 5,
+                                    },
+                                    style: { fill: index % 2 === 0 ? green : "#2f6fb0" },
+                                },
+                                {
+                                    type: "text",
+                                    style: {
+                                        x: start[0] + 8,
+                                        y: start[1],
+                                        text: payload.data[index].label,
+                                        fill: "#fff",
+                                        fontSize: 11,
+                                        verticalAlign: "middle",
+                                        overflow: "truncate",
+                                        width: Math.max(0, end[0] - start[0] - 14),
+                                    },
+                                },
+                            ],
+                        };
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "voronoi") {
+        const points = payload.data.map((row) => [row.value, row.value2 ?? 0] as [number, number]);
+        const voronoi = Delaunay.from(points).voronoi([0, 0, 100, 100]);
+        const polygons = points.map((_, index) => voronoi.cellPolygon(index) ?? []);
+        return {
+            ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ dataIndex }: { dataIndex: number }) => {
+                    const row = payload.data[dataIndex];
+                    const visits = payload.locale === "ru" ? "тыс. посещений" : "thousand visits";
+                    return `${row.label}: ${row.value3} ${visits}`;
+                },
+            },
+            grid: { left: 18, right: 18, top: 18, bottom: 18 },
+            xAxis: { type: "value", min: 0, max: 100, show: false },
+            yAxis: { type: "value", min: 0, max: 100, show: false },
+            series: [
+                {
+                    type: "custom",
+                    data: payload.data.map((_, index) => index),
+                    renderItem: (
+                        params: { dataIndex: number },
+                        api: { coord: (point: [number, number]) => [number, number] },
+                    ) => ({
+                        type: "polygon",
+                        shape: {
+                            points: polygons[params.dataIndex].map((point) =>
+                                api.coord([point[0], point[1]]),
+                            ),
+                        },
+                        style: {
+                            fill: [green, orange, "#2f6fb0", "#8f5ca6", "#d4a72c"][
+                                params.dataIndex % 5
+                            ],
+                            stroke: "#fff",
+                            lineWidth: 3,
+                            opacity: 0.78,
+                        },
+                    }),
+                },
+                {
+                    type: "scatter",
+                    data: payload.data.map((row) => ({
+                        name: row.label,
+                        value: [row.value, row.value2],
+                    })),
+                    symbolSize: 8,
+                    itemStyle: { color: ink },
+                    label: {
+                        show: true,
+                        position: "top",
+                        formatter: "{b}",
+                        color: ink,
+                        backgroundColor: "rgba(255,255,255,.82)",
+                        padding: [3, 5],
+                        borderRadius: 3,
+                    },
+                },
+            ],
+        };
+    }
+
+    if (payload.kind === "venn") {
+        const labels = payload.data.slice(0, 3).map((row) => row.label);
+        const circles = [
+            { cx: 39, cy: 58, labelY: 76, fill: "rgba(23,107,77,.46)" },
+            { cx: 61, cy: 58, labelY: 76, fill: "rgba(47,111,176,.42)" },
+            { cx: 50, cy: 39, labelY: 17, fill: "rgba(219,107,53,.40)" },
+        ];
+        return {
+            ...base,
+            tooltip: { show: false },
+            grid: { left: 18, right: 18, top: 18, bottom: 18 },
+            xAxis: { type: "value", show: false, min: 0, max: 100 },
+            yAxis: { type: "value", show: false, min: 0, max: 100 },
+            series: [
+                {
+                    type: "custom",
+                    silent: true,
+                    data: [0, 1, 2],
+                    renderItem: (
+                        params: { dataIndex: number },
+                        api: {
+                            coord: (point: [number, number]) => [number, number];
+                            size: (size: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const circle = circles[params.dataIndex];
+                        const center = api.coord([circle.cx, circle.cy]);
+                        const label = api.coord([circle.cx, circle.labelY]);
+                        return {
+                            type: "group",
+                            children: [
+                                {
+                                    type: "circle",
+                                    shape: {
+                                        cx: center[0],
+                                        cy: center[1],
+                                        r: api.size([24, 0])[0],
+                                    },
+                                    style: {
+                                        fill: circle.fill,
+                                        stroke: "#fff",
+                                        lineWidth: 2,
+                                    },
+                                },
+                                {
+                                    type: "text",
+                                    style: {
+                                        x: label[0],
+                                        y: label[1],
+                                        text: labels[params.dataIndex],
+                                        textAlign: "center",
+                                        verticalAlign: "middle",
+                                        fill: ink,
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                    },
+                                },
+                            ],
+                        };
+                    },
+                },
+                {
+                    type: "scatter",
+                    data: [[50, 52]],
+                    symbolSize: 1,
+                    itemStyle: { opacity: 0 },
+                    label: {
+                        show: true,
+                        position: "inside",
+                        formatter: String(payload.data[6]?.value ?? ""),
+                        color: ink,
+                        fontSize: 15,
+                        fontWeight: 700,
+                    },
+                    silent: true,
+                },
+            ],
+        };
+    }
 
     if (payload.kind === "pie" || payload.kind === "donut") {
         return {
