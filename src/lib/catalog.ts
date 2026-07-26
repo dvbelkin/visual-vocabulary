@@ -1944,18 +1944,18 @@ export const charts: readonly ChartDefinition[] = [
         kind: "voronoi",
         title: { ru: "Диаграмма Вороного", en: "Voronoi diagram" },
         description: {
-            ru: "Плоскость делится на области ближайшего центра: любая точка ячейки ближе к своему объекту, чем к остальным.",
-            en: "The plane is partitioned by nearest centre: every point in a cell is closest to its own object.",
+            ru: "На учебном плане города каждая цветная область показывает, какая библиотека находится ближе всего к этому месту.",
+            en: "On this synthetic city map, each coloured area shows which library is closest to that location.",
         },
         useWhen: {
-            ru: "Нужно показать зоны ближайшего обслуживания, влияния или принадлежности для набора точек.",
-            en: "You need to show nearest-service, influence, or ownership areas around a set of points.",
+            ru: "Нужно разделить территорию между ближайшими магазинами, станциями, школами или другими точками.",
+            en: "You need to divide an area among the nearest shops, stations, schools, or other locations.",
         },
         avoidWhen: {
-            ru: "Размер области должен кодировать заранее заданную долю — обычная диаграмма Вороного этого не гарантирует.",
-            en: "Cell area must encode a predefined share; an ordinary Voronoi tessellation does not guarantee that.",
+            ru: "Площадь цветной области нельзя читать как количество посещений: её определяет только расположение точек.",
+            en: "Do not read coloured area as visit volume: cell size is determined only by point locations.",
         },
-        unit: { ru: "условные координаты", en: "arbitrary coordinates" },
+        unit: { ru: "координаты учебной карты", en: "synthetic map coordinates" },
         valueLabels: {
             primary: { ru: "X", en: "X" },
             secondary: { ru: "Y", en: "Y" },

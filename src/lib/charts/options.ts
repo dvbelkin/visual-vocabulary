@@ -156,6 +156,126 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
             series: [
                 {
                     type: "custom",
+                    silent: true,
+                    data: [0],
+                    renderItem: (
+                        _params: unknown,
+                        api: { coord: (point: [number, number]) => [number, number] },
+                    ) => {
+                        const polygon = (points: Array<[number, number]>) =>
+                            points.map((point) => api.coord(point));
+                        const line = (points: Array<[number, number]>, width = 4) => ({
+                            type: "polyline",
+                            shape: { points: polygon(points) },
+                            style: {
+                                fill: "none",
+                                stroke: "#fff",
+                                lineWidth: width,
+                                opacity: 0.9,
+                            },
+                        });
+                        const riverLabel = api.coord([88, 23]);
+                        const parkLabel = api.coord([17, 70]);
+                        return {
+                            type: "group",
+                            children: [
+                                {
+                                    type: "polygon",
+                                    shape: {
+                                        points: polygon([
+                                            [0, 0],
+                                            [100, 0],
+                                            [100, 100],
+                                            [0, 100],
+                                        ]),
+                                    },
+                                    style: { fill: "#edf0ec" },
+                                },
+                                {
+                                    type: "polygon",
+                                    shape: {
+                                        points: polygon([
+                                            [0, 18],
+                                            [19, 22],
+                                            [38, 18],
+                                            [56, 25],
+                                            [76, 20],
+                                            [100, 26],
+                                            [100, 35],
+                                            [78, 29],
+                                            [57, 34],
+                                            [37, 27],
+                                            [18, 31],
+                                            [0, 27],
+                                        ]),
+                                    },
+                                    style: { fill: "#a8d2df" },
+                                },
+                                {
+                                    type: "polygon",
+                                    shape: {
+                                        points: polygon([
+                                            [8, 58],
+                                            [28, 58],
+                                            [31, 78],
+                                            [12, 84],
+                                        ]),
+                                    },
+                                    style: { fill: "#b9d6b5" },
+                                },
+                                line([
+                                    [5, 48],
+                                    [95, 74],
+                                ]),
+                                line([
+                                    [16, 96],
+                                    [36, 5],
+                                ]),
+                                line([
+                                    [67, 96],
+                                    [56, 4],
+                                ]),
+                                line([
+                                    [4, 88],
+                                    [92, 43],
+                                ]),
+                                line(
+                                    [
+                                        [0, 52],
+                                        [30, 45],
+                                        [68, 48],
+                                        [100, 42],
+                                    ],
+                                    2,
+                                ),
+                                {
+                                    type: "text",
+                                    style: {
+                                        x: riverLabel[0],
+                                        y: riverLabel[1],
+                                        text: payload.locale === "ru" ? "река" : "river",
+                                        fill: "#326f82",
+                                        fontSize: 12,
+                                        fontWeight: 700,
+                                    },
+                                },
+                                {
+                                    type: "text",
+                                    style: {
+                                        x: parkLabel[0],
+                                        y: parkLabel[1],
+                                        text: payload.locale === "ru" ? "парк" : "park",
+                                        fill: "#315f39",
+                                        fontSize: 12,
+                                        fontWeight: 700,
+                                    },
+                                },
+                            ],
+                        };
+                    },
+                },
+                {
+                    type: "custom",
                     data: payload.data.map((_, index) => index),
                     renderItem: (
                         params: { dataIndex: number },
@@ -173,7 +293,14 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                             ],
                             stroke: "#fff",
                             lineWidth: 3,
-                            opacity: 0.78,
+                            opacity: 0.42,
+                        },
+                        emphasis: {
+                            style: {
+                                opacity: 0.78,
+                                shadowBlur: 10,
+                                shadowColor: "rgba(23,32,28,.28)",
+                            },
                         },
                     }),
                 },
@@ -202,17 +329,131 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     if (payload.kind === "venn") {
         const labels = payload.data.slice(0, 3).map((row) => row.label);
         const circles = [
-            { cx: 39, cy: 58, labelY: 76, fill: "rgba(23,107,77,.46)" },
-            { cx: 61, cy: 58, labelY: 76, fill: "rgba(47,111,176,.42)" },
-            { cx: 50, cy: 39, labelY: 17, fill: "rgba(219,107,53,.40)" },
+            { cx: 39, cy: 58, labelY: 79 },
+            { cx: 61, cy: 58, labelY: 79 },
+            { cx: 50, cy: 39, labelY: 14 },
+        ];
+        const radius = 24;
+        const intersectionSets = [
+            [0, 1],
+            [0, 2],
+            [1, 2],
+            [0, 1, 2],
+        ];
+        const intersectionPolygon = (indices: number[]) => {
+            const points: Array<[number, number]> = [];
+            for (const circleIndex of indices) {
+                const circle = circles[circleIndex];
+                for (let step = 0; step < 240; step += 1) {
+                    const angle = (step / 240) * Math.PI * 2;
+                    const point: [number, number] = [
+                        circle.cx + Math.cos(angle) * radius,
+                        circle.cy + Math.sin(angle) * radius,
+                    ];
+                    if (
+                        indices.every((index) => {
+                            const candidate = circles[index];
+                            return (
+                                Math.hypot(point[0] - candidate.cx, point[1] - candidate.cy) <=
+                                radius + 0.1
+                            );
+                        })
+                    ) {
+                        points.push(point);
+                    }
+                }
+            }
+            const center = points.reduce(
+                (sum, point) => [
+                    sum[0] + point[0] / points.length,
+                    sum[1] + point[1] / points.length,
+                ],
+                [0, 0],
+            );
+            return points.sort(
+                (a, b) =>
+                    Math.atan2(a[1] - center[1], a[0] - center[0]) -
+                    Math.atan2(b[1] - center[1], b[0] - center[0]),
+            );
+        };
+        const intersections = intersectionSets.map(intersectionPolygon);
+        const regionColors = [
+            "rgba(80,155,126,.48)",
+            "rgba(93,148,196,.48)",
+            "rgba(225,139,91,.48)",
+            "rgba(73,111,122,.72)",
+            "rgba(154,111,78,.72)",
+            "rgba(132,105,145,.72)",
+            "rgba(73,78,83,.86)",
         ];
         return {
             ...base,
-            tooltip: { show: false },
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ dataIndex }: { dataIndex: number }) => {
+                    const row = payload.data[dataIndex];
+                    return `${row.label}: <strong>${row.value}</strong> ${payload.unit}`;
+                },
+            },
             grid: { left: 18, right: 18, top: 18, bottom: 18 },
             xAxis: { type: "value", show: false, min: 0, max: 100 },
             yAxis: { type: "value", show: false, min: 0, max: 100 },
             series: [
+                {
+                    type: "custom",
+                    data: payload.data.map((_, index) => index),
+                    renderItem: (
+                        params: { dataIndex: number },
+                        api: {
+                            coord: (point: [number, number]) => [number, number];
+                            size: (size: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const chartCenter = api.coord([50, 50]);
+                        const pixelRadius = Math.min(
+                            Math.abs(api.size([radius, 0])[0]),
+                            Math.abs(api.size([0, radius])[1]),
+                        );
+                        const scale = pixelRadius / radius;
+                        const toPixel = (point: [number, number]): [number, number] => [
+                            chartCenter[0] + (point[0] - 50) * scale,
+                            chartCenter[1] - (point[1] - 50) * scale,
+                        ];
+                        const index = params.dataIndex;
+                        const shape =
+                            index < 3
+                                ? {
+                                      type: "circle",
+                                      shape: {
+                                          cx: toPixel([circles[index].cx, circles[index].cy])[0],
+                                          cy: toPixel([circles[index].cx, circles[index].cy])[1],
+                                          r: pixelRadius,
+                                      },
+                                  }
+                                : {
+                                      type: "polygon",
+                                      shape: {
+                                          points: intersections[index - 3].map(toPixel),
+                                      },
+                                  };
+                        return {
+                            ...shape,
+                            style: {
+                                fill: regionColors[index],
+                                stroke: "rgba(255,255,255,.35)",
+                                lineWidth: index < 3 ? 0 : 1,
+                            },
+                            emphasis: {
+                                style: {
+                                    fill: regionColors[index].replace(/,\.[0-9]+\)/, ",.96)"),
+                                    shadowBlur: 12,
+                                    shadowColor: "rgba(23,32,28,.24)",
+                                },
+                            },
+                        };
+                    },
+                },
                 {
                     type: "custom",
                     silent: true,
@@ -224,56 +465,60 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                             size: (size: [number, number]) => [number, number];
                         },
                     ) => {
+                        const chartCenter = api.coord([50, 50]);
+                        const pixelRadius = Math.min(
+                            Math.abs(api.size([radius, 0])[0]),
+                            Math.abs(api.size([0, radius])[1]),
+                        );
+                        const scale = pixelRadius / radius;
+                        const toPixel = (point: [number, number]): [number, number] => [
+                            chartCenter[0] + (point[0] - 50) * scale,
+                            chartCenter[1] - (point[1] - 50) * scale,
+                        ];
                         const circle = circles[params.dataIndex];
-                        const center = api.coord([circle.cx, circle.cy]);
-                        const label = api.coord([circle.cx, circle.labelY]);
+                        const center = toPixel([circle.cx, circle.cy]);
+                        const label = toPixel([circle.cx, circle.labelY]);
+                        const children: unknown[] = [
+                            {
+                                type: "circle",
+                                shape: { cx: center[0], cy: center[1], r: pixelRadius },
+                                style: { fill: "transparent", stroke: ink, lineWidth: 2 },
+                            },
+                            {
+                                type: "text",
+                                style: {
+                                    x: label[0],
+                                    y: label[1],
+                                    text: labels[params.dataIndex],
+                                    textAlign: "center",
+                                    verticalAlign: "middle",
+                                    fill: ink,
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                },
+                            },
+                        ];
+                        if (params.dataIndex === 0) {
+                            const tripleCenter = toPixel([50, 51]);
+                            children.push({
+                                type: "text",
+                                style: {
+                                    x: tripleCenter[0],
+                                    y: tripleCenter[1],
+                                    text: String(payload.data[6]?.value ?? ""),
+                                    textAlign: "center",
+                                    verticalAlign: "middle",
+                                    fill: "#fff",
+                                    fontSize: 15,
+                                    fontWeight: 700,
+                                },
+                            });
+                        }
                         return {
                             type: "group",
-                            children: [
-                                {
-                                    type: "circle",
-                                    shape: {
-                                        cx: center[0],
-                                        cy: center[1],
-                                        r: api.size([24, 0])[0],
-                                    },
-                                    style: {
-                                        fill: circle.fill,
-                                        stroke: "#fff",
-                                        lineWidth: 2,
-                                    },
-                                },
-                                {
-                                    type: "text",
-                                    style: {
-                                        x: label[0],
-                                        y: label[1],
-                                        text: labels[params.dataIndex],
-                                        textAlign: "center",
-                                        verticalAlign: "middle",
-                                        fill: ink,
-                                        fontSize: 13,
-                                        fontWeight: 600,
-                                    },
-                                },
-                            ],
+                            children,
                         };
                     },
-                },
-                {
-                    type: "scatter",
-                    data: [[50, 52]],
-                    symbolSize: 1,
-                    itemStyle: { opacity: 0 },
-                    label: {
-                        show: true,
-                        position: "inside",
-                        formatter: String(payload.data[6]?.value ?? ""),
-                        color: ink,
-                        fontSize: 15,
-                        fontWeight: 700,
-                    },
-                    silent: true,
                 },
             ],
         };
