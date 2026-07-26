@@ -1,6 +1,7 @@
 ---
 import EChart from "../../../components/charts/EChart.astro";
 import D3Map from "../../../components/charts/D3Map.astro";
+import MapLibreMap from "../../../components/charts/MapLibreMap.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { categoryNames, charts } from "../../../lib/catalog";
 import { locales, localePath, t, type Locale } from "../../../lib/i18n";
@@ -24,6 +25,7 @@ const rows = chart.data.map((row) => ({
     value3: row.value3,
 }));
 const usesD3Map = chart.id === "basic-choropleth" || chart.id === "scaled-cartogram-value";
+const usesMapLibre = ["proportional-symbol", "dot-density", "heat-map"].includes(chart.id);
 ---
 
 <BaseLayout
@@ -60,6 +62,13 @@ const usesD3Map = chart.id === "basic-choropleth" || chart.id === "scaled-cartog
             {
                 usesD3Map ? (
                     <D3Map
+                        chart={chart}
+                        locale={activeLocale}
+                        label={copy.chartLabel}
+                        descriptionId="chart-description"
+                    />
+                ) : usesMapLibre ? (
+                    <MapLibreMap
                         chart={chart}
                         locale={activeLocale}
                         label={copy.chartLabel}

@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 const assetsDirectory = resolve("dist/_astro");
 const maximumJavaScriptChunk = 450 * 1024;
 const maximumTotalJavaScript = 1100 * 1024;
+const maximumMapLibreChunk = 1000 * 1024;
 const maximumStylesheet = 80 * 1024;
 
 const assets = await Promise.all(
@@ -15,13 +16,21 @@ const assets = await Promise.all(
 
 const scripts = assets.filter((asset) => asset.name.endsWith(".js"));
 const styles = assets.filter((asset) => asset.name.endsWith(".css"));
-const totalJavaScript = scripts.reduce((total, asset) => total + asset.size, 0);
+const mapLibreScripts = scripts.filter((asset) => asset.name.startsWith("MapLibreMap."));
+const coreScripts = scripts.filter((asset) => !mapLibreScripts.includes(asset));
+const totalJavaScript = coreScripts.reduce((total, asset) => total + asset.size, 0);
 const violations = [
-    ...scripts
+    ...coreScripts
         .filter((asset) => asset.size > maximumJavaScriptChunk)
         .map(
             (asset) =>
                 `${asset.name}: ${asset.size} bytes exceeds the ${maximumJavaScriptChunk}-byte JS chunk budget`,
+        ),
+    ...mapLibreScripts
+        .filter((asset) => asset.size > maximumMapLibreChunk)
+        .map(
+            (asset) =>
+                `${asset.name}: ${asset.size} bytes exceeds the ${maximumMapLibreChunk}-byte isolated MapLibre budget`,
         ),
     ...styles
         .filter((asset) => asset.size > maximumStylesheet)
@@ -45,6 +54,6 @@ if (violations.length > 0) {
 } else {
     const largestScript = scripts.sort((a, b) => b.size - a.size)[0];
     console.log(
-        `Performance budget passed: ${scripts.length} JS chunks, ${totalJavaScript} bytes total, largest ${largestScript.name} (${largestScript.size} bytes).`,
+        `Performance budget passed: ${coreScripts.length} core JS chunks (${totalJavaScript} bytes) and ${mapLibreScripts.length} isolated MapLibre chunk; largest ${largestScript.name} (${largestScript.size} bytes).`,
     );
 }

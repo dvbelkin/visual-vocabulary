@@ -1,0 +1,157 @@
+---
+import type { ChartDefinition } from "../../lib/catalog";
+import type { Locale } from "../../lib/i18n";
+
+interface Props {
+    chart: ChartDefinition;
+    locale: Locale;
+    label: string;
+    descriptionId: string;
+}
+
+const { chart, locale, label, descriptionId } = Astro.props;
+---
+
+<div
+    class="maplibre-example"
+    data-maplibre-map={chart.id}
+    data-locale={locale}
+    role="group"
+    aria-label={`${label}: ${chart.title[locale]}`}
+    aria-describedby={descriptionId}
+>
+    {
+        chart.id === "dot-density" && (
+            <fieldset class="maplibre-example__controls">
+                <legend>{locale === "ru" ? "Отображение точек" : "Point display"}</legend>
+                <label>
+                    <input type="radio" name={`point-mode-${locale}`} value="clusters" checked />
+                    {locale === "ru" ? "Кластеры" : "Clusters"}
+                </label>
+                <label>
+                    <input type="radio" name={`point-mode-${locale}`} value="points" />
+                    {locale === "ru" ? "Все точки" : "All points"}
+                </label>
+            </fieldset>
+        )
+    }
+    {
+        chart.id === "heat-map" && (
+            <div class="maplibre-example__slider">
+                <label for={`earthquake-month-${locale}`}>
+                    {locale === "ru" ? "Месяц:" : "Month:"} <output data-month-output>1</output>
+                </label>
+                <input
+                    id={`earthquake-month-${locale}`}
+                    data-month-slider
+                    type="range"
+                    min="1"
+                    max="12"
+                    value="1"
+                    step="1"
+                />
+            </div>
+        )
+    }
+    <div class="maplibre-example__canvas"></div>
+    <p class="maplibre-example__status" aria-live="polite">
+        {
+            locale === "ru"
+                ? "Карту можно перемещать и масштабировать."
+                : "Pan and zoom the map to explore."
+        }
+    </p>
+</div>
+
+<script>
+    import { renderMapLibreExample } from "../../lib/charts/maplibre-maps";
+    import "maplibre-gl/dist/maplibre-gl.css";
+
+    const cleanups: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>("[data-maplibre-map]").forEach(async (root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = "true";
+        cleanups.push(await renderMapLibreExample(root));
+    });
+
+    document.addEventListener(
+        "astro:before-swap",
+        () => cleanups.splice(0).forEach((cleanup) => cleanup()),
+        { once: true },
+    );
+</script>
+
+<style>
+    .maplibre-example__canvas {
+        width: 100%;
+        height: 440px;
+        overflow: hidden;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-sm);
+    }
+
+    .maplibre-example__controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 0 0 0.8rem;
+        padding: 0;
+        border: 0;
+    }
+
+    .maplibre-example__controls legend {
+        float: left;
+        margin-right: 0.25rem;
+        font-weight: 700;
+    }
+
+    .maplibre-example__controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+    }
+
+    .maplibre-example__slider {
+        display: grid;
+        grid-template-columns: 9rem minmax(12rem, 28rem);
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .maplibre-example__slider label {
+        font-weight: 700;
+    }
+
+    .maplibre-example__slider input {
+        width: 100%;
+    }
+
+    .maplibre-example__status {
+        min-height: 1.6em;
+        margin: 0.55rem 0 0;
+        color: var(--color-muted);
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 600px) {
+        .maplibre-example__canvas {
+            height: 360px;
+        }
+
+        .maplibre-example__controls {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .maplibre-example__controls legend {
+            width: 100%;
+        }
+
+        .maplibre-example__slider {
+            grid-template-columns: 1fr;
+            gap: 0.35rem;
+        }
+    }
+</style>
