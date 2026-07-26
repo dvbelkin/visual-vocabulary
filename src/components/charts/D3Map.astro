@@ -1,0 +1,126 @@
+---
+import type { ChartDefinition } from "../../lib/catalog";
+import type { Locale } from "../../lib/i18n";
+
+interface Props {
+    chart: ChartDefinition;
+    locale: Locale;
+    label: string;
+    descriptionId: string;
+}
+
+const { chart, locale, label, descriptionId } = Astro.props;
+---
+
+<div
+    class="d3-map"
+    data-d3-map={chart.id}
+    data-locale={locale}
+    role="group"
+    aria-label={`${label}: ${chart.title[locale]}`}
+    aria-describedby={descriptionId}
+>
+    {
+        chart.id === "scaled-cartogram-value" && (
+            <fieldset class="d3-map__controls">
+                <legend>{locale === "ru" ? "Год наблюдения" : "Observation year"}</legend>
+                <label>
+                    <input type="radio" name={`year-${locale}`} value="2008" /> 2008
+                </label>
+                <label>
+                    <input type="radio" name={`year-${locale}`} value="2018" checked /> 2018
+                </label>
+            </fieldset>
+        )
+    }
+    <div class="d3-map__canvas"></div>
+    <p class="d3-map__status" aria-live="polite">
+        {locale === "ru" ? "Наведите указатель на территорию." : "Point to an area to inspect it."}
+    </p>
+</div>
+
+<script>
+    import { renderD3Map } from "../../lib/charts/d3-maps";
+
+    const cleanups: Array<() => void> = [];
+
+    document.querySelectorAll<HTMLElement>("[data-d3-map]").forEach(async (root) => {
+        if (root.dataset.initialized) return;
+        root.dataset.initialized = "true";
+        cleanups.push(await renderD3Map(root));
+    });
+
+    document.addEventListener(
+        "astro:before-swap",
+        () => cleanups.splice(0).forEach((cleanup) => cleanup()),
+        { once: true },
+    );
+</script>
+
+<style>
+    .d3-map {
+        min-height: 420px;
+    }
+
+    .d3-map__canvas {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 975 / 610;
+    }
+
+    .d3-map__canvas :global(svg) {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    .d3-map__canvas :global(.map-region) {
+        transition:
+            opacity 140ms ease,
+            stroke-width 140ms ease;
+    }
+
+    .d3-map__canvas :global(.map-region:hover),
+    .d3-map__canvas :global(.map-region:focus-visible) {
+        opacity: 0.72;
+        stroke: #17201c;
+        stroke-width: 1.6;
+        outline: none;
+    }
+
+    .d3-map__controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 0 0 0.75rem;
+        padding: 0;
+        border: 0;
+    }
+
+    .d3-map__controls legend {
+        float: left;
+        margin-right: 0.25rem;
+        font-weight: 700;
+    }
+
+    .d3-map__controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+    }
+
+    .d3-map__status {
+        min-height: 1.6em;
+        margin: 0.5rem 0 0;
+        color: var(--color-muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .d3-map__canvas :global(.map-region) {
+            transition: none;
+        }
+    }
+</style>

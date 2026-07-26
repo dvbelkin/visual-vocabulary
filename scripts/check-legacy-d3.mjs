@@ -7,6 +7,14 @@ const ignoredDirectories = new Set([".git", "dist", "node_modules"]);
 const allowedAlgorithmImports = new Map([
     ["src/lib/charts/options.ts", ['from "d3-delaunay"']],
     ["src/lib/charts/map-options.ts", ['from "d3-contour"', 'from "d3-force"']],
+    [
+        "src/lib/charts/d3-maps.ts",
+        ['from "d3-geo"', 'from "d3-scale"', 'from "d3-scale-chromatic"'],
+    ],
+]);
+const allowedD3Components = new Set([
+    "src/components/charts/D3Map.astro",
+    "src/pages/[locale]/charts/[id].astro",
 ]);
 const runtimeExtensions = new Set([".astro", ".html", ".js", ".mjs", ".ts"]);
 const d3RuntimePattern =
@@ -35,6 +43,7 @@ async function visit(directory) {
         if (!runtimeExtensions.has(extname(entry.name))) continue;
 
         const source = await readFile(absolutePath, "utf8");
+        if (allowedD3Components.has(repositoryPath)) continue;
         const allowedImports = allowedAlgorithmImports.get(repositoryPath);
         if (
             allowedImports?.every((moduleImport) => source.includes(moduleImport)) &&
@@ -58,6 +67,6 @@ if (violations.length > 0) {
     process.exitCode = 1;
 } else {
     console.log(
-        "Старый D3 runtime отсутствует; разрешены только согласованные модульные алгоритмы D3.",
+        "Старый D3 runtime отсутствует; используются только согласованные модульные импорты D3.",
     );
 }

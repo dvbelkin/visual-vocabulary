@@ -100,6 +100,11 @@ export interface ChartDefinition {
     useWhen: LocalizedText;
     avoidWhen: LocalizedText;
     unit: LocalizedText;
+    dataStatus?: LocalizedText;
+    source?: {
+        label: LocalizedText;
+        url: string;
+    };
     valueLabels?: {
         primary: LocalizedText;
         secondary?: LocalizedText;
@@ -2020,8 +2025,8 @@ export const charts: readonly ChartDefinition[] = [
         kind: "choropleth-map",
         title: { ru: "Хороплетная карта", en: "Choropleth map" },
         description: {
-            ru: "Цвет территории показывает относительный показатель — долю электроэнергии из возобновляемых источников.",
-            en: "Territory colour represents a relative measure: the share of electricity from renewable sources.",
+            ru: "Цвет каждого округа США показывает уровень безработицы в августе 2016 года; более тёмный синий означает больший процент.",
+            en: "Each US county is coloured by its August 2016 unemployment rate; darker blue represents a higher percentage.",
         },
         useWhen: {
             ru: "Нужно сравнить нормированный показатель между территориями с известными границами.",
@@ -2031,22 +2036,52 @@ export const charts: readonly ChartDefinition[] = [
             ru: "Не кодируйте цветом абсолютные итоги: крупные и малые территории будут сравниваться нечестно.",
             en: "Do not encode absolute totals by colour: large and small territories would be compared unfairly.",
         },
-        unit: { ru: "% электроэнергии", en: "% of electricity" },
-        data: [
-            { key: "Portugal", label: { ru: "Португалия", en: "Portugal" }, value: 62 },
-            { key: "Spain", label: { ru: "Испания", en: "Spain" }, value: 51 },
-            { key: "France", label: { ru: "Франция", en: "France" }, value: 28 },
-            {
-                key: "United Kingdom",
-                label: { ru: "Великобритания", en: "United Kingdom" },
-                value: 44,
+        unit: { ru: "% рабочей силы", en: "% of labour force" },
+        dataStatus: {
+            ru: "Реальные данные · август 2016",
+            en: "Observed data · August 2016",
+        },
+        source: {
+            label: {
+                ru: "Bureau of Labor Statistics · пример D3",
+                en: "Bureau of Labor Statistics · D3 example",
             },
-            { key: "Germany", label: { ru: "Германия", en: "Germany" }, value: 48 },
-            { key: "Poland", label: { ru: "Польша", en: "Poland" }, value: 24 },
-            { key: "Norway", label: { ru: "Норвегия", en: "Norway" }, value: 91 },
-            { key: "Sweden", label: { ru: "Швеция", en: "Sweden" }, value: 76 },
-            { key: "Italy", label: { ru: "Италия", en: "Italy" }, value: 39 },
-            { key: "Greece", label: { ru: "Греция", en: "Greece" }, value: 46 },
+            url: "https://observablehq.com/@d3/choropleth",
+        },
+        data: [
+            {
+                key: "01001",
+                label: { ru: "Округ Отога, Алабама", en: "Autauga County, Alabama" },
+                value: 5.1,
+            },
+            {
+                key: "06037",
+                label: {
+                    ru: "Округ Лос-Анджелес, Калифорния",
+                    en: "Los Angeles County, California",
+                },
+                value: 5.3,
+            },
+            {
+                key: "17031",
+                label: { ru: "Округ Кук, Иллинойс", en: "Cook County, Illinois" },
+                value: 5.7,
+            },
+            {
+                key: "36061",
+                label: { ru: "Округ Нью-Йорк, Нью-Йорк", en: "New York County, New York" },
+                value: 4.9,
+            },
+            {
+                key: "48201",
+                label: { ru: "Округ Харрис, Техас", en: "Harris County, Texas" },
+                value: 5.8,
+            },
+            {
+                key: "53033",
+                label: { ru: "Округ Кинг, Вашингтон", en: "King County, Washington" },
+                value: 3.9,
+            },
         ],
     },
     {
@@ -2240,95 +2275,77 @@ export const charts: readonly ChartDefinition[] = [
         id: "scaled-cartogram-value",
         category: "spatial",
         kind: "dorling-cartogram",
-        title: { ru: "Картограмма Дорлинга", en: "Dorling cartogram" },
+        title: { ru: "Неконтурная картограмма", en: "Non-contiguous cartogram" },
         description: {
-            ru: "Страны заменены кругами: площадь круга пропорциональна числу студентов, а расположение приблизительно сохраняет географию.",
-            en: "Countries become circles whose area represents student totals while approximate geography is retained.",
+            ru: "Каждый штат уменьшен вокруг своего центра пропорционально доле взрослых с ожирением; переключатель показывает изменение с 2008 по 2018 год.",
+            en: "Each state is shrunk around its centre in proportion to adult obesity prevalence; the switch compares 2008 with 2018.",
         },
         useWhen: {
-            ru: "Нужно сравнить абсолютные итоги территорий, не позволяя физической площади доминировать.",
-            en: "You need to compare territorial totals without letting physical land area dominate.",
+            ru: "Нужно сделать относительный показатель частью самой географической формы и сохранить узнаваемый контур каждой территории.",
+            en: "You need to encode a relative measure in geographic shape while keeping each territory recognisable.",
         },
         avoidWhen: {
-            ru: "Не используйте для чтения точных границ, расстояний или соседства: круги смещены для устранения наложений.",
-            en: "Do not use it for exact boundaries, distances, or adjacency: circles move to avoid overlap.",
+            ru: "Не используйте для точного чтения границ или площадей: разрывы между штатами намеренно увеличиваются при масштабировании.",
+            en: "Do not use it for exact boundaries or areas: scaling intentionally enlarges the gaps between states.",
         },
-        unit: { ru: "тыс. студентов", en: "thousand students" },
+        unit: { ru: "% взрослых", en: "% of adults" },
+        dataStatus: {
+            ru: "Реальные данные · CDC, 2008 и 2018",
+            en: "Observed data · CDC, 2008 and 2018",
+        },
+        source: {
+            label: {
+                ru: "CDC · пример D3 Non-contiguous Cartogram",
+                en: "CDC · D3 Non-contiguous Cartogram example",
+            },
+            url: "https://observablehq.com/@d3/non-contiguous-cartogram",
+        },
         valueLabels: {
-            primary: { ru: "Студенты", en: "Students" },
-            secondary: { ru: "Исходная долгота", en: "Original longitude" },
-            tertiary: { ru: "Исходная широта", en: "Original latitude" },
+            primary: { ru: "2018", en: "2018" },
+            secondary: { ru: "2008", en: "2008" },
         },
         data: [
             {
-                key: "ES",
-                label: { ru: "Испания", en: "Spain" },
-                value: 190,
-                value2: -3.7,
-                value3: 40.4,
+                key: "01",
+                label: { ru: "Алабама", en: "Alabama" },
+                value: 36.2,
+                value2: 18.7,
             },
             {
-                key: "FR",
-                label: { ru: "Франция", en: "France" },
-                value: 245,
-                value2: 2.4,
-                value3: 46.5,
+                key: "06",
+                label: { ru: "Калифорния", en: "California" },
+                value: 25.8,
+                value2: 15.1,
             },
             {
-                key: "GB",
-                label: { ru: "Великобритания", en: "United Kingdom" },
-                value: 215,
-                value2: -1.5,
-                value3: 53.5,
+                key: "12",
+                label: { ru: "Флорида", en: "Florida" },
+                value: 30.7,
+                value2: 17.2,
             },
             {
-                key: "DE",
-                label: { ru: "Германия", en: "Germany" },
-                value: 310,
-                value2: 10.4,
-                value3: 51.1,
+                key: "17",
+                label: { ru: "Иллинойс", en: "Illinois" },
+                value: 31.8,
+                value2: 16.7,
             },
             {
-                key: "IT",
-                label: { ru: "Италия", en: "Italy" },
-                value: 205,
-                value2: 12.5,
-                value3: 42.8,
+                key: "36",
+                label: { ru: "Нью-Йорк", en: "New York" },
+                value: 27.6,
+                value2: 13.9,
             },
             {
-                key: "PL",
-                label: { ru: "Польша", en: "Poland" },
-                value: 155,
-                value2: 19.1,
-                value3: 52.1,
+                key: "48",
+                label: { ru: "Техас", en: "Texas" },
+                value: 34.8,
+                value2: 15.9,
             },
             {
-                key: "SE",
-                label: { ru: "Швеция", en: "Sweden" },
-                value: 88,
-                value2: 16.2,
-                value3: 62.2,
-            },
-            {
-                key: "NL",
-                label: { ru: "Нидерланды", en: "Netherlands" },
-                value: 92,
-                value2: 5.3,
-                value3: 52.1,
-            },
-            {
-                key: "CZ",
-                label: { ru: "Чехия", en: "Czechia" },
-                value: 74,
-                value2: 15.5,
-                value3: 49.8,
-            },
-            {
-                key: "GR",
-                label: { ru: "Греция", en: "Greece" },
-                value: 61,
-                value2: 22.1,
-                value3: 39.1,
+                key: "53",
+                label: { ru: "Вашингтон", en: "Washington" },
+                value: 28.7,
+                value2: 13.9,
             },
         ],
     },

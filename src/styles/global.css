@@ -441,6 +441,12 @@ p {
     letter-spacing: -0.035em;
 }
 
+.chart-source {
+    margin: 1rem 0 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
 .unit {
     color: var(--color-muted);
     font-size: 0.86rem;

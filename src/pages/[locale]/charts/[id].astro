@@ -1,5 +1,6 @@
 ---
 import EChart from "../../../components/charts/EChart.astro";
+import D3Map from "../../../components/charts/D3Map.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { categoryNames, charts } from "../../../lib/catalog";
 import { locales, localePath, t, type Locale } from "../../../lib/i18n";
@@ -22,6 +23,7 @@ const rows = chart.data.map((row) => ({
     value2: row.value2,
     value3: row.value3,
 }));
+const usesD3Map = chart.id === "basic-choropleth" || chart.id === "scaled-cartogram-value";
 ---
 
 <BaseLayout
@@ -48,17 +50,38 @@ const rows = chart.data.map((row) => ({
         <section class="chart-stage" aria-labelledby="chart-title">
             <div class="chart-stage__heading">
                 <div>
-                    <p class="eyebrow">{copy.synthetic}</p>
+                    <p class="eyebrow">
+                        {chart.dataStatus?.[activeLocale] ?? copy.synthetic}
+                    </p>
                     <h2 id="chart-title">{chart.title[activeLocale]}</h2>
                 </div>
                 <span class="unit">{chart.unit[activeLocale]}</span>
             </div>
-            <EChart
-                chart={chart}
-                locale={activeLocale}
-                label={copy.chartLabel}
-                descriptionId="chart-description"
-            />
+            {
+                usesD3Map ? (
+                    <D3Map
+                        chart={chart}
+                        locale={activeLocale}
+                        label={copy.chartLabel}
+                        descriptionId="chart-description"
+                    />
+                ) : (
+                    <EChart
+                        chart={chart}
+                        locale={activeLocale}
+                        label={copy.chartLabel}
+                        descriptionId="chart-description"
+                    />
+                )
+            }
+            {
+                chart.source && (
+                    <p class="chart-source">
+                        {activeLocale === "ru" ? "Источник:" : "Source:"}{" "}
+                        <a href={chart.source.url}>{chart.source.label[activeLocale]}</a>
+                    </p>
+                )
+            }
         </section>
 
         <div class="learning-grid">
@@ -79,7 +102,9 @@ const rows = chart.data.map((row) => ({
         <section class="data-table" aria-labelledby="data-title">
             <div class="section-heading section-heading--compact">
                 <div>
-                    <p class="eyebrow">{copy.synthetic}</p>
+                    <p class="eyebrow">
+                        {chart.dataStatus?.[activeLocale] ?? copy.synthetic}
+                    </p>
                     <h2 id="data-title">{copy.dataTitle}</h2>
                 </div>
             </div>
