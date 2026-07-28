@@ -443,6 +443,37 @@ describe("ECharts option factories", () => {
             "Online: 180 (60%)",
         );
     });
+
+    it("encodes chord totals and flows without allowing the diagram to scale", () => {
+        const option = buildChartOption({
+            kind: "chord",
+            title: "Chord diagram",
+            unit: "joint projects",
+            locale: "en",
+            data: [
+                { label: "Science|Business", value: 30 },
+                { label: "Science|City", value: 20 },
+                { label: "Business|City", value: 5 },
+            ],
+            reducedMotion: true,
+        }) as {
+            series: Array<{
+                roam: boolean;
+                data: Array<{ name: string; symbolSize: number }>;
+                links: Array<{ value: number; lineStyle: { width: number } }>;
+            }>;
+        };
+
+        const series = option.series[0];
+        const science = series.data.find((node) => node.name === "Science");
+        const city = series.data.find((node) => node.name === "City");
+        const strongestFlow = series.links.find((link) => link.value === 30);
+        const weakestFlow = series.links.find((link) => link.value === 5);
+
+        expect(series.roam).toBe(false);
+        expect(science?.symbolSize).toBeGreaterThan(city?.symbolSize ?? 0);
+        expect(strongestFlow?.lineStyle.width).toBeGreaterThan(weakestFlow?.lineStyle.width ?? 0);
+    });
 });
 
 describe("ECharts lifecycle", () => {

@@ -1500,8 +1500,8 @@ export const charts: readonly ChartDefinition[] = [
         kind: "chord",
         title: { ru: "Хордовая диаграмма", en: "Chord diagram" },
         description: {
-            ru: "Круговая компоновка показывает взаимные потоки между одними и теми же группами.",
-            en: "A circular layout shows reciprocal flows among the same set of groups.",
+            ru: "Круговая компоновка показывает обмен между группами: размер узла соответствует общему числу связанных проектов, а толщина хорды — числу проектов между парой групп.",
+            en: "A circular layout shows exchange among groups: node size represents the total number of connected projects, while chord thickness shows projects shared by each pair.",
         },
         useWhen: {
             ru: "Нужно дать обзор обмена между небольшим числом равноправных групп.",
@@ -1513,12 +1513,12 @@ export const charts: readonly ChartDefinition[] = [
         },
         unit: { ru: "совместных проектов", en: "joint projects" },
         data: [
-            { label: { ru: "Наука|Бизнес", en: "Science|Business" }, value: 18 },
-            { label: { ru: "Наука|Город", en: "Science|City" }, value: 12 },
-            { label: { ru: "Бизнес|Город", en: "Business|City" }, value: 15 },
+            { label: { ru: "Наука|Бизнес", en: "Science|Business" }, value: 34 },
+            { label: { ru: "Наука|Город", en: "Science|City" }, value: 18 },
+            { label: { ru: "Бизнес|Город", en: "Business|City" }, value: 27 },
             { label: { ru: "Бизнес|Культура", en: "Business|Culture" }, value: 9 },
-            { label: { ru: "Город|Культура", en: "City|Culture" }, value: 14 },
-            { label: { ru: "Культура|Наука", en: "Culture|Science" }, value: 7 },
+            { label: { ru: "Город|Культура", en: "City|Culture" }, value: 15 },
+            { label: { ru: "Культура|Наука", en: "Culture|Science" }, value: 5 },
         ],
     },
     {
@@ -1636,7 +1636,7 @@ export const charts: readonly ChartDefinition[] = [
         id: "composition-and-magnitude",
         category: "magnitude",
         kind: "stacked-bar",
-        title: { ru: "Состав и величина", en: "Composition and magnitude" },
+        title: { ru: "Составные столбцы с итогом", en: "Stacked columns with totals" },
         description: {
             ru: "Общая длина показывает итог, а сегменты — вклад компонентов.",
             en: "Total bar length shows magnitude while segments show component contributions.",

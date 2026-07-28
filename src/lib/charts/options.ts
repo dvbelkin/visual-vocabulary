@@ -2817,20 +2817,36 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
             ]),
         );
         const circular = payload.kind === "chord";
+        const totalValues = [...totals.values()];
+        const minimumTotal = Math.min(...totalValues);
+        const maximumTotal = Math.max(...totalValues);
+        const minimumLink = Math.min(...links.map((link) => link.value));
+        const maximumLink = Math.max(...links.map((link) => link.value));
+        const scaleBetween = (
+            value: number,
+            minimum: number,
+            maximum: number,
+            outputMinimum: number,
+            outputMaximum: number,
+        ) =>
+            maximum === minimum
+                ? (outputMinimum + outputMaximum) / 2
+                : outputMinimum +
+                  ((value - minimum) / (maximum - minimum)) * (outputMaximum - outputMinimum);
         return {
             ...base,
             series: [
                 {
                     type: "graph",
                     layout: circular ? "circular" : "force",
-                    roam: true,
+                    roam: !circular,
                     zoom: circular ? 1 : 1.55,
                     draggable: !circular,
                     circular: circular ? { rotateLabel: true } : undefined,
                     force: circular
                         ? undefined
                         : { repulsion: 380, edgeLength: [80, 140], gravity: 0.12 },
-                    emphasis: { focus: "adjacency", lineStyle: { width: 5 } },
+                    emphasis: { focus: "adjacency" },
                     label: { show: true, position: "right", color: ink },
                     edgeSymbol: circular ? ["none", "arrow"] : ["none", "none"],
                     edgeSymbolSize: 7,
@@ -2838,11 +2854,23 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     data: nodeNames.map((name) => ({
                         name,
                         value: totals.get(name),
-                        symbolSize: 22 + Math.sqrt(totals.get(name) ?? 0) * 4,
+                        symbolSize: circular
+                            ? scaleBetween(
+                                  totals.get(name) ?? 0,
+                                  minimumTotal,
+                                  maximumTotal,
+                                  28,
+                                  64,
+                              )
+                            : 22 + Math.sqrt(totals.get(name) ?? 0) * 4,
                     })),
                     links: links.map((link) => ({
                         ...link,
-                        lineStyle: { width: 1 + Math.sqrt(link.value) },
+                        lineStyle: {
+                            width: circular
+                                ? scaleBetween(link.value, minimumLink, maximumLink, 3, 18)
+                                : 1 + Math.sqrt(link.value),
+                        },
                     })),
                 },
             ],
