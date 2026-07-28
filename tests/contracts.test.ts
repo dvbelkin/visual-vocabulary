@@ -118,6 +118,94 @@ describe("ECharts option factories", () => {
             expect(option).toMatchObject({ animation: false });
         },
     );
+
+    it.each([
+        {
+            kind: "lollipop" as const,
+            scatterValue: [42, "Category"],
+        },
+        {
+            kind: "vertical-lollipop" as const,
+            scatterValue: ["Category", 42],
+        },
+    ])("shows only the primary point in $kind tooltips", ({ kind, scatterValue }) => {
+        const option = buildChartOption({
+            kind,
+            title: "Lollipop",
+            unit: "points",
+            locale: "en",
+            data: [{ label: "Category", value: 42 }],
+            reducedMotion: true,
+        }) as {
+            tooltip: {
+                formatter: (
+                    params: Array<{
+                        axisValue: string;
+                        marker: string;
+                        seriesType: string;
+                        value: Array<string | number>;
+                    }>,
+                ) => string;
+            };
+        };
+
+        const tooltip = option.tooltip.formatter([
+            {
+                axisValue: "Category",
+                marker: "grey",
+                seriesType: "bar",
+                value: [42, "Category"],
+            },
+            {
+                axisValue: "Category",
+                marker: "green",
+                seriesType: "scatter",
+                value: scatterValue,
+            },
+        ]);
+
+        expect(tooltip).toBe("Category<br>green42 points");
+        expect(tooltip).not.toContain("grey");
+    });
+
+    it("hides the technical y coordinate in circle timeline tooltips", () => {
+        const option = buildChartOption({
+            kind: "circle-timeline",
+            title: "Circles on a timeline",
+            unit: "participants",
+            locale: "en",
+            data: [{ label: "Jan", value: 120 }],
+            reducedMotion: true,
+        }) as {
+            tooltip: {
+                formatter: (params: { value: [string, number, number] }) => string;
+            };
+        };
+
+        const tooltip = option.tooltip.formatter({ value: ["Jan", 0, 120] });
+
+        expect(tooltip).toBe("Jan: 120 participants");
+        expect(tooltip).not.toContain(": 0");
+    });
+
+    it("formats Priestley timeline years without thousands separators", () => {
+        const option = buildChartOption({
+            kind: "priestley",
+            title: "Priestley timeline",
+            unit: "years",
+            locale: "ru",
+            data: [{ label: "Период", value: 1836, value2: 1872 }],
+            reducedMotion: true,
+        }) as {
+            xAxis: {
+                axisLabel: {
+                    formatter: (value: number) => string;
+                };
+            };
+        };
+
+        expect(option.xAxis.axisLabel.formatter(1836)).toBe("1836");
+    });
 });
 
 describe("ECharts lifecycle", () => {

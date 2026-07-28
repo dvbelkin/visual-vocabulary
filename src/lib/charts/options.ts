@@ -77,7 +77,9 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 type: "value",
                 min: minYear,
                 max: maxYear,
-                axisLabel: { formatter: "{value}" },
+                axisLabel: {
+                    formatter: (value: number) => String(Math.round(value)),
+                },
                 splitLine: { lineStyle: { color: gridLine } },
             },
             yAxis: { type: "value", min: -0.6, max: 7.6, show: false },
@@ -938,6 +940,12 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         const maximum = Math.max(...payload.data.map((row) => row.value));
         return {
             ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ value }: { value: [string, number, number] }) =>
+                    `${value[0]}: ${value[2]} ${payload.unit}`,
+            },
             grid: { left: 42, right: 42, top: 28, bottom: 58 },
             xAxis: {
                 type: "category",
@@ -1000,6 +1008,23 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     if (payload.kind === "vertical-lollipop") {
         return {
             ...base,
+            tooltip: {
+                trigger: "axis",
+                confine: true,
+                formatter: (
+                    params: Array<{
+                        axisValue: string;
+                        marker: string;
+                        seriesType: string;
+                        value: [string, number];
+                    }>,
+                ) => {
+                    const point = params.find((item) => item.seriesType === "scatter");
+                    return point
+                        ? `${point.axisValue}<br>${point.marker}${point.value[1]} ${payload.unit}`
+                        : "";
+                },
+            },
             grid: { left: 54, right: 28, top: 28, bottom: 52 },
             xAxis: {
                 type: "category",
@@ -1291,6 +1316,23 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     if (payload.kind === "lollipop") {
         return {
             ...base,
+            tooltip: {
+                trigger: "axis",
+                confine: true,
+                formatter: (
+                    params: Array<{
+                        axisValue: string;
+                        marker: string;
+                        seriesType: string;
+                        value: [number, string];
+                    }>,
+                ) => {
+                    const point = params.find((item) => item.seriesType === "scatter");
+                    return point
+                        ? `${point.axisValue}<br>${point.marker}${point.value[0]} ${payload.unit}`
+                        : "";
+                },
+            },
             grid: { left: 108, right: 48, top: 28, bottom: 48 },
             xAxis: {
                 type: "value",
@@ -1775,6 +1817,12 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         const maximum = Math.max(...payload.data.map((row) => row.value));
         return {
             ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ value }: { value: [string, number, number] }) =>
+                    `${value[0]}: ${value[2]} ${payload.unit}`,
+            },
             grid: { left: 36, right: 36, top: 44, bottom: 54 },
             xAxis: {
                 type: "category",

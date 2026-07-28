@@ -1104,8 +1104,8 @@ export const charts: readonly ChartDefinition[] = [
         kind: "proportional-symbols",
         title: { ru: "Упорядоченные пропорциональные символы", en: "Ranked proportional symbols" },
         description: {
-            ru: "Площадь кругов кодирует величину, а порядок помогает сравнить ранг.",
-            en: "Circle area encodes magnitude while ordering supports rank comparison.",
+            ru: "Площадь символов кодирует величину, а порядок помогает сравнить ранг. Вместо кругов можно использовать узнаваемые пиктограммы или силуэты объектов, если их площадь масштабируется пропорционально значению.",
+            en: "Symbol area encodes magnitude while ordering supports rank comparison. Recognisable icons or object silhouettes may replace circles if their area is scaled proportionally to the value.",
         },
         useWhen: {
             ru: "Нужно выразительно показать большие различия среди небольшого числа категорий.",
