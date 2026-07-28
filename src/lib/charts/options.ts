@@ -544,9 +544,36 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     }
 
     if (payload.kind === "scatter") {
+        const cohortNames =
+            payload.locale === "ru"
+                ? { "year-1": "1 курс", "year-2": "2 курс" }
+                : { "year-1": "First year", "year-2": "Second year" };
+        const cohorts = ["year-1", "year-2"] as const;
         return {
             ...base,
-            grid: { left: 54, right: 28, top: 26, bottom: 50 },
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({
+                    name,
+                    value,
+                    seriesName,
+                    marker,
+                }: {
+                    name: string;
+                    value: [number, number];
+                    seriesName: string;
+                    marker: string;
+                }) => {
+                    const labels =
+                        payload.locale === "ru"
+                            ? ["Часы подготовки", "Результат"]
+                            : ["Study hours", "Score"];
+                    return `${marker}${seriesName} · ${name}<br>${labels[0]}: ${value[0]}<br>${labels[1]}: ${value[1]}`;
+                },
+            },
+            legend: { top: 0, data: cohorts.map((cohort) => cohortNames[cohort]) },
+            grid: { left: 54, right: 28, top: 58, bottom: 50 },
             xAxis: {
                 type: "value",
                 name: payload.locale === "ru" ? "Часы подготовки" : "Study hours",
@@ -559,16 +586,17 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 name: payload.locale === "ru" ? "Результат" : "Score",
                 splitLine: { lineStyle: { color: gridLine } },
             },
-            series: [
-                {
-                    type: "scatter",
-                    symbolSize: 14,
-                    data: payload.data.map(({ label, value, value2 }) => ({
+            series: cohorts.map((cohort) => ({
+                name: cohortNames[cohort],
+                type: "scatter",
+                symbolSize: 13,
+                data: payload.data
+                    .filter((row) => row.key === cohort)
+                    .map(({ label, value, value2 }) => ({
                         name: label,
                         value: [value, value2],
                     })),
-                },
-            ],
+            })),
         };
     }
 
@@ -1123,6 +1151,7 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         const step = 2;
         const bandwidth = 4.5;
         const allValues = payload.data.flatMap((row) => row.values ?? [row.value]);
+        const colors = ["#2f6fb0", green, orange, "#8f5ca6"];
         const shapes = payload.data.map((row) => {
             const values = row.values ?? [row.value];
             const min = Math.floor(Math.min(...values) / step) * step - step;
@@ -1138,26 +1167,117 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
             const peak = Math.max(...density.map((item) => item.weight));
             return density.map((item) => ({ point: item.point, width: item.weight / peak }));
         });
+        const summaries = payload.data.map((row) => {
+            const values = row.values ?? [row.value];
+            return {
+                minimum: Math.min(...values),
+                q1: quantile(values, 0.25),
+                median: quantile(values, 0.5),
+                q3: quantile(values, 0.75),
+                maximum: Math.max(...values),
+            };
+        });
+        const labels =
+            payload.locale === "ru"
+                ? {
+                      standard: "Обычная скрипичная диаграмма",
+                      standardNote: "Обе половины зеркально показывают одно распределение",
+                      split: "Разделённая скрипичная диаграмма",
+                      splitNote: `Слева — ${payload.data[0].label}; справа — ${payload.data[1].label}`,
+                      median: "Медиана",
+                      interval: "Межквартильный диапазон",
+                      observation: "Наблюдение",
+                  }
+                : {
+                      standard: "Standard violin plot",
+                      standardNote: "Both halves mirror the same distribution",
+                      split: "Split violin plot",
+                      splitNote: `Left — ${payload.data[0].label}; right — ${payload.data[1].label}`,
+                      median: "Median",
+                      interval: "Interquartile range",
+                      observation: "Observation",
+                  };
+        const summaryTooltip = (index: number) => {
+            const summary = summaries[index];
+            return `${payload.data[index].label}<br>${labels.median}: ${summary.median} ${payload.unit}<br>${labels.interval}: ${summary.q1}–${summary.q3} ${payload.unit}`;
+        };
         return {
             ...base,
+            title: [
+                {
+                    text: labels.standard,
+                    subtext: labels.standardNote,
+                    left: 54,
+                    top: 2,
+                    textStyle: { fontSize: 15, color: ink },
+                    subtextStyle: { fontSize: 11, color: muted },
+                },
+                {
+                    text: labels.split,
+                    subtext: labels.splitNote,
+                    left: 54,
+                    top: 360,
+                    textStyle: { fontSize: 15, color: ink },
+                    subtextStyle: { fontSize: 11, color: muted },
+                },
+            ],
             tooltip: { trigger: "item", confine: true },
-            grid: { left: 58, right: 28, top: 28, bottom: 52 },
-            xAxis: {
-                type: "category",
+            legend: {
+                top: 52,
                 data: payload.data.map((row) => row.label),
-                axisLabel: { interval: 0, rotate: 18, fontSize: 10 },
             },
-            yAxis: {
-                type: "value",
-                name: payload.unit,
-                min: Math.floor(Math.min(...allValues) / step) * step - step,
-                max: Math.ceil(Math.max(...allValues) / step) * step + step,
-                splitLine: { lineStyle: { color: gridLine } },
-            },
+            grid: [
+                { left: 58, right: 28, top: 92, height: 230 },
+                { left: 58, right: 28, top: 440, height: 230 },
+            ],
+            xAxis: [
+                {
+                    type: "value",
+                    min: -0.5,
+                    max: payload.data.length - 0.5,
+                    interval: 1,
+                    axisLabel: {
+                        formatter: (value: number) =>
+                            Number.isInteger(value) ? (payload.data[value]?.label ?? "") : "",
+                    },
+                    splitLine: { show: false },
+                },
+                {
+                    type: "value",
+                    gridIndex: 1,
+                    min: -0.7,
+                    max: 0.7,
+                    axisLabel: { show: false },
+                    axisTick: { show: false },
+                    splitLine: { show: false },
+                },
+            ],
+            yAxis: [
+                {
+                    type: "value",
+                    name: payload.unit,
+                    min: Math.floor(Math.min(...allValues) / step) * step - step,
+                    max: Math.ceil(Math.max(...allValues) / step) * step + step,
+                    splitLine: { lineStyle: { color: gridLine } },
+                },
+                {
+                    type: "value",
+                    gridIndex: 1,
+                    name: payload.unit,
+                    min: Math.floor(Math.min(...allValues) / step) * step - step,
+                    max: Math.ceil(Math.max(...allValues) / step) * step + step,
+                    splitLine: { lineStyle: { color: gridLine } },
+                },
+            ],
             series: [
                 {
+                    id: "standard-violins",
                     type: "custom",
                     data: payload.data.map((row, index) => [index, row.value]),
+                    tooltip: {
+                        formatter: ({ dataIndex }: { dataIndex: number }) =>
+                            summaryTooltip(dataIndex),
+                    },
                     renderItem: (
                         params: { dataIndex: number },
                         api: {
@@ -1167,6 +1287,7 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     ) => {
                         const shape = shapes[params.dataIndex];
                         const categoryWidth = api.size([1, 0])[0] * 0.28;
+                        const summary = summaries[params.dataIndex];
                         const right = shape.map(({ point, width }) => {
                             const [x, y] = api.coord([params.dataIndex, point]);
                             return [x + categoryWidth * width, y];
@@ -1175,27 +1296,169 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                             const [x, y] = api.coord([params.dataIndex, point]);
                             return [x - categoryWidth * width, y];
                         });
+                        const q1 = api.coord([params.dataIndex, summary.q1]);
+                        const q3 = api.coord([params.dataIndex, summary.q3]);
+                        const median = api.coord([params.dataIndex, summary.median]);
                         return {
-                            type: "polygon",
-                            shape: { points: [...right, ...left] },
-                            style: {
-                                fill: "rgba(47, 111, 176, .28)",
-                                stroke: "#2f6fb0",
-                                lineWidth: 2,
-                            },
+                            type: "group",
+                            children: [
+                                {
+                                    type: "polygon",
+                                    shape: { points: [...right, ...left] },
+                                    style: {
+                                        fill: `${colors[params.dataIndex]}38`,
+                                        stroke: colors[params.dataIndex],
+                                        lineWidth: 2,
+                                    },
+                                },
+                                {
+                                    type: "rect",
+                                    shape: {
+                                        x: q1[0] - 5,
+                                        y: q3[1],
+                                        width: 10,
+                                        height: q1[1] - q3[1],
+                                    },
+                                    style: { fill: "#fff", stroke: ink, lineWidth: 1 },
+                                },
+                                {
+                                    type: "line",
+                                    shape: {
+                                        x1: median[0] - 8,
+                                        y1: median[1],
+                                        x2: median[0] + 8,
+                                        y2: median[1],
+                                    },
+                                    style: { stroke: ink, lineWidth: 3 },
+                                },
+                            ],
                         };
                     },
                 },
-                {
+                ...payload.data.map((row, rowIndex) => ({
+                    name: row.label,
                     type: "scatter",
-                    symbolSize: [18, 5],
-                    data: payload.data.map((row, index) => [index, row.value]),
-                    itemStyle: { color: ink },
+                    symbolSize: 6,
+                    data: (row.values ?? [row.value]).map((value, valueIndex) => ({
+                        name: `${labels.observation} ${valueIndex + 1}`,
+                        value: [rowIndex + (((valueIndex * 7) % 9) - 4) * 0.018, value],
+                    })),
+                    itemStyle: {
+                        color: colors[rowIndex],
+                        opacity: 0.72,
+                        borderColor: "#fff",
+                        borderWidth: 0.8,
+                    },
                     tooltip: {
-                        formatter: ({ value }: { value: [number, number] }) =>
-                            `${payload.data[value[0]].label}: ${value[1]} ${payload.unit}`,
+                        formatter: ({ name, value }: { name: string; value: [number, number] }) =>
+                            `${row.label} · ${name}: ${value[1]} ${payload.unit}`,
+                    },
+                })),
+                {
+                    id: "split-violin",
+                    type: "custom",
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: [[0, 0]],
+                    tooltip: {
+                        formatter: () => `${summaryTooltip(0)}<br><br>${summaryTooltip(1)}`,
+                    },
+                    renderItem: (
+                        _params: unknown,
+                        api: {
+                            coord: (point: [number, number]) => [number, number];
+                            size: (size: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const halfWidth = api.size([1, 0])[0] * 0.3;
+                        const center = (shape: Array<{ point: number }>) =>
+                            shape.map(({ point }) => api.coord([0, point]));
+                        const leftOuter = shapes[0].map(({ point, width }) => {
+                            const [x, y] = api.coord([0, point]);
+                            return [x - halfWidth * width, y];
+                        });
+                        const rightOuter = shapes[1].map(({ point, width }) => {
+                            const [x, y] = api.coord([0, point]);
+                            return [x + halfWidth * width, y];
+                        });
+                        const medianLeft = api.coord([0, summaries[0].median]);
+                        const medianRight = api.coord([0, summaries[1].median]);
+                        return {
+                            type: "group",
+                            children: [
+                                {
+                                    type: "polygon",
+                                    shape: {
+                                        points: [...center(shapes[0]), ...[...leftOuter].reverse()],
+                                    },
+                                    style: {
+                                        fill: `${colors[0]}55`,
+                                        stroke: colors[0],
+                                        lineWidth: 2,
+                                    },
+                                },
+                                {
+                                    type: "polygon",
+                                    shape: {
+                                        points: [
+                                            ...center(shapes[1]),
+                                            ...[...rightOuter].reverse(),
+                                        ],
+                                    },
+                                    style: {
+                                        fill: `${colors[1]}55`,
+                                        stroke: colors[1],
+                                        lineWidth: 2,
+                                    },
+                                },
+                                {
+                                    type: "line",
+                                    shape: {
+                                        x1: medianLeft[0] - 28,
+                                        y1: medianLeft[1],
+                                        x2: medianLeft[0],
+                                        y2: medianLeft[1],
+                                    },
+                                    style: { stroke: ink, lineWidth: 3 },
+                                },
+                                {
+                                    type: "line",
+                                    shape: {
+                                        x1: medianRight[0],
+                                        y1: medianRight[1],
+                                        x2: medianRight[0] + 28,
+                                        y2: medianRight[1],
+                                    },
+                                    style: { stroke: ink, lineWidth: 3 },
+                                },
+                            ],
+                        };
                     },
                 },
+                ...payload.data.slice(0, 2).map((row, rowIndex) => ({
+                    name: row.label,
+                    type: "scatter",
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    symbolSize: 6,
+                    data: (row.values ?? [row.value]).map((value, valueIndex) => ({
+                        name: `${labels.observation} ${valueIndex + 1}`,
+                        value: [
+                            (rowIndex === 0 ? -0.16 : 0.16) + (((valueIndex * 7) % 7) - 3) * 0.012,
+                            value,
+                        ],
+                    })),
+                    itemStyle: {
+                        color: colors[rowIndex],
+                        opacity: 0.78,
+                        borderColor: "#fff",
+                        borderWidth: 0.8,
+                    },
+                    tooltip: {
+                        formatter: ({ name, value }: { name: string; value: [number, number] }) =>
+                            `${row.label} · ${name}: ${value[1]} ${payload.unit}`,
+                    },
+                })),
             ],
         };
     }
@@ -2048,6 +2311,29 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         const maximum = payload.locale === "ru" ? "Максимум" : "Maximum";
         return {
             ...base,
+            tooltip: {
+                trigger: "axis",
+                confine: true,
+                formatter: (
+                    params: Array<{
+                        axisValue: string;
+                        marker: string;
+                        seriesName: string;
+                        seriesType: string;
+                        value: [number, string];
+                    }>,
+                ) => {
+                    const points = params.filter((item) => item.seriesType === "scatter");
+                    if (points.length === 0) return "";
+                    return [
+                        points[0].axisValue,
+                        ...points.map(
+                            (point) =>
+                                `${point.marker}${point.seriesName}: ${point.value[0]} ${payload.unit}`,
+                        ),
+                    ].join("<br>");
+                },
+            },
             legend: { top: 0, data: [minimum, maximum] },
             grid: { left: 92, right: 38, top: 52, bottom: 48 },
             xAxis: {
@@ -2130,6 +2416,12 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     if (payload.kind === "observation-strip") {
         return {
             ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ name, value }: { name: string; value: [number, number] }) =>
+                    `${name}: ${value[0]} ${payload.unit}`,
+            },
             grid: { left: 34, right: 28, top: 28, bottom: 58 },
             xAxis: {
                 type: "value",
@@ -2148,10 +2440,10 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 {
                     type: "scatter",
                     symbolSize: 14,
-                    data: payload.data.map((row, index) => [
-                        row.value,
-                        ((index * 17) % 11) / 20 - 0.25,
-                    ]),
+                    data: payload.data.map((row, index) => ({
+                        name: row.label,
+                        value: [row.value, ((index * 17) % 11) / 20 - 0.25],
+                    })),
                     itemStyle: {
                         color: green,
                         opacity: 0.72,
@@ -2164,8 +2456,19 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
     }
 
     if (payload.kind === "barcode") {
+        const frequencies = new Map<number, number>();
+        payload.data.forEach((row) =>
+            frequencies.set(row.value, (frequencies.get(row.value) ?? 0) + 1),
+        );
+        const countLabel = payload.locale === "ru" ? "Наблюдений" : "Observations";
         return {
             ...base,
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({ value }: { value: [number, number, number] }) =>
+                    `${value[0]} ${payload.unit}<br>${countLabel}: ${value[2]}`,
+            },
             grid: { left: 34, right: 28, top: 42, bottom: 58 },
             xAxis: {
                 type: "value",
@@ -2184,8 +2487,11 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 {
                     type: "scatter",
                     symbol: "rect",
-                    symbolSize: [3, 110],
-                    data: payload.data.map((row) => [row.value, 0]),
+                    symbolSize: (value: [number, number, number]) => [
+                        2 + Math.min(value[2], 5) * 2,
+                        110,
+                    ],
+                    data: [...frequencies.entries()].map(([value, count]) => [value, 0, count]),
                     itemStyle: { color: green, opacity: 0.72 },
                 },
             ],

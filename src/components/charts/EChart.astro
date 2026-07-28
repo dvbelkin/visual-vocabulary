@@ -29,6 +29,7 @@ const payload = {
 <div
     class="chart-shell"
     data-echart-root
+    data-chart-kind={chart.kind}
     role="img"
     aria-label={`${label}: ${chart.title[locale]}`}
     aria-describedby={descriptionId}
@@ -52,6 +53,7 @@ const payload = {
         LegendComponent,
         ParallelComponent,
         RadarComponent,
+        TitleComponent,
         TooltipComponent,
         VisualMapComponent,
     } from "echarts/components";
@@ -71,6 +73,7 @@ const payload = {
         ParallelComponent,
         RadarComponent,
         ScatterChart,
+        TitleComponent,
         TooltipComponent,
         VisualMapComponent,
     ]);
@@ -183,11 +186,23 @@ const payload = {
         height: 420px;
     }
 
+    .chart-shell[data-chart-kind="violin"],
+    .chart-shell[data-chart-kind="violin"] .chart-canvas {
+        min-height: 720px;
+        height: 720px;
+    }
+
     @media (max-width: 600px) {
         .chart-shell,
         .chart-canvas {
             min-height: 340px;
             height: 340px;
+        }
+
+        .chart-shell[data-chart-kind="violin"],
+        .chart-shell[data-chart-kind="violin"] .chart-canvas {
+            min-height: 760px;
+            height: 760px;
         }
     }
 </style>

@@ -240,6 +240,162 @@ describe("ECharts option factories", () => {
             }),
         ).toContain("Students: 420");
     });
+
+    it("separates scatter observations into two cohort series", () => {
+        const option = buildChartOption({
+            kind: "scatter",
+            title: "Scatterplot",
+            unit: "score and hours",
+            locale: "en",
+            data: [
+                { key: "year-1", label: "Student 1.01", value: 2, value2: 52 },
+                { key: "year-2", label: "Student 2.01", value: 2, value2: 64 },
+            ],
+            reducedMotion: true,
+        }) as {
+            legend: { data: string[] };
+            series: Array<{ name: string; data: Array<{ name: string; value: number[] }> }>;
+        };
+
+        expect(option.legend.data).toEqual(["First year", "Second year"]);
+        expect(option.series.map((series) => series.name)).toEqual(["First year", "Second year"]);
+        expect(option.series.map((series) => series.data)).toHaveLength(2);
+        expect(option.series.every((series) => series.data.length === 1)).toBe(true);
+    });
+
+    it("hides technical range-building series from dot range tooltips", () => {
+        const option = buildChartOption({
+            kind: "dot-range",
+            title: "Dot range",
+            unit: "minutes",
+            locale: "en",
+            data: [{ label: "Route A", value: 24, value2: 41 }],
+            reducedMotion: true,
+        }) as {
+            tooltip: {
+                formatter: (
+                    params: Array<{
+                        axisValue: string;
+                        marker: string;
+                        seriesName: string;
+                        seriesType: string;
+                        value: [number, string];
+                    }>,
+                ) => string;
+            };
+        };
+
+        const tooltip = option.tooltip.formatter([
+            {
+                axisValue: "Route A",
+                marker: "",
+                seriesName: "",
+                seriesType: "bar",
+                value: [24, "Route A"],
+            },
+            {
+                axisValue: "Route A",
+                marker: "● ",
+                seriesName: "Minimum",
+                seriesType: "scatter",
+                value: [24, "Route A"],
+            },
+            {
+                axisValue: "Route A",
+                marker: "● ",
+                seriesName: "Maximum",
+                seriesType: "scatter",
+                value: [41, "Route A"],
+            },
+        ]);
+
+        expect(tooltip).toBe("Route A<br>● Minimum: 24 minutes<br>● Maximum: 41 minutes");
+    });
+
+    it("hides vertical jitter from observation strip tooltips", () => {
+        const option = buildChartOption({
+            kind: "observation-strip",
+            title: "Strip plot",
+            unit: "points",
+            locale: "en",
+            data: [{ label: "Observation 1", value: 42 }],
+            reducedMotion: true,
+        }) as {
+            tooltip: {
+                formatter: (params: { name: string; value: [number, number] }) => string;
+            };
+        };
+
+        expect(
+            option.tooltip.formatter({
+                name: "Observation 1",
+                value: [42, -0.25],
+            }),
+        ).toBe("Observation 1: 42 points");
+    });
+
+    it("uses barcode thickness for duplicate counts without exposing the technical zero", () => {
+        const option = buildChartOption({
+            kind: "barcode",
+            title: "Distribution barcode",
+            unit: "seconds",
+            locale: "en",
+            data: [
+                { label: "Reading 1", value: 24 },
+                { label: "Reading 2", value: 24 },
+                { label: "Reading 3", value: 31 },
+            ],
+            reducedMotion: true,
+        }) as {
+            series: Array<{
+                data: Array<[number, number, number]>;
+                symbolSize: (value: [number, number, number]) => number[];
+            }>;
+            tooltip: {
+                formatter: (params: { value: [number, number, number] }) => string;
+            };
+        };
+
+        expect(option.series[0].data).toContainEqual([24, 0, 2]);
+        expect(option.series[0].symbolSize([24, 0, 2])[0]).toBeGreaterThan(
+            option.series[0].symbolSize([31, 0, 1])[0],
+        );
+        expect(option.tooltip.formatter({ value: [24, 0, 2] })).toBe(
+            "24 seconds<br>Observations: 2",
+        );
+    });
+
+    it("builds standard and split violin variants from observations", () => {
+        const option = buildChartOption({
+            kind: "violin",
+            title: "Violin plot",
+            unit: "travel minutes",
+            locale: "en",
+            data: [
+                { label: "Bus", value: 30, values: [20, 25, 30, 35, 40] },
+                { label: "Tram", value: 26, values: [18, 22, 26, 30, 34] },
+                { label: "Metro", value: 22, values: [16, 19, 22, 25, 28] },
+            ],
+            reducedMotion: true,
+        }) as {
+            title: Array<{ text: string; subtext: string }>;
+            grid: unknown[];
+            series: Array<{ id?: string }>;
+        };
+
+        expect(option.title.map((title) => title.text)).toEqual([
+            "Standard violin plot",
+            "Split violin plot",
+        ]);
+        expect(option.title[1].subtext).toContain("Left — Bus; right — Tram");
+        expect(option.grid).toHaveLength(2);
+        expect(option.series).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ id: "standard-violins" }),
+                expect.objectContaining({ id: "split-violin" }),
+            ]),
+        );
+    });
 });
 
 describe("ECharts lifecycle", () => {

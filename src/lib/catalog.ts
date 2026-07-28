@@ -185,8 +185,8 @@ export const charts: readonly ChartDefinition[] = [
         kind: "scatter",
         title: { ru: "Диаграмма рассеяния", en: "Scatterplot" },
         description: {
-            ru: "Положение точки показывает совместные значения двух числовых переменных.",
-            en: "Each point combines the values of two numerical variables.",
+            ru: "Каждая точка — студент: положение сопоставляет часы подготовки и результат, а цвет различает первый и второй курс.",
+            en: "Each point is a student: position compares study hours with score, while colour distinguishes first- and second-year cohorts.",
         },
         useWhen: {
             ru: "Нужно увидеть направление, силу связи и необычные наблюдения.",
@@ -202,13 +202,150 @@ export const charts: readonly ChartDefinition[] = [
             secondary: { ru: "Результат", en: "Score" },
         },
         data: [
-            { label: { ru: "А", en: "A" }, value: 2, value2: 58 },
-            { label: { ru: "Б", en: "B" }, value: 3, value2: 64 },
-            { label: { ru: "В", en: "C" }, value: 4, value2: 63 },
-            { label: { ru: "Г", en: "D" }, value: 5, value2: 72 },
-            { label: { ru: "Д", en: "E" }, value: 6, value2: 78 },
-            { label: { ru: "Е", en: "F" }, value: 7, value2: 84 },
-            { label: { ru: "Ж", en: "G" }, value: 8, value2: 88 },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.01", en: "Student 1.01" },
+                value: 1.8,
+                value2: 49,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.02", en: "Student 1.02" },
+                value: 2.4,
+                value2: 55,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.03", en: "Student 1.03" },
+                value: 2.9,
+                value2: 53,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.04", en: "Student 1.04" },
+                value: 3.5,
+                value2: 61,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.05", en: "Student 1.05" },
+                value: 4.1,
+                value2: 59,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.06", en: "Student 1.06" },
+                value: 4.7,
+                value2: 66,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.07", en: "Student 1.07" },
+                value: 5.2,
+                value2: 64,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.08", en: "Student 1.08" },
+                value: 5.8,
+                value2: 72,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.09", en: "Student 1.09" },
+                value: 6.4,
+                value2: 70,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.10", en: "Student 1.10" },
+                value: 7.0,
+                value2: 77,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.11", en: "Student 1.11" },
+                value: 7.7,
+                value2: 75,
+            },
+            {
+                key: "year-1",
+                label: { ru: "Студент 1.12", en: "Student 1.12" },
+                value: 8.3,
+                value2: 82,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.01", en: "Student 2.01" },
+                value: 2.0,
+                value2: 61,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.02", en: "Student 2.02" },
+                value: 2.6,
+                value2: 66,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.03", en: "Student 2.03" },
+                value: 3.2,
+                value2: 64,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.04", en: "Student 2.04" },
+                value: 3.8,
+                value2: 72,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.05", en: "Student 2.05" },
+                value: 4.4,
+                value2: 70,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.06", en: "Student 2.06" },
+                value: 5.0,
+                value2: 77,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.07", en: "Student 2.07" },
+                value: 5.6,
+                value2: 75,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.08", en: "Student 2.08" },
+                value: 6.2,
+                value2: 83,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.09", en: "Student 2.09" },
+                value: 6.8,
+                value2: 80,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.10", en: "Student 2.10" },
+                value: 7.4,
+                value2: 87,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.11", en: "Student 2.11" },
+                value: 8.0,
+                value2: 85,
+            },
+            {
+                key: "year-2",
+                label: { ru: "Студент 2.12", en: "Student 2.12" },
+                value: 8.7,
+                value2: 92,
+            },
         ],
     },
     {
@@ -713,8 +850,8 @@ export const charts: readonly ChartDefinition[] = [
             en: "Each dot represents one observation, with slight jitter revealing overlaps.",
         },
         useWhen: {
-            ru: "Наблюдений немного и важно не скрывать их агрегацией.",
-            en: "There are relatively few observations and aggregation would hide useful detail.",
+            ru: "Наблюдений немного и важно не скрывать их агрегацией. Положение по горизонтали показывает значение, а небольшой вертикальный сдвиг только разводит совпадающие точки и не кодирует данные.",
+            en: "There are relatively few observations and aggregation would hide useful detail. Horizontal position shows the value; slight vertical jitter only separates overlapping dots and does not encode data.",
         },
         avoidWhen: {
             ru: "Точек настолько много, что наложение мешает увидеть плотность.",
@@ -735,24 +872,25 @@ export const charts: readonly ChartDefinition[] = [
         kind: "barcode",
         title: { ru: "Штрих-код распределения", en: "Distribution barcode" },
         description: {
-            ru: "Каждое наблюдение отмечено тонким штрихом на общей числовой оси.",
-            en: "Every observation is marked by a thin tick on a shared numerical axis.",
+            ru: "Каждое уникальное значение отмечено штрихом на общей числовой оси; более толстый штрих означает больше совпавших наблюдений.",
+            en: "Each unique value is marked by a tick on a shared numerical axis; a thicker tick means more observations share that value.",
         },
         useWhen: {
             ru: "Нужно показать все точные позиции и заметить скопления или пустые интервалы.",
             en: "You want to show every exact position and reveal clusters or gaps.",
         },
         avoidWhen: {
-            ru: "Много совпадающих значений: штрихи накладываются и скрывают частоту.",
-            en: "Many values are identical, causing ticks to overlap and hide frequency.",
+            ru: "Уникальных значений настолько много, что штрихи сливаются; тогда форму лучше покажет гистограмма.",
+            en: "There are so many unique values that ticks merge; a histogram will show the shape more clearly.",
         },
         unit: { ru: "секунд", en: "seconds" },
-        data: [12, 14, 17, 19, 23, 24, 27, 31, 32, 34, 37, 41, 46, 48, 52, 58, 61, 68, 74, 83].map(
-            (value, index) => ({
-                label: { ru: `Замер ${index + 1}`, en: `Reading ${index + 1}` },
-                value,
-            }),
-        ),
+        data: [
+            12, 14, 17, 17, 19, 23, 24, 24, 24, 27, 31, 32, 34, 34, 37, 41, 46, 48, 48, 52, 58, 61,
+            68, 74, 83,
+        ].map((value, index) => ({
+            label: { ru: `Замер ${index + 1}`, en: `Reading ${index + 1}` },
+            value,
+        })),
     },
     {
         id: "stacked-columns",
@@ -1036,12 +1174,12 @@ export const charts: readonly ChartDefinition[] = [
         kind: "violin",
         title: { ru: "Скрипичная диаграмма", en: "Violin plot" },
         description: {
-            ru: "Ширина симметричной формы показывает плотность наблюдений на разных значениях.",
-            en: "The width of each symmetric shape represents observation density at each value.",
+            ru: "Ширина формы показывает плотность наблюдений: широкие участки соответствуют частым значениям. В обычной скрипке половины зеркальны; в разделённой левая и правая половины сравнивают две подписанные группы.",
+            en: "Shape width shows observation density: wider sections represent more common values. A standard violin mirrors one distribution; a split violin uses its labelled left and right halves for two groups.",
         },
         useWhen: {
-            ru: "Важно сравнить не только медиану и разброс, но и форму нескольких распределений.",
-            en: "You need to compare distribution shape as well as centre and spread.",
+            ru: "Важно сравнить форму распределений, медиану и межквартильный диапазон. Точки показывают исходные наблюдения, а ширина — сглаженную оценку их плотности.",
+            en: "You need to compare distribution shape, median, and interquartile range. Dots show the observations; width is a smoothed density estimate.",
         },
         avoidWhen: {
             ru: "Аудитории нужна простая сводка или наблюдений недостаточно для оценки плотности.",
