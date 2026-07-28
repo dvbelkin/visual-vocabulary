@@ -805,6 +805,7 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     stack: "negative",
                     data: payload.data.map((row) => -row.value),
                     itemStyle: { color: orange },
+                    tooltip: { valueFormatter: (value: number) => `${Math.abs(value)}%` },
                 },
                 {
                     name: names[1],
@@ -828,6 +829,7 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                     stack: "positive",
                     data: payload.data.map((row) => row.value3 ?? 0),
                     itemStyle: { color: green },
+                    tooltip: { valueFormatter: (value: number) => `${value}%` },
                 },
             ],
         };
@@ -835,40 +837,162 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
 
     if (payload.kind === "spine") {
         const names = payload.locale === "ru" ? ["Онлайн", "Очно"] : ["Online", "In person"];
+        const total = payload.data.reduce((sum, row) => sum + row.value, 0);
+        let cumulative = 0;
+        const groups = payload.data.map((row, index) => {
+            const start = (cumulative / total) * 100;
+            cumulative += row.value;
+            const end = (cumulative / total) * 100;
+            const online = row.value2 ?? 0;
+            const inPerson = row.value3 ?? row.value - online;
+            const onlineShare = (online / row.value) * 100;
+            return {
+                index,
+                start,
+                end,
+                online,
+                inPerson,
+                onlineShare,
+                inPersonShare: 100 - onlineShare,
+            };
+        });
+        const groupTooltip = (index: number) => {
+            const row = payload.data[index];
+            const group = groups[index];
+            return `${row.label}<br>${payload.locale === "ru" ? "Всего" : "Total"}: ${row.value} ${payload.unit}<br>${names[0]}: ${group.online} (${Math.round(group.onlineShare)}%)<br>${names[1]}: ${group.inPerson} (${Math.round(group.inPersonShare)}%)`;
+        };
+        const segmentSeries = (name: string, color: string, data: number[][]) => ({
+            name,
+            type: "custom",
+            data,
+            itemStyle: { color },
+            tooltip: {
+                formatter: ({ dataIndex }: { dataIndex: number }) => groupTooltip(dataIndex),
+            },
+            renderItem: (
+                _params: unknown,
+                api: {
+                    value: (dimension: number) => number;
+                    coord: (point: [number, number]) => [number, number];
+                },
+            ) => {
+                const topLeft = api.coord([api.value(0), api.value(3)]);
+                const bottomRight = api.coord([api.value(1), api.value(2)]);
+                const width = bottomRight[0] - topLeft[0];
+                const height = bottomRight[1] - topLeft[1];
+                return {
+                    type: "group",
+                    children: [
+                        {
+                            type: "rect",
+                            shape: {
+                                x: topLeft[0],
+                                y: topLeft[1],
+                                width,
+                                height,
+                            },
+                            style: {
+                                fill: color,
+                                stroke: "#fff",
+                                lineWidth: 2,
+                            },
+                        },
+                        {
+                            type: "text",
+                            style: {
+                                x: topLeft[0] + width / 2,
+                                y: topLeft[1] + height / 2,
+                                text:
+                                    width > 54 && height > 24 ? `${Math.round(api.value(6))}%` : "",
+                                fill: "#fff",
+                                fontWeight: 700,
+                                align: "center",
+                                verticalAlign: "middle",
+                            },
+                        },
+                    ],
+                };
+            },
+        });
         return {
             ...base,
-            legend: { top: 0 },
-            grid: { left: 104, right: 32, top: 52, bottom: 48 },
+            tooltip: { trigger: "item", confine: true },
+            legend: { top: 0, data: names },
+            grid: { left: 58, right: 28, top: 72, bottom: 64 },
             xAxis: {
                 type: "value",
-                min: -100,
+                min: 0,
                 max: 100,
-                axisLabel: { formatter: (value: number) => `${Math.abs(value)}%` },
+                name:
+                    payload.locale === "ru" ? "Доля всех участников" : "Share of all participants",
+                nameLocation: "middle",
+                nameGap: 34,
+                axisLabel: { formatter: (value: number) => `${value}%` },
                 splitLine: { lineStyle: { color: gridLine } },
             },
             yAxis: {
-                type: "category",
-                inverse: true,
-                data: payload.data.map((row) => row.label),
+                type: "value",
+                min: 0,
+                max: 100,
+                name: payload.locale === "ru" ? "Состав курса" : "Cohort composition",
+                axisLabel: { formatter: (value: number) => `${value}%` },
+                splitLine: { lineStyle: { color: gridLine } },
             },
             series: [
+                segmentSeries(
+                    names[0],
+                    "#2f6fb0",
+                    groups.map((group) => [
+                        group.start,
+                        group.end,
+                        0,
+                        group.onlineShare,
+                        group.index,
+                        group.online,
+                        group.onlineShare,
+                    ]),
+                ),
+                segmentSeries(
+                    names[1],
+                    green,
+                    groups.map((group) => [
+                        group.start,
+                        group.end,
+                        group.onlineShare,
+                        100,
+                        group.index,
+                        group.inPerson,
+                        group.inPersonShare,
+                    ]),
+                ),
                 {
-                    name: names[0],
-                    type: "bar",
-                    data: payload.data.map((row) => -row.value),
-                    itemStyle: { color: "#2f6fb0" },
-                    label: {
-                        show: true,
-                        position: "insideLeft",
-                        formatter: ({ value }: { value: number }) => `${Math.abs(value)}%`,
+                    type: "custom",
+                    silent: true,
+                    clip: false,
+                    data: groups.map((group) => [(group.start + group.end) / 2, 100, group.index]),
+                    renderItem: (
+                        _params: unknown,
+                        api: {
+                            value: (dimension: number) => number;
+                            coord: (point: [number, number]) => [number, number];
+                        },
+                    ) => {
+                        const position = api.coord([api.value(0), api.value(1)]);
+                        const row = payload.data[api.value(2)];
+                        return {
+                            type: "text",
+                            style: {
+                                x: position[0],
+                                y: position[1] - 12,
+                                text: `${row.label}\n${row.value}`,
+                                fill: ink,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                align: "center",
+                                verticalAlign: "bottom",
+                            },
+                        };
                     },
-                },
-                {
-                    name: names[1],
-                    type: "bar",
-                    data: payload.data.map((row) => row.value2 ?? 0),
-                    itemStyle: { color: green },
-                    label: { show: true, position: "insideRight", formatter: "{c}%" },
                 },
             ],
         };

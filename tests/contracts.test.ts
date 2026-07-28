@@ -396,6 +396,53 @@ describe("ECharts option factories", () => {
             ]),
         );
     });
+
+    it("formats both sides of diverging stacked bars as percentages", () => {
+        const option = buildChartOption({
+            kind: "diverging-stacked",
+            title: "Diverging stacked bars",
+            unit: "% of responses",
+            locale: "en",
+            data: [{ label: "Question", value: 28, value2: 20, value3: 52 }],
+            reducedMotion: true,
+        }) as {
+            series: Array<{
+                tooltip?: { valueFormatter: (value: number) => string };
+            }>;
+        };
+
+        expect(option.series[0].tooltip?.valueFormatter(-28)).toBe("28%");
+        expect(option.series[3].tooltip?.valueFormatter(52)).toBe("52%");
+    });
+
+    it("encodes cohort size as variable width in the spine chart", () => {
+        const option = buildChartOption({
+            kind: "spine",
+            title: "Spine chart",
+            unit: "participants",
+            locale: "en",
+            data: [
+                { label: "Year one", value: 300, value2: 180, value3: 120 },
+                { label: "Year two", value: 100, value2: 40, value3: 60 },
+            ],
+            reducedMotion: true,
+        }) as {
+            series: Array<{
+                data: Array<[number, number, number, number, number, number, number]>;
+                tooltip?: { formatter: (params: { dataIndex: number }) => string };
+            }>;
+        };
+
+        const firstWidth = option.series[0].data[0][1] - option.series[0].data[0][0];
+        const secondWidth = option.series[0].data[1][1] - option.series[0].data[1][0];
+
+        expect(firstWidth).toBe(75);
+        expect(secondWidth).toBe(25);
+        expect(option.series[0].data[0][3]).toBe(60);
+        expect(option.series[0].tooltip?.formatter({ dataIndex: 0 })).toContain(
+            "Online: 180 (60%)",
+        );
+    });
 });
 
 describe("ECharts lifecycle", () => {
