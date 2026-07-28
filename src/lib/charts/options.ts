@@ -661,7 +661,30 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
         const axisNames = payload.locale === "ru" ? ["Практика", "Экзамен"] : ["Practice", "Exam"];
         return {
             ...base,
-            grid: { left: 58, right: 32, top: 28, bottom: 54 },
+            tooltip: {
+                trigger: "item",
+                confine: true,
+                formatter: ({
+                    name,
+                    value,
+                    marker,
+                }: {
+                    name: string;
+                    value: [number, number, number];
+                    marker: string;
+                }) => {
+                    const labels =
+                        payload.locale === "ru"
+                            ? ["Практика", "Экзамен", "Студентов"]
+                            : ["Practice", "Exam", "Students"];
+                    return `${marker}${name}<br>${labels[0]}: ${value[0]}<br>${labels[1]}: ${value[1]}<br>${labels[2]}: ${value[2]}`;
+                },
+            },
+            legend: {
+                top: 0,
+                data: payload.data.map((row) => row.label),
+            },
+            grid: { left: 58, right: 32, top: 72, bottom: 54 },
             xAxis: {
                 type: "value",
                 name: axisNames[0],
@@ -676,18 +699,19 @@ export function buildChartOption(payload: ChartPayload): EChartsCoreOption {
                 scale: true,
                 splitLine: { lineStyle: { color: gridLine } },
             },
-            series: [
-                {
-                    type: "scatter",
-                    data: payload.data.map((row) => ({
+            series: payload.data.map((row) => ({
+                name: row.label,
+                type: "scatter",
+                data: [
+                    {
                         name: row.label,
                         value: [row.value, row.value2 ?? 0, row.value3 ?? 0],
-                    })),
-                    symbolSize: (value: [number, number, number]) =>
-                        18 + Math.sqrt(value[2] / maximum) * 46,
-                    label: { show: true, position: "top", formatter: "{b}" },
-                },
-            ],
+                    },
+                ],
+                symbolSize: (value: [number, number, number]) =>
+                    18 + Math.sqrt(value[2] / maximum) * 46,
+                label: { show: true, position: "top", formatter: "{b}" },
+            })),
         };
     }
 

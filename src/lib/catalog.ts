@@ -1270,12 +1270,12 @@ export const charts: readonly ChartDefinition[] = [
         kind: "bubble",
         title: { ru: "Пузырьковая диаграмма", en: "Bubble chart" },
         description: {
-            ru: "Положение показывает два числовых показателя, а площадь круга — третий.",
-            en: "Position shows two numerical measures while circle area encodes a third.",
+            ru: "Положение показывает средний балл за практику и экзамен, цвет различает учебные программы, а площадь круга выражает число студентов программы.",
+            en: "Position shows average practice and exam scores, colour distinguishes study programmes, and circle area represents the number of students in each programme.",
         },
         useWhen: {
-            ru: "Нужно исследовать связь двух показателей с учётом масштаба наблюдения.",
-            en: "You need to explore two-variable relationships while accounting for observation size.",
+            ru: "Нужно исследовать связь двух показателей, различить программы и учесть число студентов в каждой из них.",
+            en: "You need to explore two-variable relationships, distinguish programmes, and account for their student counts.",
         },
         avoidWhen: {
             ru: "Пузырей много, размеры близки или третья переменная несущественна.",

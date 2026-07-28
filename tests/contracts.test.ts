@@ -206,6 +206,40 @@ describe("ECharts option factories", () => {
 
         expect(option.xAxis.axisLabel.formatter(1836)).toBe("1836");
     });
+
+    it("uses one colour series per programme in the bubble chart", () => {
+        const option = buildChartOption({
+            kind: "bubble",
+            title: "Bubble chart",
+            unit: "scores / students",
+            locale: "en",
+            data: [
+                { label: "Programme A", value: 72, value2: 78, value3: 420 },
+                { label: "Programme B", value: 64, value2: 69, value3: 260 },
+            ],
+            reducedMotion: true,
+        }) as {
+            legend: { data: string[] };
+            series: Array<{ name: string; data: Array<{ value: number[] }> }>;
+            tooltip: {
+                formatter: (params: {
+                    name: string;
+                    value: [number, number, number];
+                    marker: string;
+                }) => string;
+            };
+        };
+
+        expect(option.legend.data).toEqual(["Programme A", "Programme B"]);
+        expect(option.series.map((series) => series.name)).toEqual(["Programme A", "Programme B"]);
+        expect(
+            option.tooltip.formatter({
+                name: "Programme A",
+                value: [72, 78, 420],
+                marker: "● ",
+            }),
+        ).toContain("Students: 420");
+    });
 });
 
 describe("ECharts lifecycle", () => {
